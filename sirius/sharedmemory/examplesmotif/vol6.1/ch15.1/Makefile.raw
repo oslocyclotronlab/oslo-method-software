@@ -1,0 +1,7 @@
+PROGRAMS=allcaps cut_paste editor error file_browser modify_text passwd phone prompt_phone replace search_text select_text simple_text text_box text_dialog
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

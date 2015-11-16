@@ -1,0 +1,198 @@
+
+
+
+ sssshhhhmmmmccccttttllll((((2222))))                                                         sssshhhhmmmmccccttttllll((((2222))))
+
+
+
+
+ NNNNAAAAMMMMEEEE
+      shmctl - shared memory control operations
+
+ SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+      ####iiiinnnncccclllluuuuddddeeee <<<<ssssyyyyssss////sssshhhhmmmm....hhhh>>>>
+
+      iiiinnnntttt sssshhhhmmmmccccttttllll((((iiiinnnntttt sssshhhhmmmmiiiidddd,,,, iiiinnnntttt ccccmmmmdddd,,,, ssssttttrrrruuuucccctttt sssshhhhmmmmiiiidddd____ddddssss ****bbbbuuuuffff))));;;;
+
+ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+      sssshhhhmmmmccccttttllll(((()))) provides a variety of shared memory control operations as
+      specified by _c_m_d.  The following _c_m_ds are available:
+
+           IIIIPPPPCCCC____SSSSTTTTAAAATTTT       Place the current value of each member of the data
+                          structure associated with _s_h_m_i_d into the structure
+                          pointed to by _b_u_f.  The contents of this structure
+                          are defined in the _g_l_o_s_s_a_r_y.
+
+           IIIIPPPPCCCC____SSSSEEEETTTT        Set the value of the following members of the data
+                          structure associated with _s_h_m_i_d to the
+                          corresponding value found in the structure pointed
+                          to by _b_u_f:
+
+                                    sssshhhhmmmm____ppppeeeerrrrmmmm....uuuuiiiidddd
+                                    sssshhhhmmmm____ppppeeeerrrrmmmm....ggggiiiidddd
+                                    sssshhhhmmmm____ppppeeeerrrrmmmm....mmmmooooddddeeee    ////**** oooonnnnllllyyyy lllloooowwww 9999 bbbbiiiittttssss ****////
+
+                          This _c_m_d can only be executed by a process that
+                          has an effective user ID equal to either that of a
+                          user having appropriate privileges or to the value
+                          of either sssshhhhmmmm____ppppeeeerrrrmmmm....uuuuiiiidddd or sssshhhhmmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd in the
+                          data structure associated with _s_h_m_i_d.
+
+           IIIIPPPPCCCC____RRRRMMMMIIIIDDDD       Remove the shared memory identifier specified by
+                          _s_h_m_i_d from the system and destroy the shared
+                          memory segment and data structure associated with
+                          it.  If the segment is attached to one or more
+                          processes, then the segment key is changed to
+                          IIIIPPPPCCCC____PPPPRRRRIIIIVVVVAAAATTTTEEEE and the segment is marked removed.
+                          The segment disappears when the last attached
+                          process detaches it.  This _c_m_d can only be
+                          executed by a process that has an effective user
+                          ID equal to either that of a user with appropriate
+                          privileges or to the value of either sssshhhhmmmm____ppppeeeerrrrmmmm....uuuuiiiidddd
+                          or sssshhhhmmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd in the data structure associated
+                          with _s_h_m_i_d.
+
+           SSSSHHHHMMMM____LLLLOOOOCCCCKKKK       Lock the shared memory segment specified by _s_h_m_i_d
+                          in memory.  This _c_m_d can only be executed by a
+                          process that either has an effective user ID equal
+                          to that of a user having appropriate privileges or
+                          has an effective user ID equal to the value of
+
+
+
+ Hewlett-Packard Company            - 1 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssshhhhmmmmccccttttllll((((2222))))                                                         sssshhhhmmmmccccttttllll((((2222))))
+
+
+
+
+                          either sssshhhhmmmm____ppppeeeerrrrmmmm....uuuuiiiidddd or sssshhhhmmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd in the data
+                          structure associated with _s_h_m_i_d and has PPPPRRRRIIIIVVVV____MMMMLLLLOOOOCCCCKKKK
+                          privilege (see sssseeeettttpppprrrriiiivvvvggggrrrrpppp(((()))) description,
+                          _g_e_t_p_r_i_v_g_r_p(2)).
+
+           SSSSHHHHMMMM____UUUUNNNNLLLLOOOOCCCCKKKK     Unlock the shared memory segment specified by
+                          _s_h_m_i_d.  This _c_m_d can only be executed by a process
+                          that either has an effective user ID equal to a
+                          user having appropriate privileges or has an
+                          effective user ID equal to the value of either
+                          sssshhhhmmmm____ppppeeeerrrrmmmm....uuuuiiiidddd or sssshhhhmmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd in the data
+                          structure associated with _s_h_m_i_d and has PPPPRRRRIIIIVVVV____MMMMLLLLOOOOCCCCKKKK
+                          privilege (see sssseeeettttpppprrrriiiivvvvggggrrrrpppp(((()))) description,
+                          _g_e_t_p_r_i_v_g_r_p(2)).
+
+ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEE
+      sssshhhhmmmmccccttttllll(((()))) returns a value of 0 upon successful completion; otherwise, a
+      value of -1 is returned and eeeerrrrrrrrnnnnoooo is set to indicate the error.
+
+ EEEERRRRRRRROOOORRRRSSSS
+      sssshhhhmmmmccccttttllll(((()))) fails if any of the following conditions are encountered (see
+      DEPENDENCIES):
+
+           [EINVAL]       _s_h_m_i_d is not a valid shared memory identifier.
+
+           [EINVAL]       _c_m_d is not a valid command.
+
+           [EACCES]       _c_m_d is equal to IIIIPPPPCCCC____SSSSTTTTAAAATTTT and Read operation
+                          permission is denied to the calling process (see
+                          _s_h_a_r_e_d _m_e_m_o_r_y _o_p_e_r_a_t_i_o_n _p_e_r_m_i_s_s_i_o_n_s in
+                          _g_l_o_s_s_a_r_y(9)).
+
+           [EPERM]        _c_m_d is equal to IIIIPPPPCCCC____RRRRMMMMIIIIDDDD, IIIIPPPPCCCC____SSSSEEEETTTT, SSSSHHHHMMMM____LLLLOOOOCCCCKKKK, or
+                          SSSSHHHHMMMM____UUUUNNNNLLLLOOOOCCCCKKKK and the effective user ID of the
+                          calling process is not equal to that of a user
+                          having appropriate privileges and it is not equal
+                          to the value of either sssshhhhmmmm____ppppeeeerrrrmmmm....uuuuiiiidddd or
+                          sssshhhhmmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd in the data structure associated
+                          with _s_h_m_i_d.
+
+           [EPERM]        _c_m_d is equal to SSSSHHHHMMMM____LLLLOOOOCCCCKKKK or SSSSHHHHMMMM____UUUUNNNNLLLLOOOOCCCCKKKK and the
+                          effective user ID of the calling process is not
+                          equal to that of a user having appropriate
+                          privileges and the calling process does not have
+                          PPPPRRRRIIIIVVVV____MMMMLLLLOOOOCCCCKKKK privilege (see sssseeeettttpppprrrriiiivvvvggggrrrrpppp(((())))
+                          description, _g_e_t_p_r_i_v_g_r_p(2)).
+
+           [EINVAL]       _c_m_d is equal to SSSSHHHHMMMM____UUUUNNNNLLLLOOOOCCCCKKKK and the shared-memory
+                          segment specified by _s_h_m_i_d is not locked in
+                          memory.
+
+
+
+
+ Hewlett-Packard Company            - 2 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssshhhhmmmmccccttttllll((((2222))))                                                         sssshhhhmmmmccccttttllll((((2222))))
+
+
+
+
+           [EFAULT]       _b_u_f points to an illegal address.  The reliable
+                          detection of this error is implementation
+                          dependent.
+
+           [ENOMEM]       _c_m_d is equal to SSSSHHHHMMMM____LLLLOOOOCCCCKKKK and there is not
+                          sufficient lockable memory to fill the request.
+
+ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+      The following call to sssshhhhmmmmccccttttllll(((()))) locks in memory the shared memory
+      segment represented by _m_y_s_h_m_i_d.  This example assumes the process has
+      a valid shmid, which can be obtained by calling _s_h_m_g_e_t(2).
+
+           sssshhhhmmmmccccttttllll ((((mmmmyyyysssshhhhmmmmiiiidddd,,,, SSSSHHHHMMMM____LLLLOOOOCCCCKKKK,,,, 0000))));;;;
+
+      The following call to sssshhhhmmmmccccttttllll(((()))) removes the shared memory segment
+      represented by _m_y_s_h_m_i_d.  This example assumes the process has a valid
+      shmid, which can be obtained by calling sssshhhhmmmmggggeeeetttt(((()))) (see _s_h_m_g_e_t(2).
+
+           sssshhhhmmmmccccttttllll ((((mmmmyyyysssshhhhmmmmiiiidddd,,,, IIIIPPPPCCCC____RRRRMMMMIIIIDDDD,,,, 0000))));;;;
+
+ DDDDEEEEPPPPEEEENNNNDDDDEEEENNNNCCCCIIIIEEEESSSS
+    SSSSeeeerrrriiiieeeessss 333300000000////444400000000
+      An additional error condition can occur on Series 300/400 systems:
+
+           [EACCES]       _s_h_m_i_d is the id of a shared memory segment
+                          currently being used by the system to implement
+                          other features (see _g_r_a_p_h_i_c_s(7) and _i_o_m_a_p(7)).
+
+ AAAAUUUUTTTTHHHHOOOORRRR
+      sssshhhhmmmmccccttttllll(((()))) was developed by AT&T and HP.
+
+ SSSSEEEEEEEE AAAALLLLSSSSOOOO
+      ipcrm(1), ipcs(1), shmget(2), shmop(2), stdipc(3C).
+
+ SSSSTTTTAAAANNNNDDDDAAAARRRRDDDDSSSS CCCCOOOONNNNFFFFOOOORRRRMMMMAAAANNNNCCCCEEEE
+      sssshhhhmmmmccccttttllll(((()))): SVID2, XPG2, XPG3, XPG4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Hewlett-Packard Company            - 3 -     HP-UX Release 9.0: August 1992
+
+
+

@@ -1,0 +1,264 @@
+
+
+
+ sssseeeemmmmoooopppp((((2222))))                                                           sssseeeemmmmoooopppp((((2222))))
+
+
+
+
+ NNNNAAAAMMMMEEEE
+      semop - semaphore operations
+
+ SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+      ####iiiinnnncccclllluuuuddddeeee <<<<ssssyyyyssss////sssseeeemmmm....hhhh>>>>
+
+      iiiinnnntttt sssseeeemmmmoooopppp((((
+           iiiinnnntttt sssseeeemmmmiiiidddd,,,,
+           ssssttttrrrruuuucccctttt sssseeeemmmmbbbbuuuuffff ****ssssooooppppssss,,,,
+           uuuunnnnssssiiiiggggnnnneeeedddd iiiinnnntttt nnnnssssooooppppssss
+      ))));;;;
+
+ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+      sssseeeemmmmoooopppp(((()))) is used to atomically perform an array of semaphore operations
+      on the set of semaphores associated with the semaphore identifier
+      specified by _s_e_m_i_d.  _s_o_p_s is a pointer to the array of semaphore-
+      operation structures.  _n_s_o_p_s is the number of such structures in the
+      array.  The contents of each structure includes the following members:
+
+           uuuusssshhhhoooorrrrtttt    sssseeeemmmm____nnnnuuuummmm;;;;      ////**** sssseeeemmmmaaaapppphhhhoooorrrreeee nnnnuuuummmmbbbbeeeerrrr ****////
+           sssshhhhoooorrrrtttt     sssseeeemmmm____oooopppp        ////**** sssseeeemmmmaaaapppphhhhoooorrrreeee ooooppppeeeerrrraaaattttiiiioooonnnn ****////
+           sssshhhhoooorrrrtttt     sssseeeemmmm____ffffllllgggg;;;;      ////**** ooooppppeeeerrrraaaattttiiiioooonnnn ffffllllaaaaggggssss ****////
+
+      Each semaphore operation specified by _s_e_m__o_p is performed on the
+      corresponding semaphore specified by _s_e_m_i_d and _s_e_m__n_u_m.  Semaphore
+      array operations are atomic in that none of the semaphore operations
+      are performed until blocking conditions on all of the semaphores in
+      the array have been removed.
+
+      _s_e_m__o_p specifies one of three semaphore operations as follows:
+
+           If _s_e_m__o_p is a negative integer, one of the following occurs:
+
+                If semval (see _s_e_m_a_p_h_o_r_e _i_d_e_n_t_i_f_i_e_r in _g_l_o_s_s_a_r_y(9)) is
+                greater than or equal to the absolute value of _s_e_m__o_p, the
+                absolute value of _s_e_m__o_p is subtracted from semval.  Also,
+                if (_s_e_m__f_l_g & SSSSEEEEMMMM____UUUUNNNNDDDDOOOO) is ``true'', the absolute value of
+                _s_e_m__o_p is added to the calling process's semadj value (see
+                _g_l_o_s_s_a_r_y(9) and _e_x_i_t(2)) for the specified semaphore.
+
+                If semval is less than the absolute value of _s_e_m__o_p and
+                (_s_e_m__f_l_g & IIIIPPPPCCCC____NNNNOOOOWWWWAAAAIIIITTTT) is ``true'', sssseeeemmmmoooopppp(((()))) returns
+                immediately.
+
+                If semval is less than the absolute value of _s_e_m__o_p and
+                (_s_e_m__f_l_g & IIIIPPPPCCCC____NNNNOOOOWWWWAAAAIIIITTTT) is ``false'', sssseeeemmmmoooopppp(((()))) increments the
+                semncnt associated with the specified semaphore and suspend
+                execution of the calling process until one of the following
+                conditions occur:
+
+
+
+
+
+ Hewlett-Packard Company            - 1 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssseeeemmmmoooopppp((((2222))))                                                           sssseeeemmmmoooopppp((((2222))))
+
+
+
+
+                     semval becomes greater than or equal to the absolute
+                     value of _s_e_m__o_p.  When this occurs, the value of
+                     semncnt associated with the specified semaphore is
+                     decremented, the absolute value of _s_e_m__o_p is subtracted
+                     from semval and, if (_s_e_m__f_l_g & SSSSEEEEMMMM____UUUUNNNNDDDDOOOO) is ``true'',
+                     the absolute value of _s_e_m__o_p is added to the calling
+                     process's semadj value for the specified semaphore.
+
+                     The semid for which the calling process is awaiting
+                     action is removed from the system (see _s_e_m_c_t_l(2)).
+                     When this occurs, eeeerrrrrrrrnnnnoooo is set equal to EIDRM, and a
+                     value of -1 is returned.
+
+                     The calling process receives a signal that is to be
+                     caught.  When this occurs, the value of semncnt
+                     associated with the specified semaphore is decremented,
+                     and the calling process resumes execution in the manner
+                     prescribed in _s_i_g_n_a_l(5).
+
+           If _s_e_m__o_p is a positive integer, the value of _s_e_m__o_p is added to
+           semval and, if (_s_e_m__f_l_g & SSSSEEEEMMMM____UUUUNNNNDDDDOOOO) is ``true'', the value of
+           _s_e_m__o_p is subtracted from the calling process's semadj value for
+           the specified semaphore.
+
+           If _s_e_m__o_p is zero, one of the following occurs:
+
+                If semval is zero, sssseeeemmmmoooopppp(((()))) proceeds to the next semaphore
+                operation specified by _s_o_p_s, or returns immediately if this
+                is the last operation.
+
+                If semval is not equal to zero and (_s_e_m__f_l_g & IIIIPPPPCCCC____NNNNOOOOWWWWAAAAIIIITTTT) is
+                ``true'', sssseeeemmmmoooopppp(((()))) returns immediately.
+
+                If semval is not equal to zero and (_s_e_m__f_l_g & IIIIPPPPCCCC____NNNNOOOOWWWWAAAAIIIITTTT) is
+                ``false'', sssseeeemmmmoooopppp(((()))) increments the semzcnt associated with
+                the specified semaphore and suspends execution of the
+                calling process until one of the following occurs:
+
+                     _s_e_m_v_a_l becomes zero, at which time the value of semzcnt
+                     associated with the specified semaphore is decremented.
+
+                     The semid for which the calling process is awaiting
+                     action is removed from the system.  When this occurs,
+                     eeeerrrrrrrrnnnnoooo is set equal to EIDRM, and a value of -1 is
+                     returned.
+
+                     The calling process receives a signal that is to be
+                     caught.  When this occurs, the value of semzcnt
+                     associated with the specified semaphore is decremented,
+                     and the calling process resumes execution in the manner
+                     prescribed in _s_i_g_n_a_l(5).
+
+
+
+ Hewlett-Packard Company            - 2 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssseeeemmmmoooopppp((((2222))))                                                           sssseeeemmmmoooopppp((((2222))))
+
+
+
+
+ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+      The following call to sssseeeemmmmoooopppp(((()))) atomically performs a "P" or "get"
+      operation on the second semaphore in the semaphore set and a "V" or
+      "release" operation on the third semaphore in the set.  This example
+      assumes the process has a valid semid which represents a set of 4
+      semaphores as shown on the _s_e_m_g_e_t(2) manual page.  It also assumes
+      that the semvals of the semaphores in the set have been initialized as
+      shown in the _s_e_m_c_t_l(2) manual entry.
+
+           ssssttttrrrruuuucccctttt sssseeeemmmmbbbbuuuuffff ssssooooppppssss[[[[4444]]]];;;;
+
+           ssssooooppppssss[[[[0000]]]]....sssseeeemmmm____nnnnuuuummmm ==== 1111;;;;
+           ssssooooppppssss[[[[0000]]]]....sssseeeemmmm____oooopppp  ==== ----1111;;;;      /* P (get) */
+           ssssooooppppssss[[[[0000]]]]....sssseeeemmmm____ffffllllgggg ==== 0000;;;;
+           ssssooooppppssss[[[[1111]]]]....sssseeeemmmm____nnnnuuuummmm ==== 2222;;;;
+           ssssooooppppssss[[[[1111]]]]....sssseeeemmmm____oooopppp  ====  1111;;;;      /* V (release) */
+           ssssooooppppssss[[[[1111]]]]....sssseeeemmmm____ffffllllgggg ==== 0000;;;;
+
+           sssseeeemmmmoooopppp ((((mmmmyyyysssseeeemmmmiiiidddd,,,, ssssooooppppssss,,,, 2222))));;;;
+
+ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEE
+      If sssseeeemmmmoooopppp(((()))) returns due to the receipt of a signal, a value of -1 is
+      returned to the calling process and eeeerrrrrrrrnnnnoooo is set to EINTR.  If it
+      returns due to the removal of a _s_e_m_i_d from the system, a value of -1
+      is returned and eeeerrrrrrrrnnnnoooo is set to EIDRM.
+
+      Upon successful completion, a non-negative value is returned.
+      Otherwise, a value of -1 is returned and eeeerrrrrrrrnnnnoooo is set to indicate the
+      error.
+
+ EEEERRRRRRRROOOORRRRSSSS
+      sssseeeemmmmoooopppp(((()))) fails if one or more of the following is true for any of the
+      semaphore operations specified by _s_o_p_s:
+
+           [EINVAL]       _s_e_m_i_d is not a valid semaphore identifier.
+
+           [EFBIG]        _s_e_m__n_u_m is less than zero or greater than or equal
+                          to the number of semaphores in the set associated
+                          with _s_e_m_i_d.
+
+           [E2BIG]        _n_s_o_p_s is greater than the system-imposed maximum.
+
+           [EACCES]       Operation permission is denied to the calling
+                          process (see _g_l_o_s_s_a_r_y(9)).
+
+           [EAGAIN]       The operation would result in suspension of the
+                          calling process but (_s_e_m__f_l_g & IIIIPPPPCCCC____NNNNOOOOWWWWAAAAIIIITTTT) is
+                          ``true''.
+
+           [ENOSPC]       The limit on the number of individual  processes
+                          requesting an SSSSEEEEMMMM____UUUUNNNNDDDDOOOO would be exceeded.
+
+
+
+ Hewlett-Packard Company            - 3 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssseeeemmmmoooopppp((((2222))))                                                           sssseeeemmmmoooopppp((((2222))))
+
+
+
+
+           [EINVAL]       The number of individual semaphores for which the
+                          calling process requests a SSSSEEEEMMMM____UUUUNNNNDDDDOOOO would exceed
+                          the limit.
+
+           [ERANGE]       An operation would cause a semval to overflow the
+                          system-imposed limit.
+
+           [ERANGE]       An operation would cause a semadj value to
+                          overflow the system-imposed limit.
+
+           [EFAULT]       _s_o_p_s points to an illegal address.  The reliable
+                          detection of this error will be implementation
+                          dependent.
+
+           Upon successful completion, the value of sempid for each
+           semaphore specified in the array pointed to by _s_o_p_s is set equal
+           to the process ID of the calling process.  The value of sssseeeemmmm____oooottttiiiimmmmeeee
+           in the data structure associated with the semaphore identifier
+           will be set to the current time.
+
+ WWWWAAAARRRRNNNNIIIINNNNGGGGSSSS
+      Check all references to _s_i_g_n_a_l(5) for appropriateness on systems that
+      support _s_i_g_v_e_c_t_o_r(2).  _s_i_g_v_e_c_t_o_r(2) can affect the behavior described
+      on this page.
+
+ SSSSEEEEEEEE AAAALLLLSSSSOOOO
+      ipcs(1), exec(2), exit(2), fork(2), semctl(2), semget(2), stdipc(3C),
+      signal(5).
+
+ SSSSTTTTAAAANNNNDDDDAAAARRRRDDDDSSSS CCCCOOOONNNNFFFFOOOORRRRMMMMAAAANNNNCCCCEEEE
+      sssseeeemmmmoooopppp(((()))): SVID2, XPG2, XPG3, XPG4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Hewlett-Packard Company            - 4 -     HP-UX Release 9.0: August 1992
+
+
+

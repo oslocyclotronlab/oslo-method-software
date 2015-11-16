@@ -1,0 +1,103 @@
+                  HANDS ON MAMA 4.0
+
+_____________________________________________________________
+File    Info     Display  	 Modify        Fit  	   Fold   Special
+____  ______  ________   ________    ______    _____  _______
+ GR     CA     CC  CE  	 AR  CO  	  FD  FR      FG     AN
+ RE     CR     DS  DX  	 CU  EL  	  FX  FT      FO  	 HC
+ TR     HE     DY  DZ  	 FN  NO  	  NF  LP      RM  	 NU
+ WR     LS     EX  IC  	 PA  PC  	  PO  PF      UN  	 UX
+        SH     OD  OL  	 PM  RN  	  RP  RF        	 ST
+        SU     OV  SC  	 SM  UC  	  SW  RW        	 TF
+        SD     TX  		 XY  CT            
+_____________________________________________________________
+Topics: ABOut Mama, PEAkfit, SUMmary, NEWs  
+
+
+
+
+AN            Fit A and N separately to experimental first-generation matrix
+AP            Add a new Peak to the fit set-up
+AR            Arithmetic's (+-/*) on matr./spc.
+CA            Get info and give a0, a1 and a2 and dimension for matr./spc.
+CC [N1,N2..]  Change Color map to N1,N2...
+
+CE            Change from channel display to energy display (or back again)
+CO            COmpress matr./spc. by integer value (see ELastic)
+CR            Call CursoR and get info, or activate matr./spc. (X to exit)
+CT            Set CounTs per channel in a singles spectrum using cursor
+CU            CUt in matrix, e.g. xnew = xold - 1.0 * yold and ynew = yold	
+
+DP [N]        Delete Peak no. N from the fit set-up
+DS [I,J[,K]]  DiSplay matr./spc. in Ith of J parts of window
+              (I,J=1,0 or K=1: full scale, and I,J=2,0 or K=2: autoscale)
+DX  M1 M2     Low/high markers for Display of X axis
+DY  M1 M2     Low/high markers for Display of Y axis    
+DZ  M1 M2     Low/high markers for Display of Z axis
+
+EL            ELastic stretch/compress giving new a0,a1 and a2 calibration 
+EX            EXpand display using cursor (mouse)
+FD            Fit Data points with polynomial, exponential, range, etc.
+FG            Make First Generation matrix from exp. p-g coincidences
+FN            Fill ch. with Neg. counts from neighbours (Gaussian weighting)
+
+FO            FOld matr./spc. with NaI or Gaussian response matrix	
+FR [P,Q..]    Free additional parameters P,Q,... in peak fit
+FT [N]        N=1-15: set-up for N peaks and do fit
+              N=   0: do fit using present parameter values
+              N=  -1: recalculate initial param. estimates and do fit
+FX [P]        FiX additional parameter P or change fixed value(s)
+GR            Get Response matrix into working matrix 1 or 2
+
+HC            Hard Copy of window, region or screen (snapshot)
+HE            List commands
+IC            Select ICon for matr./spc.
+LP            List Parameter values for fit
+LS            LiSt files in current directory (ls from UNIX)
+
+MA [N]        Change limits for fit and/or peak positions
+              (N=1-17 : change MArker no. N)
+NF            Set-up New Fit for peaks ( <16 ) and do fit
+NO            NOrmalize to 100000 along X axis in matrix
+NU            Extract NUclear temperature from exp. first-gen. matrix
+OD            Offline Display, shows shared-memory spectra of offline sorting
+
+OL            OutLay matrix in spectra
+OV [I,J[,K]]  OVerlay (no erase) of matr./spc. into Ith of J parts of
+		   window, where	I,J=1,0 or K=1 gives full scale and
+                            	I,J=2,0 or K=2 gives autoscale
+PA            PArtition of matr./spc. Choose new origo
+PO            POlynom fit to set of data
+PC            Put Constant numbers in matr./spc. Only RETURNs make erase (=0) 
+
+PF            Peak Find on spectrum or matrix
+PM            Project Matrix down on X or Y axis
+RE            REad matr./spc.
+RF            Reset Free param. to their original value
+RM            Make Response Matrix of NaI or Gaussian shape
+
+RN            Replace Negative counts with 0's
+RP N          Free (N=1) or fix (N=0) relative peak positions
+RW N          Free (N=1) or fix (N=0) relative widths
+SC N          SCale for Y axis: 1/2/3=lin/G/log10 , N < 0: on right side
+SD            Sirius Display, display acquisition spectra
+
+SH            SHow counts of matr./spc. as numbers on TTY
+SM            SMooth matr./spc. with Gaussian weighting
+ST            STop and exit Mama 
+SU [I,J]      SUm counts between channel I and J using cursor
+SW            Change Starting Widths FWHM parameters, etc.
+
+TF            Total Fit of (a,n) to the exp. first-gen. matr.
+TR            Transform spectrum to one or many rows in a matrix
+TX            TeXt in display window (filename and time) on/off
+UN            UNfold matr./spc. with NaI or Gaussian response matrix
+UC            Subtraction of UnCorrelated events in gg-matrix
+
+UX            Type in your UniX command	
+WR            WRite matr./spc. and give a0, a1, a2 and dimensions
+XY            Interchange XY axis (reflection about diagonal in matr.)
+
+
+
+									Blindern, 14.aug.1995/mg

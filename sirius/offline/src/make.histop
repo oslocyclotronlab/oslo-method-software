@@ -1,0 +1,14 @@
+CFLAGS = -O3 -I/Applications/sirius/include
+    CC = cc
+ DOBJS = specdump.o rw.o attspec.o attshared.o detshared.o
+ COBJS = specclear.o attspec.o attshared.o detshared.o
+    RM = rm -f
+RM_CMD = $(RM) *.o a.out core
+
+dump:	$(DOBJS)
+	$(CC) $(CFLAGS) $(DOBJS) -o offline_specdump
+
+clear:	$(COBJS)
+	$(CC) $(CFLAGS) $(COBJS) -o offline_specclear
+clean:  
+	@$(RM_CMD)

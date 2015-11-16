@@ -1,0 +1,29 @@
+CFLAGS = -O3 -I/Applications/sirius/include -I/usr/X11R6/include -I/sw/include/ -L/usr/X11R6/lib -L/sw/lib -lXm -lXt -lX11
+    CC = cc
+ TOBJS = reduc_gui.o reduc_message.o reduc_storage.o reduc_startshift.o reduc_startwin.o reduc_stop.o reduc_status.o reduc_position.o number2string.o reduc_unload.o reduc_init.o reduc_shift.o
+    RM = rm -f
+    CP = mv
+RM_CMD = $(RM) *.o a.out core
+CP_BIN = $(CP) red_master /Applications/sirius/bin/.
+
+gui:	$(TOBJS)
+	$(CC) $(CFLAGS) $(TOBJS) -o red_master
+
+install:
+	@$(CP_BIN)
+
+clean:  
+	@$(RM_CMD)
+
+
+
+
+
+
+
+
+
+
+
+
+

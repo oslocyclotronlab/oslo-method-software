@@ -1,0 +1,7 @@
+PROGRAMS=attach1 corners dev_ind_draw entry_cb form_corners frame paned_win1 paned_win2 proc_traversal proc_traversal1 rowcol spreadsheet text_entry text_form tictactoe traversal unit_types
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

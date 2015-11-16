@@ -1,0 +1,13 @@
+      pointer (psingles , singles)
+      pointer (pesp, esp)
+      pointer (pdesp, desp)
+      pointer (pedesp, edesp)
+      pointer (pthicksp, thicksp)
+      pointer (pgesp, gesp)
+      pointer (ptgesp, tgesp)
+      pointer (pnasp, nasp)
+      pointer (ptnasp, tnasp)
+      pointer (pansp, alfna)
+      pointer (pagsp, alfge)
+      pointer (pmtsp, mat)
+

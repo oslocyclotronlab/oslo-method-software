@@ -1,0 +1,942 @@
+PROGRAM event_builder
+! oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+! o        DAISY  -  A VME-based data acquisition system for     o
+! o                 the CACTUS multidetector set-up.             o
+! oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+!
+! File        :    pack-one:VALETv3.2:VALET:PROGRAM:event_full
+! Written by  :    2B/TR
+! Date        :    11-88
+! Modified    :    27-01-89 and 04-02-92 for PUR/JW
+!
+!
+OPTION IMPLICIT INT32
+CHAR answer, daisy, test, setup, tpu_2, tpu_3
+!
+!========================================================!
+!  TPU REGISTERS:                                        !
+!    txstatus    - TPU status register            FFFFx0 !
+!    txnumreg    - Number of triggered channels   FFFFx5 !
+!    txpattern   - Pattern of active channels     FFFFx6 !
+!    nextReg     - Controls the data flow         FFFF09 !
+!                                                        !
+!    For details see TPU User`s manual                   !
+!--------------------------------------------------------!
+!                                                        !
+!  Registers in TPU  Master   (TPU #1)                   !
+CONST t1status = 16%F0FFFF00
+CONST nextreg = 16%F0FFFF09
+CONST t1numreg = 16%F0FFFF05
+CONST t1pattern = 16%F0FFFF06
+!                                                        !
+!--------------------------------------------------------!
+!                                                        !
+!  Registers in TPU Slave  (TPU #2)                      !
+CONST t2status = 16%F0FFFF10
+CONST t2numreg = 16%F0FFFF15
+CONST t2pattern = 16%F0FFFF16
+!                                                        !
+!--------------------------------------------------------!
+!                                                        !
+!  Registers in TPU Slave  (TPU #3)                      !
+CONST t3status = 16%F0FFFF20
+CONST t3numreg = 16%F0FFFF25
+CONST t3pattern = 16%F0FFFF26
+!                                                        !
+!--------------------------------------------------------!
+!                                                        !
+!  Declaration of TPU variables                          !
+CONST resetstatus = 16%0
+CONST nextevent = 0
+!
+!========================================================!
+!  NIM REGISTERS:
+CONST nimcsr = 16%F0EFFF9C ! Control & Status register
+CONST nimpattern = 16%F0EFFF9E ! Pattern register
+!--------------------------------------------------------!
+!                                                        !
+!  Declaration of NIM variables                          !
+INT32 nimadc(1 TO 16) ! Contains addresses of NIM ADC`s
+CONST clear = 16%0 ! Reset
+CONST enable = 16%1
+!
+!========================================================!
+
+!========================================================!
+!  CAMAC parameters
+INT16 temp16 ! Temporary storage of CAMAC data
+INT16 tpp0, tpp1 ! Temporary storage of PUR data
+INT32 cadc1(0 TO 7) ! ADC1 data registers
+INT32 cadc2(0 TO 7) ! ADC2 data registers
+INT32 cadc3(0 TO 7) ! ADC3 data registers
+INT32 cadc4(0 TO 7) ! ADC4 data registers
+INT32 ctdc1(0 TO 7) ! TDC1 data registers
+INT32 ctdc2(0 TO 7) ! TDC2 data registers
+INT32 ctdc3(0 TO 7) ! TDC3 data registers
+INT32 ctdc4(0 TO 7) ! TDC4 data registers
+INT32 cpur1(0 TO 3) ! PUR1 data registers
+
+CONST branch = 1 ! Defined by rotary switch on Branch Driver
+CONST crate = 1 ! Defined by rotary switch on Crate Controller
+CONST adc1slot = 11 ! Position of ADC1
+CONST adc2slot = 12 ! Position of ADC2
+CONST adc3slot = 13 ! Position of ADC3
+CONST adc4slot = 14 ! Position of ADC4
+CONST tdc1slot = 15 ! Position of TDC1
+CONST tdc2slot = 16 ! Position of TDC2
+CONST tdc3slot = 17 ! Position of TDC3
+CONST tdc4slot = 18 ! Position of TDC4
+CONST pur1slot =   7 ! Position of PUR1
+
+!========================================================!
+
+!========================================================!
+! DECLARATIONS FOR DATA STORAGE                          !
+!                                                        ! 
+INT32 buf32(0 TO 65535) ! Data buffer, 32 bits 
+
+CONST maxbuf1 = 32767 ! Upper limit of buffer 1
+CONST maxbuf2 = 65535 ! Upper limit of buffer 2
+CONST event_header = 16%F000 ! Event_header id. code
+CONST safe = 100 ! Maximum eventlength with 3 TPU`s
+CONST buffer1 = 1
+CONST buffer2 = 2
+CONST empty = 16%0 !Reset semaphore
+CONST full = 16%1 !Set semaphore
+!                                                        ! 
+!========================================================!
+! Declaration of MESSAGE BOX in shared memory            !
+!  The MESSAGE BOX has 10 longword locations             !
+!                                                        ! 
+CONST buffer_address = 16%201FFFD0 ! Data buffer address
+CONST buffer_length = 16%201FFFD4 ! Length of data buffer
+CONST sema_1 = 16%201FFFD8 !Location of semaphore 1
+CONST sema_2 = 16%201FFFDC !Location of semaphore 2
+CONST v_vmestatus = 16%201FFFE4 ! Vme status
+CONST v_ndstatus = 16%201FFFE8 ! Nd status
+
+CONST pstart = 1
+CONST pstop = 0
+
+
+
+
+
+! ============================================= !
+SUB config ! Subroutine to configure  the setup
+   
+   CONST baseadr = 16%F0EFFFA0 ! Address for NIM ADC1
+   CONST statw = 16%A00 ! LAM disabl,OVF disabl,SUB disabl
+   INT32 i ! Local loop control variable
+   CONST puren = 0 ! PUR control word
+   INT16 dummy   
+   
+   ! Set vme acquisition to stopped
+   put32(v_vmestatus, pstop)
+   
+   
+   !  Calculate the addresses of the NIM ADC`s
+   inc = 0
+   FOR i = 1 TO 16
+      nimadc(i) = baseadr+inc
+      inc = inc+2
+   ENDFOR
+   
+   
+   ! Define the the symbolic addresses of CAMAC devices:  
+   ! Camac ADC1
+   FOR i = 0 TO 7
+      cdreg(cadc1(i), branch, crate, adc1slot, i) ! Data reg. 0-7
+   ENDFOR
+   cdreg(astat1, branch, crate, adc1slot, 14) ! Status register
+   
+   ! Camac ADC2
+   FOR i = 0 TO 7
+      cdreg(cadc2(i), branch, crate, adc2slot, i) ! Data reg. 0-7
+   ENDFOR
+   cdreg(astat2, branch, crate, adc2slot, 14) ! Status register
+   
+   ! Camac ADC3
+   FOR i = 0 TO 7
+      cdreg(cadc3(i), branch, crate, adc3slot, i) ! Data reg. 0-7
+   ENDFOR
+   cdreg(astat3, branch, crate, adc3slot, 14) ! Status register
+   
+   ! Camac ADC4
+   FOR i = 0 TO 7
+      cdreg(cadc4(i), branch, crate, adc4slot, i) ! Data reg. 0-7
+   ENDFOR
+   cdreg(astat4, branch, crate, adc4slot, 14) ! Status register
+   
+   ! Camac TDC1
+   FOR i = 0 TO 7
+      cdreg(ctdc1(i), branch, crate, tdc1slot, i) ! Data reg. 0-7
+   ENDFOR
+   cdreg(tstat1, branch, crate, tdc1slot, 14) ! Status register
+   
+   ! Camac TDC2
+   FOR i = 0 TO 7
+      cdreg(ctdc2(i), branch, crate, tdc2slot, i) ! Data reg. 0-7
+   ENDFOR
+   cdreg(tstat2, branch, crate, tdc2slot, 14) ! Status register
+   
+   ! Camac TDC3
+   FOR i = 0 TO 7
+      cdreg(ctdc3(i), branch, crate, tdc3slot, i) ! Data reg. 0-7
+   ENDFOR
+   cdreg(tstat3, branch, crate, tdc3slot, 14) ! Status register
+   
+   ! Camac TDC4
+   FOR i = 0 TO 7
+      cdreg(ctdc4(i), branch, crate, tdc4slot, i) ! Data reg. 0-7
+   ENDFOR
+   cdreg(tstat4, branch, crate, tdc4slot, 14) ! Status register
+
+   ! Camac PUR1
+   FOR i = 0 TO 3
+      cdreg(cpur1(i),branch,crate,pur1slot,i) ! Data reg. 0-3   
+   ENDFOR
+   cdreg(pcont1,branch,crate,pur1slot,0) ! Controlregister
+
+   ! Enable NIM Controller as slave
+   put16(nimcsr, clear) ! Reset CSR
+   put16(nimpattern, clear) ! Reset Pattern & ADC`s
+   put16(nimcsr, enable) ! Enable as Slave
+   
+   ! Enable CAMAC ADC/TDC
+   cccz(astat1) ! Reset Crate
+   ccci(astat1, 0) ! Clear Crate Inhibit flag
+   
+   f = 20 ! Write to status register
+   cssa(f, astat1, statw, q)
+   IF q <> 1 THEN PRINT " Missing Q-response from ADC1"
+   cssa(f, astat2, statw, q)
+   IF q <> 1 THEN PRINT " Missing Q-response from ADC2"
+   cssa(f, astat3, statw, q)
+   IF q <> 1 THEN PRINT " Missing Q-response from ADC3"
+   cssa(f, astat4, statw, q)
+   IF q <> 1 THEN PRINT " Missing Q-response from ADC4"
+   cssa(f, tstat1, statw, q)
+   IF q <> 1 THEN PRINT " Missing Q-response from TDC1"
+   cssa(f, tstat2, statw, q)
+   IF q <> 1 THEN PRINT " Missing Q-response from TDC2"
+   cssa(f, tstat3, statw, q)
+   IF q <> 1 THEN PRINT " Missing Q-response from TDC3"
+   cssa(f, tstat4, statw, q)
+   IF q <> 1 THEN PRINT " Missing Q-response from TDC4"
+
+   !Enable PUR
+   cssa(16,pcont1,puren,q)
+   cssa(0,pcont1,dummy,q)
+   IF q <> 1 THEN PRINT "Missing Q-response from PUR1"
+
+   !Get start address of buffer 1 
+   bufadd1 = address(buf32(0))
+   ! Store start address of databuffer in a predefined memory location
+   put32(buffer_address, bufadd1)
+   
+   
+   !  Store Buffer length 
+   put32(buffer_length, maxbuf1)
+   
+ENDSUB config
+! ============================================= !
+
+
+
+
+
+
+
+! ============================================= !
+SUB initialize
+   INT i
+   
+   !  Clear data buffers
+   FOR i = 0 TO maxbuf2
+      buf32(i) = 0
+   ENDFOR
+   
+   !   Set semaphors  for buffer to empty state
+   put32(sema_1, empty)
+   put32(sema_2, empty)
+   
+   
+   curbuf = buffer1 !   Start with Buffer One
+   p1 = 0
+   curmax = maxbuf1 !   Initialize the roof of Buffer One
+   
+   put16(t1status, resetstatus) ! Reset TPU before running
+   
+ENDSUB initialize
+! ============================================= !
+
+
+
+
+
+
+! ============================================= !
+SUB dumpbuf
+   ! Unformatted dump of buffer 1
+   INT j
+   FOR j = 0 TO 100
+      PRINT "      buf32(", j:2:1, ") ", buf32(j):4:16, "   (Hex)"
+   ENDFOR
+ENDSUB dumpbuf
+! ============================================= !
+
+
+
+
+
+
+! ============================================= !
+SUB checkstatus(OUT INT returstat) ! Check ND stat
+   
+   get32(v_ndstatus, par)
+   returstat = par
+ENDSUB checkstatus
+! ============================================= !
+
+
+
+
+! Check if code is compiled
+klar = compiled
+IF klar <> -1 THEN
+   PRINT "CODE MUST BE COMPILED !!! "
+   STOP
+ENDIF
+
+config
+initialize
+
+LOOP ! Main execution loop
+   PRINT ""
+   PRINT ""
+   PRINT ""
+   PRINT "        ._______________________________________________."
+   PRINT "        I               Oslo Cyclotron                  I"
+   PRINT "        I          Data Acquisition System              I"
+   PRINT "        I_______________________________________________I"
+   PRINT ""
+   PRINT "                A :     START data acquisition"
+   PRINT "                B :     DUMP of data buffer (buffer one)"
+   PRINT "                C :     Print STATUS"
+   PRINT "                D :     Enable/Disable TPUs"
+   PRINT "                * :     EXIT"
+   PRINT ""
+   PRINT "           Ctrl-C :     STOP data acquisition"
+   PRINT ""
+   
+   PRINT "DAISY>",
+   daisy = inkey
+   SELECT daisy
+      
+   CASE "a", "A"
+      
+      initialize
+      
+      
+      PRINT ""
+      PRINT " Data acquisition started:  Date:", date, ",", " Time:", time
+      
+      ! Set vme acq status to started
+      put32(v_vmestatus, pstart)
+      
+      waitstate:
+      put32(sema_1, empty)
+      put32(sema_2, empty)
+      p1 = 0
+      curbuf = buffer1
+      curmax = maxbuf1
+      LOOP
+         get32(v_ndstatus, par)
+      EXIT IF par = 1
+      ENDLOOP
+      
+      
+      ! +++++++++++++++++++++++++++++++++++++++++++++++++
+      ! +         Main ReadOut Loop starts here         +           
+      ! +++++++++++++++++++++++++++++++++++++++++++++++++
+      LOOP
+         continue:
+         
+         put8(nextreg, para) !   Enable TPUs for next event
+         
+         ! Loop for event detected
+         notdetected:
+         get8(t1numreg, para)
+         IF (bit(para, 7) = 0) THEN GOTO notdetected
+         
+         
+         
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         ! Buffer handling section..                       :
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         
+         IF p1 >= curmax-safe THEN !No space for event, change buffer
+            
+            IF curbuf = buffer1 THEN
+               
+               FOR i = p1 TO maxbuf1-1 !Remove old data from upper part
+                  buf32(i) = 0
+               ENDFOR
+               
+               put32(sema_1, full) ! Set buffer 1 semaphore to "1"
+               
+               LOOP
+                  get32(sema_2, value)
+               EXIT IF value = empty !   Waits for Buffer 2 to be fetched
+                  checkstatus(returstat)
+                  IF returstat = 0 THEN GOTO waitstate
+               ENDLOOP
+               
+               
+               p1 = maxbuf1+1 ! Set pointer to first location of Buffer Two
+               curbuf = buffer2
+               curmax = maxbuf2
+               
+            ELSE !   Buffer Two is current
+               
+               FOR j = p1 TO maxbuf2-1 ! Remove old data from upper part
+                  buf32(j) = 0
+               ENDFOR
+               
+               put32(sema_2, full) ! Set buffer 2 semaphore to "1"
+               
+               LOOP
+                  get32(sema_1, value)
+               EXIT IF value = empty !   Waits for Buffer 1 to be fetched
+                  checkstatus(returstat)
+                  IF returstat = 0 THEN GOTO waitstate
+               ENDLOOP
+               
+               
+               p1 = 0 !   Set pointer to first location of Buffer One
+               curbuf = buffer1
+               curmax = maxbuf1
+               
+            ENDIF
+         ENDIF
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         
+         
+         
+         ! ::::::::::::::::::::::::::::::::::::::::::::::::::::
+         ! Check for PileUp                                   :
+         ! ::::::::::::::::::::::::::::::::::::::::::::::::::::
+         
+         ! Assumes that the pileUp periode (2/4 us) is over
+         get8(t1numreg, para)
+         pileup = bit(para, 6) ! Pileup flag,
+         
+         IF pileup = 1 THEN ! Skip this event and continue with next
+            nopileup = nopileup+1
+            put16(nimpattern, clear) ! Resets NIM ADC`s for new event
+            GOTO continue ! Continue with next event
+         ENDIF
+         ! ::::::::::::::::::::::::::::::::::::::::::::::::::::
+         
+         
+         
+         header = p1 ! Start of event pointer is saved in "header"
+         p1 = p1+1 ! Update buffer pointer
+         
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         !      Data structure and readout for TPU1        :
+         !  TPU1 (Master) is dedicated to NIM ADC`s        :
+         !  Bit 0 points to ADC1 and 2, bit 2 to and 4     :
+         !  and so on.                                     :
+         !  Odd bit numbers are not used by event_builder  :
+         !  They may  be used as logical bits in sorting   :
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         
+         
+         get16(t1pattern, patcopy1) ! Take a copy of TPU1 pattern
+         IF (patcopy1 <> 0) THEN
+            buf32(p1) = 16%800A
+            p1 = p1+1
+            buf32(p1) = patcopy1 ! Store Pattern1
+            p1 = p1+1
+            
+            ! Loop on eventreadyflag from NIM CONTROLLER
+            ! Not necessary with the present code efficiency
+            ! 7411 : max 22 us at 2k, time elapsed is app. 70us
+            ! 7420 : max 6 us at 2k
+            !notready:
+            !get16(nimcsr, para)
+            !counter = counter+1
+            !IF (bit(para, 15) = 0) THEN GOTO notready
+            ! Now the conversion for NIM ADC`s are ready
+            !get16(nimpattern, dummy) ! *** Test Only ***
+            
+            pat = patcopy1 AND 16%F ! Bit 0 & 1 are for particle telescopes
+            IF pat <> 0 THEN
+               IF bit(patcopy1, 0) = 1 THEN ! gate a
+                  get16(nimadc(1), buf32(p1)) ! DE(a)
+                  p1 = p1+1
+                  get16(nimadc(2), buf32(p1)) ! E(a)
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy1, 2) = 1 THEN ! gate b
+                  get16(nimadc(3), buf32(p1)) ! DE(b)
+                  p1 = p1+1
+                  get16(nimadc(4), buf32(p1)) ! E(b)
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy1 AND 16%F0
+            IF pat <> 0 THEN
+               IF bit(patcopy1, 4) = 1 THEN
+                  get16(nimadc(5), buf32(p1))
+                  p1 = p1+1
+                  get16(nimadc(6), buf32(p1))
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy1, 6) = 1 THEN
+                  get16(nimadc(7), buf32(p1))
+                  p1 = p1+1
+                  get16(nimadc(8), buf32(p1))
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy1 AND 16%F00
+            IF pat <> 0 THEN
+               IF bit(patcopy1, 8) = 1 THEN
+                  get16(nimadc(9), buf32(p1))
+                  p1 = p1+1
+                  get16(nimadc(10), buf32(p1))
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy1, 10) = 1 THEN
+                  get16(nimadc(11), buf32(p1))
+                  p1 = p1+1
+                  get16(nimadc(12), buf32(p1))
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy1 AND 16%F000
+            IF pat <> 0 THEN
+               IF bit(patcopy1, 12) = 1 THEN
+                  get16(nimadc(13), buf32(p1))
+                  p1 = p1+1
+                  get16(nimadc(14), buf32(p1))
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy1, 14) = 1 THEN
+                  get16(nimadc(15), buf32(p1))
+                  p1 = p1+1
+                  get16(nimadc(16), buf32(p1))
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+         ENDIF
+         
+         
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         !  Data structure and readout for TPU2            :
+         !  TPU is dedicated to CAMAC ADC`s & TDC`s        :
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         
+         f = 0 ! Read data
+         
+         get16(t2pattern, patcopy2) ! Take a copy of TPU2 pattern
+         IF (patcopy2 <> 0) THEN
+            buf32(p1) = 16%800B
+            p1 = p1+1
+            buf32(p1) = patcopy2 ! Store Pattern2
+            p1 = p1+1
+            
+            pat = patcopy2 AND 16%F ! Masking hit nibbles
+            IF pat <> 0 THEN
+               IF bit(patcopy2, 0) = 1 THEN
+                  cssa(f, cadc1(0), temp16, q) ! Read ADC1(0)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc1(0), temp16, q) ! Read TDC1(0)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 1) = 1 THEN
+                  cssa(f, cadc1(1), temp16, q) ! Read ADC1(1)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc1(1), temp16, q) ! Read TDC1(1)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 2) = 1 THEN
+                  cssa(f, cadc1(2), temp16, q) ! Read ADC1(2)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc1(2), temp16, q) ! Read TDC1(2)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 3) = 1 THEN
+                  cssa(f, cadc1(3), temp16, q) ! Read ADC1(3)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc1(3), temp16, q) ! Read TDC1(3)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy2 AND 16%F0
+            IF pat <> 0 THEN
+               IF bit(patcopy2, 4) = 1 THEN
+                  cssa(f, cadc1(4), temp16, q) ! Read ADC1(4)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc1(4), temp16, q) ! Read TDC1(4)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 5) = 1 THEN
+                  cssa(f, cadc1(5), temp16, q) ! Read ADC1(5)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc1(5), temp16, q) ! Read TDC1(5)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 6) = 1 THEN
+                  cssa(f, cadc1(6), temp16, q) ! Read ADC1(6)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc1(6), temp16, q) ! Read TDC1(6)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 7) = 1 THEN
+                  cssa(f, cadc1(7), temp16, q) ! Read ADC1(7)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc1(7), temp16, q) ! Read TDC1(7)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy2 AND 16%F00
+            IF pat <> 0 THEN
+               IF bit(patcopy2, 8) = 1 THEN
+                  cssa(f, cadc2(0), temp16, q) ! Read ADC2(0)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc2(0), temp16, q) ! Read TDC2(0)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 9) = 1 THEN
+                  cssa(f, cadc2(1), temp16, q) ! Read ADC2(1)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc2(1), temp16, q) ! Read TDC2(1)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 10) = 1 THEN
+                  cssa(f, cadc2(2), temp16, q) ! Read ADC2(2)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc2(2), temp16, q) ! Read TDC2(2)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 11) = 1 THEN
+                  cssa(f, cadc2(3), temp16, q) ! Read ADC2(3)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc2(3), temp16, q) ! Read TDC2(3)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy2 AND 16%F000
+            IF pat <> 0 THEN
+               IF bit(patcopy2, 12) = 1 THEN
+                  cssa(f, cadc2(4), temp16, q) ! Read ADC2(4)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc2(4), temp16, q) ! Read TDC2(4)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 13) = 1 THEN
+                  cssa(f, cadc2(5), temp16, q) ! Read ADC2(5)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc2(5), temp16, q) ! Read TDC2(5)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 14) = 1 THEN
+                  cssa(f, cadc2(6), temp16, q) ! Read ADC2(6)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc2(6), temp16, q) ! Read TDC2(6)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy2, 15) = 1 THEN
+                  cssa(f, cadc2(7), temp16, q) ! Read ADC2(7)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc2(7), temp16, q) ! Read TDC2(7)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+         ENDIF
+         
+         
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         !  Data structure and readout for TPU3            :
+         !  TPU is dedicated to CAMAC ADC`s & TDC`s        :
+         !::::::::::::::::::::::::::::::::::::::::::::::::::
+         
+         get16(t3pattern, patcopy3) ! Take a copy of TPU3 pattern
+         IF (patcopy3 <> 0) THEN
+            buf32(p1) = 16%800C
+            p1 = p1+1
+            buf32(p1) = patcopy3 ! Store Pattern3
+            p1 = p1+1
+            
+            pat = patcopy3 AND 16%F ! Masking hit nibbles
+            IF pat <> 0 THEN
+               IF bit(patcopy3, 0) = 1 THEN
+                  cssa(f, cadc3(0), temp16, q) ! Read ADC3(0)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc3(0), temp16, q) ! Read TDC3(0)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 1) = 1 THEN
+                  cssa(f, cadc3(1), temp16, q) ! Read ADC3(1)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc3(1), temp16, q) ! Read TDC3(1)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 2) = 1 THEN
+                  cssa(f, cadc3(2), temp16, q) ! Read ADC3(2)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc3(2), temp16, q) ! Read TDC3(2)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 3) = 1 THEN
+                  cssa(f, cadc3(3), temp16, q) ! Read ADC3(3)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc3(3), temp16, q) ! Read TDC3(3)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy3 AND 16%F0
+            IF pat <> 0 THEN
+               IF bit(patcopy3, 4) = 1 THEN
+                  cssa(f, cadc3(4), temp16, q) ! Read ADC3(4)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc3(4), temp16, q) ! Read TDC3(4)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 5) = 1 THEN
+                  cssa(f, cadc3(5), temp16, q) ! Read ADC3(5)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc3(5), temp16, q) ! Read TDC3(5)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 6) = 1 THEN
+                  cssa(f, cadc3(6), temp16, q) ! Read ADC3(6)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc3(6), temp16, q) ! Read TDC3(6)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 7) = 1 THEN
+                  cssa(f, cadc3(7), temp16, q) ! Read ADC3(7)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc3(7), temp16, q) ! Read TDC3(7)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy3 AND 16%F00
+            IF pat <> 0 THEN
+               IF bit(patcopy3, 8) = 1 THEN
+                  cssa(f, cadc4(0), temp16, q) ! Read ADC4(0)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc4(0), temp16, q) ! Read TDC4(0)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 9) = 1 THEN
+                  cssa(f, cadc4(1), temp16, q) ! Read ADC4(1)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc4(1), temp16, q) ! Read TDC4(1)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 10) = 1 THEN
+                  cssa(f, cadc4(2), temp16, q) ! Read ADC4(2)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc4(2), temp16, q) ! Read TDC4(2)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 11) = 1 THEN
+                  cssa(f, cadc4(3), temp16, q) ! Read ADC4(3)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc4(3), temp16, q) ! Read TDC4(3)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+            
+            pat = patcopy3 AND 16%F000
+            IF pat <> 0 THEN
+               IF bit(patcopy3, 12) = 1 THEN
+                  cssa(f, cadc4(4), temp16, q) ! Read ADC4(4)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc4(4), temp16, q) ! Read TDC4(4)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 13) = 1 THEN
+                  cssa(f, cadc4(5), temp16, q) ! Read ADC4(5)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc4(5), temp16, q) ! Read TDC4(5)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 14) = 1 THEN
+                  cssa(f, cadc4(6), temp16, q) ! Read ADC4(6)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc4(6), temp16, q) ! Read TDC4(6)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+               IF bit(patcopy3, 15) = 1 THEN
+                  cssa(f, cadc4(7), temp16, q) ! Read ADC4(7)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+                  cssa(f, ctdc4(7), temp16, q) ! Read TDC4(7)
+                  buf32(p1) = temp16
+                  p1 = p1+1
+               ENDIF
+            ENDIF
+         ENDIF
+         
+         ! PUR readout, 2 data words as "virtual" TPU4         
+         cssa(1,cpur1(0),tpp0,q) ! Read PUR1(0)
+         cssa(1,cpur1(1),tpp1,q) ! Read PUR1(1)
+         temp16 = tpp0 OR tpp1
+         IF temp16 <> 0 THEN ! Pileup detected
+            buf32(p1) = 16%800D 
+            p1 = p1+1
+            buf32(p1) = tpp0 
+            p1 = p1+1
+            buf32(p1) = tpp1 
+            p1 = p1+1
+         ENDIF
+
+         
+         ! Write event_header word to buffer
+         buf32(header) = (p1-header)+event_header
+         
+         put16(nimpattern, clear) ! Reset NIM ADCs for new event
+         cccc(cadc1(0)) ! Reset all CAMAC devices for next event
+         
+         ! ::::::::::::::::::::::::::::::::::::::::::::::::::::        
+         
+      ENDLOOP ! End of main readout loop
+      
+      
+   CASE "b", "B"
+      
+      dumpbuf ! Call subroutine "dumpbuf"
+      
+   CASE "c", "C"
+      
+      high1 = bufadd1+4*maxbuf1
+      bufadd2 = bufadd1+4*(maxbuf1+1)
+      high2 = bufadd2+4*maxbuf1
+      PRINT ""
+      PRINT "FIC8230 on-board DRAM   :20002000  - 201FFFFF"
+      PRINT "BUFFER 1 address space  :", bufadd1:8:16, "  - ", high1:8:16
+      PRINT "BUFFER 2 address space  :", bufadd2:8:16, "  - ", high2:8:16
+      IF tpu_2 = "e" OR tpu_2 = "E" THEN
+         PRINT "TPU2 is Enabled"
+      ENDIF
+      IF tpu_3 = "e" OR tpu_3 = "E" THEN
+         PRINT "TPU3 is Enabled"
+      ENDIF
+      
+      
+   CASE "d", "D"
+      PRINT "Enable(E) / Disable (D) TPU# :"
+      INPUT tpu_2
+      IF tpu_2 = "E" OR tpu_2 = "e" THEN
+         put16(t2status, enable)
+         PRINT "          ... TPU2 Enabled"
+      ELSE IF tpu_2 = "D" OR tpu_2 = "d" THEN
+         put16(t2status, clear)
+         PRINT "          ... TPU2 Disabled"
+      ELSE
+         PRINT "Illegal command !"
+      ENDIF
+      
+      INPUT tpu_3
+      IF tpu_3 = "E" OR tpu_3 = "e" THEN
+         put16(t3status, enable)
+         PRINT "          ... TPU3 Enabled"
+      ELSE IF tpu_3 = "D" OR tpu_3 = "d" THEN
+         put16(t3status, clear)
+         PRINT "          ... TPU3 Disabled"
+      ELSE
+         PRINT "Illegal command !"
+      ENDIF
+      
+      
+   CASE "*"
+   EXIT IF daisy = "*"
+      
+      
+   CASE ELSE
+      PRINT "Illegal command !"
+   ENDSELECT
+   
+   slutt:
+ENDLOOP ! End of main execution loop
+
+
+ENDPROGRAM event_builder
+

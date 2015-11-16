@@ -1,0 +1,1 @@
+plot "eshell.dat" using 2:3 ; pause -1

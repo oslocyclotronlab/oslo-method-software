@@ -1,0 +1,37 @@
+#####################################
+#  REMAKE_ALL
+#
+# Use UNIX command sh REMAKE.ALL to execute
+#
+#This executable file recompile and reload all
+#component programs in Reduc.
+#
+#####################################
+
+# Delete old object files if such excists
+#make -f make.sorter clean
+
+# Rebuild the main sorting task
+make -f make.sorter sort
+make -f make.sorter install
+
+# Rebuild the graphical user interface
+make -f make.master gui
+make -f make.master install
+
+# Delete all objects files
+make -f make.sorter clean
+
+
+
+
+
+
+
+
+
+
+
+
+
+

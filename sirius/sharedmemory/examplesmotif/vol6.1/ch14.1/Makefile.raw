@@ -1,0 +1,7 @@
+PROGRAMS=color_slide simple_scale tick_marks
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

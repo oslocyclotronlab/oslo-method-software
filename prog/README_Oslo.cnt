@@ -1,0 +1,11 @@
+ The Oslo-method
+ 
+ 1. Sort ALFNA(Eg,Ex) from experiment 
+ 2. Use rm in mama and unfold ALFNA -> unfolded 
+ 3. Use fg in mama and extract first-generation matrix fg 
+ 4. Run rhosigchi on fg 
+ 5. Run counting 
+ 6. Run counting.kumac, spincut.kumac and sigext.kumac in PAW
+    or run counting.cpp, spincut.cpp and sigext.cpp in ROOT
+ 7. Run normalization 
+ 8. Run strength.kumac in PAW or strength.cpp in ROOT

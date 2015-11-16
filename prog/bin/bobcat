@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Script to call Bobcat
+# 22-11-2007 -- JW
+#
+
+ssh -p35 siri.uio.no

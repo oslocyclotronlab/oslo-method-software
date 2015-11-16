@@ -1,0 +1,1261 @@
+Dear Mr. Guttormsen,
+
+The systems contains a VME driver and a corresponding library 
+(/lib/ces/libvme.a). You find examples how to use this library in
+/usr/ces/examples/vlib. 'vlib' is a small library that simplifies the calls
+to 'libvme'.
+
+The functions GETx and PUTx have not been implemented on the system, however
+they can be easily substituted by a sequence like
+
+/*
+* PUT 32
+*/
+long *p,data;
+
+p = (long *)vme_map(vme_address,4,AM-code);
+*p = data;
+
+The AM-code indicates the VME addressing mode (e.g. 0x09 for A32, 0x39 for
+A24). '4' in the example above indicates the 'window size' that you want to
+map to VME. 'vme_map' maps a given part of the VME address space into the
+processors logical address space, it returns a pointer that can subsequently
+be used to access VME directly. Normally, the VME addresses used by a given
+program are mapped once in the beginning, the VME access is then done using
+pointers and finally the VME window is released at the end of the program.
+(see /usr/src/ces/examples/vlib/vpeek.c).
+
+CAMAC calls are in fact missing on your disk. I am sending you with the next
+mails a small CAMAC library and test programs that should be installed in
+/usr/src/ces/exaples/cbd. The following files should arrive:
+
+-rw-r--r--    1 martin   user         622 Apr  3 08:13 Makefile
+-rw-r--r--    1 martin   user        2438 Apr  3 08:13 ReadMe
+-rw-r--r--    1 martin   user        1115 Apr  3 08:13 cam_cmd.c
+-rw-r--r--    1 martin   user       10144 Apr  3 08:13 cbdclib.c
+-rw-r--r--    1 martin   user        1836 Apr  3 08:13 cfsa.c
+-rw-r--r--    1 martin   user        2044 Apr  3 08:13 cfubc.c
+-rw-r--r--    1 martin   user        2045 Apr  3 08:13 csubr.c
+-rw-r--r--    1 martin   user        6956 Apr  3 08:13 slottest.c
+
+I hope this will help you to complete the porting of your DAQ program.
+Happy Easter and best regards,
+
+     Martin Weymann
+-- 
++-----------------------------------------------------------------------------+
+| CCCC EEEE SSSS  Creative Electronic Systems | Martin Weymann                |
+| C    E    S     70, route du Pont Butin     | Syst.Integration/Tech.Support |
+| C    EEE  SSSS  PO Box 107                  | email: martin@lancy.ces.ch    |
+| C    E       S  CH-1213 Petit Lancy 1       | Tel: +41 22 792 57 45         |
+| CCCC EEEE SSSS  Switzerland                 | Fax: +41 22 792 57 48         |
++-----------------------------------------------------------------------------+
+
+/*
+*********************************************************
+* file: cam_cmd.c
+* 921103 MAWE
+* 931028 MAWE change linktrap() to copen(), add ccloase()
+* 931028 MAWE last update
+*
+* CAMAC command interpreter
+*********************************************************
+*/
+#include <stdio.h>
+
+#define  B 1
+#define  C 1
+#define  N 20
+
+#define  FALSE 0
+#define  TRUE  0xFF000000
+
+#define  CAMAC(f_,a_,d_) \
+{ dr=(d_);cfsa((f_),hm[(a_)],&dr,&q); \
+  printf("F(%2d)A(%2d) W=%06x, Q=%1d, R=%06x\n",\
+  (f_),(a_),(d_),q,dr);\
+}
+/*
+*********************************************************
+* do it
+*--------------------------------------------------------
+*/
+main()
+{
+	long i,b,c,n,a,f,d,hm[16],q,dr,t;
+	
+	printf("CAM_CMD> B,C,N,delay\n");
+	printf("CAM_CMD> ");
+	scanf("%d,%d,%d,%d",&b,&c,&n,&t);
+	printf("B=%d,C=%d,N=%d,delay=%d ticks\n",b,c,n);
+
+	copen();
+	for (i=0;i<16;i++) {
+		cdreg(&hm[i],b,c,n,i);
+	}
+	ccci(hm[0],FALSE);
+	
+/*
+* test loop
+*/
+	printf("CAM_CMD> F,A,W\n");
+	for (;;) {
+		printf("CAM_CMD> ");
+		if (scanf("%d,%d,%x",&f,&a,&d) != 3) break;
+		CAMAC(f,a,d);
+		if (t) {sleep(t);}
+	}
+	printf("\n"); 
+	cclose();
+}
+
+
+/*
+****************************************************************************
+* file: cfsa.c
+* 930503 MAWE 
+* 930630 MAWE adapted to VIC_8250
+* 930709 MAWE adapted to pipe server
+* 930811 MAWE generic version
+* 950915 MAWE last update
+*
+* read FASTBUS control register (FRC)
+****************************************************************************
+*/
+#include	<stdio.h>
+/*
+* adapt to different libraries
+*/
+#ifndef OSK
+#define		OPEN		{copen();}
+#define		CLOSE		{cclose();}
+#else
+#define		OPEN		{linktrap();}
+#define		CLOSE
+#endif
+
+#define		D	0
+#define		F	16
+#define		A	0
+#define		N	9
+#define		CT	1
+
+#ifndef C
+#define		C	1
+#endif
+#ifndef B
+#define		B	1
+#endif
+/*
+*===========================================================================
+* do it
+*---------------------------------------------------------------------------
+*/
+main(argc,argv)
+int argc;
+char *argv[];
+{
+	long i,b,c,n,a,f,q,d,ext,ct;
+	
+	if (argc>8) argc=8;
+	if ((argc==8)&&(sscanf(argv[7],"%d",&b)==1)) {argc--;} else {b=B;}
+	if ((argc==7)&&(sscanf(argv[6],"%d",&c)==1)) {argc--;} else {c=C;}
+	if ((argc==6)&&(sscanf(argv[5],"%d",&n)==1)) {argc--;} else {n=N;}
+	if ((argc==5)&&(sscanf(argv[4],"%d",&a)==1)) {argc--;} else {a=A;}
+
+	if ((argc==4)&&(sscanf(argv[3],"%x",&ct)==1)) {argc--;} else {ct=CT;}
+	if ((argc==3)&&(sscanf(argv[2],"%d",&f)==1)) {argc--;} else {f=F;}
+	if ((argc==2)&&(sscanf(argv[1],"%x",&d)==1)) {argc--;} else {d=D;}
+	if (argc != 1) {
+		printf("use: %s [<data>[<F>[<count>[<A>[<N>[<C>[<B>]]]]]]]\n",argv[0]);
+		printf("     CDREG(&ext,B,C,N,A), followed by\n");
+		printf("     CFSA (F,ext,<data>,&q) <count> times; display result\n");
+		exit(0);
+	}
+	OPEN
+	cdreg(&ext,b,c,n,a);
+	for(i=ct;i;i--) {
+		cfsa(f,ext,&d,&q);
+		d++;
+	}
+	fprintf(stderr,"B=%d,C=%d,N=%d,A=%d,F=%d> ext=0x%08x, data=0x%08x, %s\n",
+	b,c,n,a,f,ext,--d,q?"Q":"No Q");
+	CLOSE
+}
+
+
+/*
+*****************************************************************
+* file: cbdclib.c
+* 931028 MAWE
+* 950914 MAWE adapted to RTPC
+* 950914 MAWE ctci,ctcd,ctgl,cssa added
+* 950915 MAWE csubr,cfubr,csubc,cfubc added
+* 950915 MAWE last update
+*
+* small ESONE library for CBD 8210
+*
+* routines that access CAMAC return -1 if X=0, otherwise they
+* return the state of Q
+*****************************************************************
+*/
+#include <stdio.h>
+
+#define F(e,f) \
+  {(e) &= ~0x7C;(e) |= ((f)<<2)|2;}
+#define NAF(e,n,a,f) \
+  {(e) &= ~0xFFFF;(e) |= ((((((n)<<4)|(a))<<5)|(f))<<2)|2;}
+#define BCNAF(e,b,c,n,a,f) \
+  {(e) &= ~0x3FFFFF;(e) |= ((((((((((b)<<3)|(c))<<5)|(n))<<4)|(a))<<5)|(f))<<2)|2;}
+#define CSR(e) \
+  (*(ushort *)(((e)&~0x7FFFF)|0xE802))
+#define STATUS(s,q) \
+  ((q)=(s)>>15,((s)&0x4000)?(q):-1)
+#define Q(s) \
+  ((s)&0x8000)
+/*
+#define WAIT \
+  {int i; for(i=10000;i;i--);}
+*/
+#define WAIT
+/*  
+typedef unsigned short ushort;
+*/
+/*
+*===============================================================
+* global pointer
+*---------------------------------------------------------------
+*/
+static long cbd;
+/*
+*===============================================================
+* initialize access
+*---------------------------------------------------------------
+*/
+long copen()
+{
+	if (!(cbd = (long)vme_map(0x00800000,0x00400000,0x39))) {
+		fprintf(stderr,"linktrap: unable to allocate VME window\n");
+		exit(0);
+	}
+	return(0);
+}
+/*
+*===============================================================
+* initialize access
+*---------------------------------------------------------------
+*/
+long cclose()
+{
+	vme_rel(cbd,0x00400000);
+	return(0);
+}
+/*
+*===============================================================
+* CDREG - declare CAMAC register
+*---------------------------------------------------------------
+*/
+long cdreg(ext,b,c,n,a)
+long *ext,b,c,n,a;
+{
+	register long e;
+	
+	e = cbd;
+	BCNAF(e,b,c,n,a,0)
+	*ext = e;
+	return(0);
+}
+/*
+*===============================================================
+* CDLAM - declare LAM
+*---------------------------------------------------------------
+*/
+long cdlam(lam,b,c,n,a,inta)
+long *lam,b,c,n,a,*inta;
+{
+	register long e;
+	
+	e = cbd;
+	BCNAF(e,b,c,n,a,0)
+	*lam = e;
+	return(0);
+}
+/*
+*===============================================================
+* CCCC - generate crate clear
+*---------------------------------------------------------------
+*/
+long cccc(ext)
+register long ext;
+{
+	register ushort s;
+	register long q;
+
+	NAF(ext,28,9,26)
+	
+	WAIT
+	s = *(ushort *)ext;
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,q));
+}
+/*
+*===============================================================
+* CCCI - set/clear dataway inhibit
+*---------------------------------------------------------------
+*/
+long ccci(ext,l)
+register long ext,l;
+{
+	register ushort s;
+	register long q;
+
+	if (l) {
+		NAF(ext,30,9,26)
+	}else{
+		NAF(ext,30,9,24)
+	}
+	WAIT
+	s = *(ushort *)ext;
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,q));
+}
+/*
+*===============================================================
+* CCCD - enable/disable crate demand
+*---------------------------------------------------------------
+*/
+long cccd(ext,l)
+register long ext,l;
+{
+	register ushort s;
+	register long q;
+
+	if (l) {
+		NAF(ext,30,10,26)
+	}else{
+		NAF(ext,30,10,24)
+	}
+	WAIT
+	s = *(ushort *)ext;
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,q));
+}
+/*
+*===============================================================
+* CCCZ - generate dataway initialise
+*---------------------------------------------------------------
+*/
+long cccz(ext)
+register long ext;
+{
+	register ushort s;
+	register long q;
+
+	NAF(ext,28,8,26)
+	WAIT
+	s = *(ushort *)ext;
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,q));
+}
+/*
+*===============================================================
+* CCLC - clear LAM
+*---------------------------------------------------------------
+*/
+long cclc(lam)
+register long lam;
+{
+	register ushort s;
+	register long q;
+
+	F(lam,10)
+	WAIT
+	s = *(ushort *)lam;
+	WAIT
+	s = CSR(lam);
+	return(STATUS(s,q));
+}
+/*
+*===============================================================
+* CCLM - enable/disable LAM
+*---------------------------------------------------------------
+*/
+long cclm(lam,l)
+register long lam,l;
+{
+	register ushort s;
+	register long q;
+
+	if (l) {
+		F(lam,26)
+	}else{
+		F(lam,24)
+	}
+	WAIT
+	s = *(ushort *)lam;
+	WAIT
+	s = CSR(lam);
+	return(STATUS(s,q));
+}
+/*
+*===============================================================
+* CTCI - test dataway inhibit
+*---------------------------------------------------------------
+*/
+long ctci(ext,l)
+register long ext,*l;
+{
+	register ushort s;
+	register long q;
+
+	NAF(ext,30,9,27)
+	WAIT
+	s = *(ushort *)ext;
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,*l));
+}
+/*
+*===============================================================
+* CTCD - test crate demand enabled
+*---------------------------------------------------------------
+*/
+long ctcd(ext,l)
+register long ext,*l;
+{
+	register ushort s;
+	register long q;
+
+	NAF(ext,30,10,27)
+	WAIT
+	s = *(ushort *)ext;
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,*l));
+}
+/*
+*===============================================================
+* CTGL - test crate demand present
+*---------------------------------------------------------------
+*/
+long ctgl(ext,l)
+register long ext,*l;
+{
+	register ushort s;
+	register long q;
+
+	NAF(ext,30,11,27)
+	WAIT
+	s = *(ushort *)ext;
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,*l));
+}
+/*
+*===============================================================
+* CTLM - test LAM
+*---------------------------------------------------------------
+*/
+long ctlm(lam,l)
+register long lam,*l;
+{
+	register ushort s;
+
+	F(lam,8)
+	WAIT
+	s = *(ushort *)lam;
+	WAIT
+	s = CSR(lam);
+	return(STATUS(s,*l));
+}
+/*
+
+/*
+*===============================================================
+* CSSA - execute CAMAC command (16 bit data)
+*---------------------------------------------------------------
+*/
+long cssa(f,ext,d,q)
+register long f,ext;
+register ushort *d;
+long *q;
+{
+	register ushort s;
+	
+	F(ext,f)
+	if (f&8) {						/* control */
+		WAIT
+		s = *(ushort *)ext;
+	}else if (f&0x10) {					/* write */
+		WAIT
+		*(ushort *)ext = *d;
+	}else{							/* read */
+		WAIT
+		*d = *(ushort *)ext;
+	}
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,*q));
+}
+/*
+*===============================================================
+* CFSA - execute CAMAC command (24 bit data)
+*---------------------------------------------------------------
+*/
+long cfsa(f,ext,d,q)
+register long f,ext;
+register ushort *d;
+long *q;
+{
+	register ushort s;
+	
+	F(ext,f)
+	if (f&8) {						/* control */
+		WAIT
+		s = *(ushort *)ext;
+	}else if (f&0x10) {					/* write */
+		WAIT
+		((ushort *)ext)[-1] = *d++;
+		WAIT
+		*(ushort *)ext = *d;
+	}else{							/* read */
+		WAIT
+		*d++ = ((ushort *)ext)[-1];
+		WAIT
+		*d = *(ushort *)ext;
+	}
+	WAIT
+	s = CSR(ext);
+	return(STATUS(s,*q));
+}
+/*
+*===============================================================
+* CSUBR - blocktransfer in Q-repeat mode (16 bit data)
+*---------------------------------------------------------------
+*/
+long csubr(f,ext,d,cb)
+register long f,ext;
+register ushort *d;
+long *cb;
+{
+	register ushort s;
+	register int i,n;
+	
+	n=0;
+	F(ext,f)
+	if (f&8) {
+		for(i=cb[0];i;i--,n++) {		/* control */
+			do {
+				WAIT
+				s = *(ushort *)ext;
+				WAIT
+				s = CSR(ext);
+			}while (Q(s)==0);
+		}
+	}else if (f&0x10) {				/* write */
+		for(i=cb[0];i;i--,d++,n++) {
+			do {
+				WAIT
+				*(ushort *)ext = *d;
+				WAIT
+				s = CSR(ext);
+			}while (Q(s)==0);
+		}
+	}else{						/* read */
+		for(i=cb[0];i;i--,d++,n++) {
+			do {
+				WAIT
+				*d = *(ushort *)ext;
+				WAIT
+				s = CSR(ext);
+			}while (Q(s)==0);
+		}
+	}
+	cb[1] = n;
+	return(n==cb[0]);
+}
+/*
+*===============================================================
+* CFUBR - blocktransfer in Q-repeat mode (24 bit data)
+*---------------------------------------------------------------
+*/
+long cfubr(f,ext,d,cb)
+register long f,ext;
+register ushort *d;
+long *cb;
+{
+	register ushort s;
+	register int i,n;
+	
+	n=0;
+	F(ext,f)
+	if (f&8) {
+		for(i=cb[0];i;i--,n++) {		/* control */
+			do {
+				WAIT
+				s = *(ushort *)ext;
+				WAIT
+				s = CSR(ext);
+			}while (Q(s)==0);
+		}
+	}else if (f&0x10) {				/* write */
+		for(i=cb[0];i;i--,d+=2,n++) {
+			do {
+				WAIT
+				((ushort *)ext)[-1] = *d;
+				WAIT
+				*(ushort *)ext = d[1];
+				WAIT
+				s = CSR(ext);
+			}while (Q(s)==0);
+		}
+	}else{						/* read */
+		for(i=cb[0];i;i--,d+=2,n++) {
+			do {
+				WAIT
+				*d = ((ushort *)ext)[-1];
+				WAIT
+				d[1] = *(ushort *)ext;
+				WAIT
+				s = CSR(ext);
+			}while (Q(s)==0);
+		}
+	}
+	cb[1] = n;
+	return(n==cb[0]);
+}
+/*
+*===============================================================
+* CSUBC - blocktransfer in Q-stop mode (16 bit data)
+*---------------------------------------------------------------
+*/
+long csubc(f,ext,d,cb)
+register long f,ext;
+register ushort *d;
+long *cb;
+{
+	register ushort s;
+	register int i,n;
+	
+	n=0;
+	F(ext,f)
+	if (f&8) {
+		for(i=cb[0];i;i--,n++) {		/* control */
+			WAIT
+			s = *(ushort *)ext;
+			WAIT
+			s = CSR(ext);
+			if (Q(s)==0) break;
+		}
+	}else if (f&0x10) {				/* write */
+		for(i=cb[0];i;i--,d++,n++) {
+			WAIT
+			*(ushort *)ext = *d;
+			WAIT
+			s = CSR(ext);
+			if (Q(s)==0) break;
+		}
+	}else{						/* read */
+		for(i=cb[0];i;i--,d++,n++) {
+			WAIT
+			*d = *(ushort *)ext;
+			WAIT
+			s = CSR(ext);
+			if (Q(s)==0) break;
+		}
+	}
+	cb[1] = n;
+	return(n==cb[0]);
+}
+/*
+*===============================================================
+* CFUBC - blocktransfer in Q-stop mode (24 bit data)
+*---------------------------------------------------------------
+*/
+long cfubc(f,ext,d,cb)
+register long f,ext;
+register ushort *d;
+long *cb;
+{
+	register ushort s;
+	register int i,n;
+	
+	n=0;
+	F(ext,f)
+	if (f&8) {
+		for(i=cb[0];i;i--,n++) {		/* control */
+			WAIT
+			s = *(ushort *)ext;
+			WAIT
+			s = CSR(ext);
+			if (Q(s)==0) break;
+		}
+	}else if (f&0x10) {				/* write */
+		for(i=cb[0];i;i--,d+=2,n++) {
+			WAIT
+			((ushort *)ext)[-1] = *d;
+			WAIT
+			*(ushort *)ext = d[1];
+			WAIT
+			s = CSR(ext);
+			if (Q(s)==0) break;
+		}
+	}else{						/* read */
+		for(i=cb[0];i;i--,d+=2,n++) {
+			WAIT
+			*d = ((ushort *)ext)[-1];
+			WAIT
+			d[1] = *(ushort *)ext;
+			WAIT
+			s = CSR(ext);
+			if (Q(s)==0) break;
+		}
+	}
+	cb[1] = n;
+	return(n==cb[0]);
+}
+
+
+/*
+****************************************************************************
+* file: cfubc.c
+* 950915 MAWE 
+* 950915 MAWE last update
+*
+* CAMAC blocktransfer to HM 2161 (24-bit)
+****************************************************************************
+*/
+#include	<stdio.h>
+/*
+* adapt to different libraries
+*/
+#ifndef OSK
+#define		OPEN	{copen();}
+#define		CLOSE	{cclose();}
+#else OSK
+#define		OPEN	{linktrap();}
+#define		CLOSE	
+#endif OSK
+
+#define		SIZE	0x10000
+
+#define		NW	0x2000
+#define		CT	1
+
+#define		F	0
+#define		A	1
+#define		N	12
+
+#ifndef C
+#define		C	1
+#endif
+#ifndef B
+#define		B	1
+#endif
+/*
+*===========================================================================
+* globals
+*---------------------------------------------------------------------------
+*/
+long buf[SIZE];
+/*
+*===========================================================================
+* do it
+*---------------------------------------------------------------------------
+*/
+main(argc,argv)
+int argc;
+char *argv[];
+{
+	long i,nw,b,c,n,a,f,q,d,ext,ct,cb[4];
+	
+	if (argc>8) argc=8;
+	if ((argc==8)&&(sscanf(argv[7],"%d",&b)==1)) {argc--;} else {b=B;}
+	if ((argc==7)&&(sscanf(argv[6],"%d",&c)==1)) {argc--;} else {c=C;}
+	if ((argc==6)&&(sscanf(argv[5],"%d",&n)==1)) {argc--;} else {n=N;}
+	if ((argc==5)&&(sscanf(argv[4],"%d",&a)==1)) {argc--;} else {a=A;}
+	if ((argc==4)&&(sscanf(argv[3],"%d",&f)==1)) {argc--;} else {f=F;}
+
+	if ((argc==3)&&(sscanf(argv[2],"%x",&ct)==1)) {argc--;} else {ct=CT;}
+	if ((argc==2)&&(sscanf(argv[1],"%x",&nw)==1)) {argc--;} else {nw=NW;}
+	
+	if (argc != 1) {
+		printf("use: %s [<NW>,[<count>[<F>[<A>[<N>[<C>[<B>]]]]]]]\n",argv[0]);
+    		printf("     CDREG(&ext,B,C,N,A), cb[0]=<NW>\n");
+		printf("     CFUBC(F,ext,dat,cb) <count> times;\n");
+		exit(0);
+	}
+	if (nw>SIZE) nw=SIZE;
+	for (i=0;i<nw;i++) buf[i]=i;
+	cb[0]=nw;
+	cb[1]=0;
+	cb[2]=0;
+	cb[3]=0;
+    
+	OPEN
+	cdreg(&ext,b,c,n,a);
+	for(i=ct;i;i--) {
+		cfubc(f,ext,buf,cb);
+	}
+	fprintf(stderr,"B=%d,C=%d,N=%d,A=%d,F=%d> cb[0]=0x%06x, cb[1]=0x%06x\n",
+	b,c,n,a,f,cb[0],cb[1]);
+	CLOSE
+}
+
+
+
+/*
+****************************************************************************
+* file: csubr.c
+* 930810 MAWE 
+* 930810 MAWE last update
+*
+* CAMAC blocktransfer to HM 2161 (16-bit)
+****************************************************************************
+*/
+#include	<stdio.h>
+/*
+* adapt to different libraries
+*/
+#ifndef OSK
+#define		OPEN	{copen();}
+#define		CLOSE	{cclose();}
+#else OSK
+#define		OPEN	{linktrap();}
+#define		CLOSE	
+#endif OSK
+
+#define		SIZE	0x10000
+
+#define		NW	0x2000
+#define		CT	1
+
+#define		F	0
+#define		A	1
+#define		N	12
+
+#ifndef C
+#define		C	1
+#endif
+#ifndef B
+#define		B	1
+#endif
+/*
+*===========================================================================
+* globals
+*---------------------------------------------------------------------------
+*/
+short buf[SIZE];
+/*
+*===========================================================================
+* do it
+*---------------------------------------------------------------------------
+*/
+main(argc,argv)
+int argc;
+char *argv[];
+{
+	long i,nw,b,c,n,a,f,q,d,ext,ct,cb[4];
+	
+	if (argc>8) argc=8;
+	if ((argc==8)&&(sscanf(argv[7],"%d",&b)==1)) {argc--;} else {b=B;}
+	if ((argc==7)&&(sscanf(argv[6],"%d",&c)==1)) {argc--;} else {c=C;}
+	if ((argc==6)&&(sscanf(argv[5],"%d",&n)==1)) {argc--;} else {n=N;}
+	if ((argc==5)&&(sscanf(argv[4],"%d",&a)==1)) {argc--;} else {a=A;}
+	if ((argc==4)&&(sscanf(argv[3],"%d",&f)==1)) {argc--;} else {f=F;}
+
+	if ((argc==3)&&(sscanf(argv[2],"%x",&ct)==1)) {argc--;} else {ct=CT;}
+	if ((argc==2)&&(sscanf(argv[1],"%x",&nw)==1)) {argc--;} else {nw=NW;}
+	
+	if (argc != 1) {
+		printf("use: %s [<NW>,[<count>[<F>[<A>[<N>[<C>[<B>]]]]]]]\n",argv[0]);
+    		printf("     CDREG(&ext,B,C,N,A), cb[0]=<NW>\n");
+		printf("     CSUBR(F,ext,dat,cb) <count> times;\n");
+		exit(0);
+	}
+	if (nw>SIZE) nw=SIZE;
+	for (i=0;i<nw;i++) buf[i]=i;
+	cb[0]=nw;
+	cb[1]=0;
+	cb[2]=0;
+	cb[3]=0;
+    
+	OPEN
+	cdreg(&ext,b,c,n,a);
+	for(i=ct;i;i--) {
+		csubr(f,ext,buf,cb);
+	}
+	fprintf(stderr,"B=%d,C=%d,N=%d,A=%d,F=%d> cb[0]=0x%06x, cb[1]=0x%06x\n",
+	b,c,n,a,f,cb[0],cb[1]);
+	CLOSE
+}
+
+
+
+/******************************************************************************
+* file: <slottest.c>            created: 10-December-1991       L. Tremblet   *
+*                                                                             *
+* CAMAC slot test program                                                     *
+* -----------------------                                                     *
+* -- This program checks the dataway lines at a given CAMAC                   *
+* -- station using the BORER display module (1801,1802)                       *
+*                                                                             *
+* Revision history:                                                           *
+* ----------------                                                            *
+*                                                                             *
+* M. Gentile   30/01/92    Added User Interface (Menulib)                     *
+* L. Tremblet  03/03/92    Added WANT_MENU compile time option                *
+* MAWE         05/12/92    stripped down version, remove I after Z            *
+* MAWE         08/09/92    removed include "camac.h" (was never used)         *
+* MAWE         28/10/93    replace 'linktrap()' by 'copen()', add 'cclose()'  *
+*                                                                             *
+/*****************************************************************************/
+
+
+#include <stdio.h>
+/*
+* #include "camac.h"
+*/
+
+#define ENABLE  -1
+#define DISABLE  0
+
+#define DEFAULT_BRANCH  1
+#define DEFAULT_CRATE   1
+#define DEFAULT_STATION 8
+#define DEFAULT_MAXLOOP 1000
+
+#define BOOL(x) (!(!(x)))
+#define bit(a,x)        BOOL((a) & (1L << (x)))
+#define shift(a,x)      ((x>=0) ? ((a) << (x)) : ((a) >> (x)))
+#define subword(a,p,x)  ((unsigned)(((unsigned) a) << (32-p-x)) >> (32-x))
+
+#define PRINSTEP 100
+
+#define test1 " TEST 1/ INITIALIZE (Z). TEST IF=0 " 
+#define test2 " TEST 2/ SET ALL WRITE BITS = 1 AND CHECK " 
+#define test3 " TEST 3/ F9 , TEST IF ALL BITS CLEARED " 
+#define test4 " TEST 4/ BIT CROSS TALK " 
+#define test6 " TEST 6/ SET LAM AND TEST " 
+#define test7 " TEST 7/ CLEAR LAM AND TEST " 
+#define test8 " TEST 8/ SET I AND TEST " 
+#define test9 " TEST 9/ CLEAR I AND TEST " 
+#define test10 " TEST 10/ TEST BITS 1-24, ONE AT A TIME " 
+
+#define test_naf " TEST NAF/ "
+
+int reg[16], idmy[2];
+int xread, yread, xwrit;
+int cycle, chan, unit;
+int reg1, lam, dum;
+int br, bw, b, c, n, q;
+int i, j, m;
+int once = 0;
+int loop, max_loop;
+
+
+
+int wait_key()
+{
+  int c;
+  
+  printf("Press <return>");
+  c = getchar();
+  return 1;
+}
+
+void checknaf(a2, f2) 
+ int a2, f2;
+  {
+    /* -- a2,f2 = most recent A,F */
+   int a3, f3, q;
+   cfsa(1, reg[a2], &yread, &q);
+   if(q==0) 
+     {
+      printf(test_naf); printf( "Q=0 for F=1 A=%4d\n", a2);
+     }
+    /* -- get A pattern */
+   a3 = subword(yread, 0, 4);
+   if(a2!=a3) 
+     {
+      printf(test_naf); printf( "A=%4d not%4d\n", a3, a2);
+     }
+    /* -- get F pattern */
+   f3 = subword(yread, 4, 5);
+   if(f2!=f3) 
+     {
+      printf(test_naf); printf( "F=%4d not%4d\n", f3, f2);
+     }
+    /* -- check N line */
+   if(bit(yread,9)==0) 
+     {
+      printf(test_naf); printf( "wrong N\n");
+     }
+  } /* ENDSUB checknaf */
+
+
+void test_camac()
+{
+   printf("\n***** slot test started *****\n");
+
+   for(i=0;i<=15;i++) {
+      cdreg(&reg[i], b, c, n, i);
+   }
+   cdreg(&reg1, b, c, n, 0);
+   idmy[0] = 1;
+   cdlam(&lam, b, c, n, 0, idmy);
+
+   cycle = 0;
+
+   if (max_loop == 0) max_loop = 0x7fffffff;
+   for (loop = 0; loop < max_loop; loop++) {
+
+     /* -- check Z */
+       cccz(reg1);
+       ccci(reg1,DISABLE);
+       for(i=0;i<=15;i++) {
+          cfsa(0, reg[i], &xread, &q);
+          checknaf(i, 0);
+          if(q==0) {
+ 	    printf(test1); printf(" Q=0, F=0, A=%4d\n", i);
+          }
+          if(xread!=0) {
+             for(j=0;j<=23;j++) {
+                if(bit(xread,j)!=0) {
+ 	          printf(test1); printf("BIT%4d not 0 AFTER Z\n", j+1);
+ 	       }
+              }
+          }
+       }
+       xwrit = 0xFFFFFF;
+       cfsa(16, reg1, &xwrit, &q);
+        /*  A,F arrived correctly ? */
+       checknaf(0, 16);
+       if(q==0) {
+          printf(test2); printf("Q=0,F=16,A=0\n");
+       }
+       cfsa(0, reg1, &xread, &q);
+       if(xread!=xwrit) {
+          for(j=0;j<=23;j++) {
+             if(bit(xread,j)==0) {
+ 	       printf(" TEST 2, SET ALL WRITE BITS = 1 AND CHECK\n");
+                if(bit(xread,j)==0) {
+ 	          printf(test2); printf(" bit %4d not 1\n", j+1);
+                }
+             }
+          }
+       }
+ 
+       cfsa(9, reg1, &xwrit, &q);
+       checknaf(0, 9);
+       cfsa(0, reg1, &xread, &q);
+       if(xread!=0) {
+          for(j=0;j<=23;j++) {
+             if(bit(xread,j)!=0) {
+      	       printf(test3); printf("F9 does not clear bit%4d\n", j+1);
+             }
+          }
+       }
+       for(i=1;i<=2;i++) {
+           /*  alternate pattern */
+          if(i==1) {
+              xwrit = 0x555555;
+          }
+          if(i==2) {
+              xwrit = 0xAAAAAA;
+          }
+          cfsa(16, reg1, &xwrit, &q);
+          cfsa(0, reg1, &xread, &q);
+          if(xread!=xwrit) {
+             for(j=0;j<=23;j++) {
+                bw = bit(xwrit, j); br = bit(xread, j);
+                if(bw!=br) {
+ 	          printf(test4); printf("bit%4d =%4d not%4d\n", j+1, bw, br);
+                }
+             }
+          }
+       }
+       cfsa(9, reg1, &dum, &q);
+        /*  enable and set LAM */
+       cclm(lam, ENABLE);
+       cfsa(25, reg1, &dum, &q);
+       checknaf(0, 25);
+       ctlm(lam, &q);
+       checknaf(0, 8);
+       if(q==0) {
+          printf(test6); printf("LAM not set\n");
+       }
+       cclc(lam);
+       checknaf(0, 10);
+       ctlm(lam, &q);
+       if(q!=0) {
+          printf(test7); printf("LAM not cleared\n");
+       }
+        /* -- check inhibit */
+       ccci(reg1, ENABLE);
+       cfsa(1, reg1, &xread, &q);
+       if(bit(xread,12)==0) {
+          printf(test8); printf("I OFF not ON\n");
+       }
+       ccci(reg1, DISABLE);
+       cfsa(1, reg1, &xread, &q);
+       if(bit(xread,12)!=0) {
+          printf(test8); printf("I ON not OFF\n");
+       }
+        /*  check R,W lines , one bit at a time */
+       for(j=0;j<=23;j++) {
+          xwrit = shift(1, j);
+          cfsa(16, reg1, &xwrit, &q); cfsa(0, reg1, &xread, &q);
+          if(xread!=xwrit) {
+             for(m=0;m<=23;m++) {
+                br = bit(xread, m); bw = bit(xwrit, m);
+                if(br!=bw) {
+ 	       printf(test10); printf("FAIL for%4d bit%4d =%4d", j+1, m+1, br);
+         	       }
+	     }
+          }
+          cfsa(9, reg1, &dum, &q);
+       }
+       cycle++;
+       if(cycle%PRINSTEP ==0 ) {
+          printf("CYCLE %d\n", cycle);
+       }
+  }
+  /*
+  wait_key();
+  */
+}
+
+
+int quit_action()
+   {
+    return 0;       /* Quit return */
+   }
+
+
+main()
+{
+   printf(" B C N = ");
+   scanf("%d %d %d", &b, &c, &n);
+   max_loop = 2000;
+   copen();
+   test_camac();
+   cclose();
+}
+
+
+
+#************************************************************
+# file: Makefile
+# 960403 MAWE
+# 960403 MAWE last update
+#
+# CAMAC programs for CBD 8210
+#************************************************************
+#
+# Configuration
+#
+DDIR    = /usr/include/ces
+LDIR    = /lib/ces
+
+CC	= gcc 
+CFLAGS	= 
+LFLAGS  = $(CAMLIB) $(VMELIB) -L$(LDIR) -lvme
+TARGET	= cam_cmd cfsa cfubc csubr slottest
+VMELIB	= ../vlib/vlib.o
+CAMLIB	= ./cbdclib.o
+
+#
+# Rules
+#
+all:	$(TARGET)
+
+clean:
+	rm -f *.o
+
+clobber: clean
+	rm $(TARGET)
+
+$(TARGET): %: %.c $(CAMLIB)
+	$(CC) $(CFLAGS) -o $* $*.c $(LFLAGS)
+#
+# Dependencies
+#
+$(CAMLIB): cbdclib.c
+#
+
+
+
+*********************************************************************
+* file: ../CAMTST/ReadMe
+* 930810 MAWE
+* 950915 MAWE last update
+*
+* Test / example programs for CAMAC
+*********************************************************************
+
+1. General
+----------
+
+This directory contains a collection of programs that may serve
+as examples how to use diverse CAMAC libraries. Some of them are
+also useful to verify CAMAC hardware.
+
+The program sources contain switches (#ifdef ... #endif) that are
+used in the makefiles of the associated libraries to adapt them
+to the specific needs of the library.
+
+Defaults for B,C,N .. are coded using preprocessor symbols (#define..)
+they correspond to test setup and can be adapted to any configuration
+by changing the C-code and running the makefile in the directory
+corresponding to the library of interest.
+
+2. Test Programs
+----------------
+
+2.1 `slottest.c' 
+
+    has been written in CERN and test the CAMAC dataway extensively in 
+    an automated procedure. It assumes a `Borer Type 1802' dataway display 
+    as a test module. This module needs to be configured with its internal 
+    switch moved towards the front-panel:
+
+    b        |-------------|                              f
+    a        |    |-------||                              r
+    c        | .  >       <|                              o
+    k        |    |-------||                              n
+             |-------------|                              t
+
+    and with its front panel switch set ro `ON-LINE'.
+    `slottest' is linked with both vcclibc.r and `vcclib.r'
+    (i.e. it uses th `lowercase' style routines)
+
+2.2 'cam_cmd.c'
+
+    is a small 'command interpreter' which allows to do a sequence
+    of CFSAs interactively (or driven by a script). First B,C and
+    N are defined, then F,A and a data word can be chaosen repeatedly.
+    
+2.3 'cfsa.c'
+
+    executes the CFSA function (optionally in a loop). B,C,N,A,F and
+    other parameters are taken from the command line. Parameters me
+    be suppressed from the right, e.g. if parameter #3 must be set to
+    a non-default value parameters #1 and #2 must also be given -
+    parmaters #4, #5, ... may be left out.
+
+    cfsa -h
+
+    to get the order of the command line parameters.
+
+2.4 'csubr.c'
+
+    executes the CSUBR function. Paramter handling as in 'cfsa.c' (2.4)
+
+2.5 'cfubc.c'
+
+    executes the CSUBR function. Paramter handling as in 'cfsa.c' (2.4)

@@ -1,0 +1,1 @@
+ask_par.o: ask_par.c ask_par.h

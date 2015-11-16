@@ -1,0 +1,7 @@
+PROGRAMS=busy more_help simple_help warn_msg working
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

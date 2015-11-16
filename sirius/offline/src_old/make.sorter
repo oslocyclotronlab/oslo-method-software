@@ -1,0 +1,17 @@
+ CFLAGS = -O -I/Applications/sirius/include  -D_FILE_OFFSET_BIT=64
+  CLIBS = -I/usr/include
+  SOBJS = attshared.o attspec.o getbits.o box_chn.o detshared.o read_exa.o read_daisy.o read_disc.o number2string.o offline_format.o user_routine.o rw.o cleansymbols.o offline_main.o
+    CC = cc
+    RM = rm -f
+    CP = mv
+RM_CMD = $(RM) *.o a.out
+CP_BIN = $(CP) off_sort /Applications/sirius/bin/.
+
+sort: $(SOBJS)
+	$(CC) $(CFLAGS) $(SOBJS) -o off_sort $(CLIBS)
+
+install:
+	@$(CP_BIN)
+
+clean:  
+	@$(RM_CMD)

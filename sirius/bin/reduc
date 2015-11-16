@@ -1,0 +1,6 @@
+#!/bin/sh
+set LD_BIND_NOW=1
+ulimit -s 65500 65500
+# on some systems use: limit stacksize 65536
+/Applications/sirius/bin/red_master
+

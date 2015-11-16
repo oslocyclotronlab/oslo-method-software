@@ -1,0 +1,279 @@
+VME data acquisition started at 10/09/98 15:04:49
+To jump out of eventloop, press Ctrl_C
+^C
+Leaving infinite event-loop...
+Type r if you want to restart VME-acquisition
+
+VME data acquisition stopped at 10/10/98 12:12:32
+Records = 8908    Events = 24879483 
+
+eventbuilder+>d
+Dump of 500 first words and 500 last words in buffer 1
+
+ f00f    (Event  1    Word  1)
+ 800a 9 82d 831
+ 800b 800 137 0
+ 800c 5000 393 8a0 f0 3d5
+
+ f005    (Event  2    Word  16)
+ 800a 6 1854 1c01
+
+ f00b    (Event  3    Word  21)
+ 800a 9 1848 1c50
+ 800c 408 2cf 0 4cd 0
+
+ f005    (Event  4    Word  32)
+ 800a 3 50 42b
+
+ f005    (Event  5    Word  37)
+ 800a 3 44 4ce
+
+ f01d    (Event  6    Word  42)
+ 800a 9 1030 1020
+ 800b 306 0 0 0 0 0 0 0 0
+ 800c a47 0 0 377 8 ba 9 125 995 0 0 0 0
+
+ f01e    (Event  7    Word  71)
+ 800a e 26 7d
+ 800b 3508 1ca 2c0 221 25c 3d dfc 87 0 a7 0
+ 800c 5480 0 0 139 0 25a 0 249 7bc
+ 800d 0 1000
+
+ f00f    (Event  8    Word  101)
+ 800a 9 b6 116
+ 800b 802 0 0 0 0
+ 800c 80 133 a88
+
+ f013    (Event  9    Word  116)
+ 800a b 49 4c5
+ 800b 10 0 0
+ 800c 2640 0 0 98 0 1bf 0 27c 0
+
+ f005    (Event  10    Word  135)
+ 800a 6 184e 1c10
+
+ f005    (Event  11    Word  140)
+ 800a 3 0 1040
+
+ f005    (Event  12    Word  145)
+ 800a 3 1029 1030
+
+ f009    (Event  13    Word  150)
+ 800a c 1843 0
+ 800b 4 2b5 842
+
+ f011    (Event  14    Word  159)
+ 800a b 848 c4d
+ 800b 800 0 0
+ 800c 4c00 a0 0 4b8 0 423 0
+
+ f011    (Event  15    Word  176)
+ 800a b 846 c52
+ 800b 8480 0 0 42 b0c ec dc8
+ 800c 400 0 0
+
+ f005    (Event  16    Word  193)
+ 800a 6 1877 1b53
+
+ f018    (Event  17    Word  198)
+ 800a 419 8a1 f82 e5b 0 128 0
+ 800c 4845 b1 3ba 116 6d9 0 82 0 4d3 0 4a2
+ 800d 0 5002
+
+ f011    (Event  18    Word  222)
+ 800a 9 10f6 10b5
+ 800b 810 0 0 0 0
+ 800c 1020 0 0 d4 972
+
+ f00d    (Event  19    Word  239)
+ 800a b 18a0 1a4d
+ 800c 2280 22f 95a 178 a04 0 cba
+
+ f012    (Event  20    Word  252)
+ 800a 9 f6 0
+ 800b 4 81 b45
+ 800c 4001 0 0 0 0
+ 800d 0 4000
+
+ f00f    (Event  21    Word  270)
+ 800a e 102c 105b
+ 800c 2809 0 0 94d 3b3 0 0 0 0
+
+ f00b    (Event  22    Word  285)
+ 800a c 1054 13ba
+ 800c 401 0 7a1 5a e02
+
+ f00b    (Event  23    Word  296)
+ 800a e 54 408
+ 800c 401 0 0 77 35e
+
+ f00b    (Event  24    Word  307)
+ 800a e 1811 19c8
+ 800c 41 0 0 9c 5fb
+
+ f017    (Event  25    Word  318)
+ 800a 9 0 47
+ 800b 900 169 6e5 15e 6
+ 800c 3860 0 671 282 0 0 0 0 0 0 0
+
+ f005    (Event  26    Word  341)
+ 800a 3 849 c45
+
+ f019    (Event  27    Word  346)
+ 800a b 1083 11bb
+ 800b 108 0 0 0 0
+ 800c 24c3 0 0 114 8 0 73 5a3 12 5ac 407 60 4c0
+
+ f005    (Event  28    Word  371)
+ 800a 3 43 4d1
+ f00e    (Event  29    Word  376)
+ 800a c 1827 0
+ 800c 2020 1a3 900 0 0
+ 800d 0 8000
+
+ f005    (Event  30    Word  390)
+ 800a 6 1854 1c09
+
+ f005    (Event  31    Word  395)
+ 800a 3 42 4d1
+
+ f00f    (Event  32    Word  400)
+ 800a b 1047 1431
+ 800b 2 67 bc5
+ 800c 1200 0 837 ea 0
+
+ f005    (Event  33    Word  415)
+ 800a 6 1854 1bff
+
+ f017    (Event  34    Word  420)
+ 800a c 859 d35
+ 800b 2490 0 e2a c0 86e 16f 801 0 a18
+ 800c b 0 9ba 0 0 280 a3c
+
+ f015    (Event  35    Word  443)
+ 800a b 3f 4d9
+ 800b 18a 3c ba6 7e 773 0 0 e9 924
+ 800c 4800 0 eb1 0 0
+
+ f00f    (Event  36    Word  464)
+ 800a 9 0 108f
+ 800b 2000 0 0
+ 800c 41 0 0 a3 bcc
+
+ f005    (Event  37    Word  479)
+ 800a 6 1876 1a4c
+
+ f005    (Event  38    Word  484)
+ 800a 3 47 4c9
+
+ f00b    (Event  39    Word  489)
+ 800a e 8b4 983
+ 800b 480 cf 4f0 0 0
+
+ f00f    (Event  40    Word  500) 76 846 32 0 651 e 76 8f5
+
+ f005    (Event  2184    Word  32277)
+ 800a 6 104e 13c8
+
+ f005    (Event  2185    Word  32282)
+ 800a 3 1892 19ac
+
+ f013    (Event  2186    Word  32287)
+ 800a 9 46 4d3
+ 800b 5090 24d 0 269 559 0 5d3 c6 0
+ 800c 800 0 0
+
+ f005    (Event  2187    Word  32306)
+ 800a 3 87d a02
+
+ f005    (Event  2188    Word  32311)
+ 800a 3 4a 4c6
+
+ f013    (Event  2189    Word  32316)
+ 800a 9 42 4cf
+ 800b 1082 76 3d2 c3 0 0 0
+ 800c 801 0 0 b8 61a
+
+ f005    (Event  2190    Word  32335)
+ 800a 6 107c 121e
+
+ f00d    (Event  2191    Word  32340)
+ 800a b 46 4c9
+ 800c 209 0 3d c9 c4 b9 1c8
+
+ f00f    (Event  2192    Word  32353)
+ 800a e 861 b49
+ 800b 202 44d 838 12d 20e
+ 800c 40 11a bc6
+
+ f011    (Event  2193    Word  32368)
+ 800a 9 849 c4b
+ 800b 4040 7d 0 5b 0
+ 800c 801 0 0 0 0
+
+ f01d    (Event  2194    Word  32385)
+ 800a 44e 1853 1c06 1a5 0 15a 0
+ 800b c00 41 d82 b1 906
+ 800c 3449 0 8f1 9a 97a c0 c0d ff db2 140 ed1 ed ef5
+
+ f013    (Event  2195    Word  32414)
+ 800a 9 82 0
+ 800b 8000 374 96d
+ 800c 2281 317 894 4b6 93e 5f 0 da ecf
+
+ f005    (Event  2196    Word  32433)
+ 800a 3 44 4d3
+
+ f005    (Event  2197    Word  32438)
+ 800a 6 104d 13bb
+
+ f015    (Event  2198    Word  32443)
+ 800a e 3c 21
+ 800b 50 0 0 0 0
+ 800c e80 a0 0 0 0 0 0 0 0
+
+ f005    (Event  2199    Word  32464)
+ 800a 3 85 21f
+
+ f015    (Event  2200    Word  32469)
+ 800a c 1057 13b6
+ 800b 2012 0 9c0 46 3ce 0 0
+ 800c 803 0 0 0 0 39 6b4
+
+ f005    (Event  2201    Word  32490)
+ 800a 6 1055 13b7
+
+ f01b    (Event  2202    Word  32495)
+ 800a 9 18bc 142d
+ 800b 6400 113 395 23b 0 64 58e
+ 800c 1c83 0 0 0 0 111 47b 74 9b 0 33b 4d2 0
+
+ f005    (Event  2203    Word  32522)
+ 800a 3 4a 4cb
+
+ f01c    (Event  2204    Word  32527)
+ 800a 9 6e 586
+ 800b d40c 0 829 51 0 0 d4d 0 0 b3 0 d3 12c
+ 800c 408 0 0 0 0
+ 800d 0 4000
+
+ f01f    (Event  2205    Word  32555)
+ 800a e 1844 0
+ 800b 3006 0 0 0 0 423 0 75 67d
+ 800c 54a5 0 0 2ca 562 139 0 0 11 27b 0 4c0 928 6c 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Scanning buffer 1 and making estimates:
+Netto words ( -200 zeros at end)    32568 
+Eventheader words                    2205 
+Patterns from TPU 1, TPU 2 or TPU3   5035 
+Patterns from TPU 4 (pile-up)         143 
+Patterns from TPU 5 (Siri)              0 
+Patterns from TPU 6 (not used)          0 
+Data (energy, time...) equal 0       8281 
+Data (energy, time...) not equal 0  11583 
+Percent data equal 0                 41.7
+Extra delay is 50 us (waitingloops = 304)
+
+eventbuilder+>r
+
+VME data acquisition started at 10/10/98 12:12:44
+To jump out of eventloop, press Ctrl_C

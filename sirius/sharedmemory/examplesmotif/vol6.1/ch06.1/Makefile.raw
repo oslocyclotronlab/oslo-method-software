@@ -1,0 +1,8 @@
+PROGRAMS= file_sel hello prompt_dlg select_dlg show_files
+
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

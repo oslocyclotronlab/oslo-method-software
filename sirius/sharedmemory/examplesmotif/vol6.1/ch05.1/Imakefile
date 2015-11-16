@@ -1,0 +1,7 @@
+SYS_LIBRARIES = -lXm -lXt -lX11 
+
+AllTarget(dialog hello reason)
+
+NormalProgramTarget(dialog,dialog.o,,,)
+NormalProgramTarget(hello,hello.o,,,)
+NormalProgramTarget(reason,reason.o,,,)

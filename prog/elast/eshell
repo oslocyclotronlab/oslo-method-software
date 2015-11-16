@@ -1,0 +1,246 @@
+#!/bin/sh
+
+# clear screen
+
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+
+# default settings
+
+export input="NoCom"
+export target="2(1H)1(C)"
+export TT=0.1
+export beam="17F"
+export EX="0"
+export EX3="0"
+export Q="x"
+export energy="65.5"
+export energy2="65.6"
+export esteps="1"
+export angle="0"
+export angle2="0"
+export astep="1"
+export product="4He"
+
+
+while [ $input != "Q" ]
+do
+
+  # display parameters and menue
+
+  echo "============================= PARAMETERS ================================"
+  echo ""
+  echo "  Target : $target, Thickness = $TT mg/cm**2"
+  echo "  Beam   : $beam, Energy [MeV] : from $energy to $energy2 in $esteps steps"
+  echo "  E(x),beam : $EX MeV, E(x),product : $EX3 MeV, Manual Q-Value : $Q MeV"
+  echo "  Angle [deg] of product or ion: from $angle to $angle2 in steps of $astep"
+  echo "  Reaction parameters: $target($beam,$product)"
+  echo ""
+  echo "-------------------------------  MENUE ----------------------------------"
+  echo ""
+  echo "   e: define beam energy parameters  t: define target and target thickness"
+  echo "   b: define beam ion                a: define angle parameters"
+  echo "   r: define reaction product        x: Excitation energies"
+  echo ""
+  echo "  st: Angle Energy, EnergyLoss, EnergyOut, EnergyStrag., AngleStrag."
+  echo "  pw: Energy, StopingPower, range, v/c, Av.ChargeState" 
+  echo ""
+  echo "  rf: Fwd/Only sol.: EBeam Energy3 Angle3 Angle3CM Jakobian3 Energy4 Angle4"
+  echo "  rb: Bwd. sol.: EBeam Energy3 Angle3 Angle3CM Jakobian3 Energy4 Angle4"
+  echo "  rg: General parameters.: EBeam Energy3+ Energy3- Theta3Max Energy4+ Energy4-" 
+  echo ""
+  echo "   Q: return to UNIX shell (and use 'elast' directely!)"
+  echo ""
+
+  # get a command and execute it!
+
+  export input=`getstring`
+
+  if [ $input = "Q" ]
+  then
+    echo "good bye!"
+
+  elif [ $input = "r" ]
+  then
+    echo "New reaction product=particle3 (like 17F in d(16O,17F)n )?"
+    export product=`getstring`
+
+  elif [ $input = "x" ]
+  then
+    echo "New Q-value or 'x' for database use ?"
+    export Q=`getstring`
+    echo "New excitation of incident (beam) particle?"
+    export EX=`getstring`
+    echo "New excitation of reaction product particle?"
+    export EX3=`getstring`
+
+  elif [ $input = "e" ]
+  then
+    echo "New beam energy (energy 1)?"
+    export energy=`getstring`
+    echo "New beam energy 2 (larger than 0 and different for energy 1)?"
+    export energy2=`getstring`
+    echo "Number of different energies desired?"
+    export esteps=`getstring`
+
+  elif [ $input = "b" ]
+  then
+    echo "New beam ion (like 44Ti, 4He, 1H)?"
+    export beam=`getstring`
+
+  elif [ $input = "t" ]
+  then
+    echo "New target material (first in compound is used for reactions)?"
+    echo "EXAMPLES: Natural Titan: 1(Ti)  (reaction tables will warn: missing mass!)"
+    echo "          44Ti: 1(44Ti)         (NOT only 44Ti, allway is compoud syntax)"  
+    echo "          CH2 with H as reaction traget and natural C: 2(1H)1(C)"
+    echo "          'DC' indicates beam decay-mode. "
+    echo "               => NO energy straggling calcultions allowed!"
+    export target=`getstring`
+    echo "New target thickness (mg/cm**2)?"
+    export TT=`getstring`
+
+  elif [ $input = "a" ]
+  then
+    echo "New angle (angle 1)?"
+    export angle=`getstring`
+    echo "New angle 2 ?"
+    export angle2=`getstring`
+    echo "Angle step width desired (step >t angle1-angle2  =>  only one step) ?"
+    export astep=`getstring`
+
+  elif [ $input = "rf" ]
+  then
+    echo "A $beam beam interacts with a $target, foreward or only solution"
+    echo "Excitations for particle 2,3 and Q-setting [MeV]: $EX,$EX3,$Q" 
+    echo "elast -qa $angle $angle2 $astep -x $EX -X $EX3 ERE+ARt+RJ+R4E-R4A- "$target" $TT $beam $product $Q $energy $energy2 $esteps"
+    echo ""
+    elast -qa $angle $angle2 $astep -x $EX -X $EX3 ERE+ARt+RJ+R4E-R4A- "$target" $TT $beam $product $Q $energy $energy2 $esteps
+    elast -Qa $angle $angle2 $astep -x $EX -X $EX3 ERE+ARt+RJ+R4E-R4A- "$target" $TT $beam $product $Q $energy $energy2 $esteps > eshell.dat
+    echo ""
+    echo "Enter Colum i vs Colum j to plot in the format 'i:j' or q to exit"
+    export input2=`getstring`
+    if [ $input2 != "q" ]
+    then
+       echo plot '"eshell.dat"' using "$input2" \; pause -1 > gp.comand
+       echo "Click into this window and hit return to continue!"
+       gnuplot gp.comand
+    fi
+
+   elif [ $input = "rg" ]
+  then
+    echo "A $beam beam interacts with a $target, general info"
+    echo "Excitations for particle 2,3 and Q-setting [MeV]: $EX,$EX3,$Q" 
+    echo "elast -x $EX -X $EX3 ERE+RE-RTR4E+R4E- "$target" $TT $beam $product $Q $energy $energy2 $esteps"
+    echo ""
+    elast -x $EX -X $EX3 ERE+RE-RTR4E+R4E- "$target" $TT $beam $product $Q $energy $energy2 $esteps
+    elast -Qx $EX -X $EX3 ERE+RE-RTR4E+R4E- "$target" $TT $beam $product $Q $energy $energy2 $esteps > eshell.dat
+    echo ""
+    echo "Enter Colum i vs Colum j to plot in the format 'i:j' or q to exit"
+    export input2=`getstring`
+    if [ $input2 != "q" ]
+    then
+       echo plot '"eshell.dat"' using "$input2" \; pause -1 > gp.comand
+       echo "Click into this window and hit return to continue!"
+       gnuplot gp.comand
+    fi
+
+  elif [ $input = "rb" ]
+  then
+    echo "A $beam beam inteeracts with a $target, backward solution (if exists)"
+    echo "Excitations for particle 2,3 and Q-setting [MeV]: $EX,$EX3,$Q" 
+    echo "elast -qa $angle $angle2 $astep -x $EX -X $EX3 ERE-ARt-RJ-R4E+R4A+ "$target" $TT $beam $product $Q $energy $energy2 $esteps"
+    echo ""
+    elast -qa $angle $angle2 $astep -x $EX -X $EX3 ERE-ARt-RJ-R4E+R4A+ "$target" $TT $beam $product $Q $energy $energy2 $esteps
+    elast -Qa $angle $angle2 $astep -x $EX -X $EX3 ERE-ARt-RJ-R4E+R4A+ "$target" $TT $beam $product $Q $energy $energy2 $esteps > eshell.dat
+    echo ""
+    echo "Enter Colum i vs Colum j to plot in the format 'i:j' or q to exit"
+    export input2=`getstring`
+    if [ $input2 != "q" ]
+    then
+       echo plot '"eshell.dat"' using "$input2" \; pause -1 > gp.comand
+       echo "Click into this window and hit return to continue!"
+       gnuplot gp.comand
+    fi
+
+
+  elif [ $input = "st" ]
+  then
+    echo "A $beam beam traveles through a $target target of $TT mg/cm**2, command:"
+    echo "elast -qa $angle $angle2 $astep AEloae "$target" $TT $beam $energy $energy2 $esteps"
+    echo ""
+    elast -qa $angle $angle2 $astep AEloae "$target" $TT $beam $energy $energy2 $esteps
+    elast -Qa $angle $angle2 $astep AEloae "$target" $TT $beam $energy $energy2 $esteps > eshell.dat    
+    echo ""
+    echo "Enter Colum i vs Colum j to plot in the format 'i:j' or q to exit"
+    export input2=`getstring`
+    if [ $input2 != "q" ]
+    then
+       echo plot '"eshell.dat"' using "$input2" \; pause -1 > gp.comand
+       echo "Click into this window and hit return to continue!"
+       gnuplot gp.comand
+    fi
+     
+  elif [ $input = "pw" ]
+  then
+    echo "A $beam beam interacts with a $target target, command:"
+    echo "elast -q  Eprvc "$target" $TT $beam $energy $energy2 $esteps"
+    echo ""
+    elast -q Eprvc "$target" $TT $beam $energy $energy2 $esteps
+    elast -Q Eprvc "$target" $TT $beam $energy $energy2 $esteps > eshell.dat    
+    echo ""
+    echo "Enter Colum i vs Colum j to plot in the format 'i:j' or q to exit"
+    export input2=`getstring`
+    if [ $input2 != "q" ]
+    then
+       echo plot '"eshell.dat"' using "$input2" \; pause -1 > gp.comand
+       echo "Click into this window and hit return to continue!"
+       gnuplot gp.comand
+    fi
+     
+  else
+    echo "ERROR: No such command defined: ===> $input <==="
+  fi
+
+done

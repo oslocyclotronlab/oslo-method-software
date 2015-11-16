@@ -1,0 +1,15 @@
+ 
+  STATUS (v.1.01) :
+ --------------------------------------------------
+ Input tape format 		: SIRIUS type
+ Output tape format		: SIRIUS type
+ Number of telescopes	: 64
+ Data input			: NONE
+ Data output		: NONE
+ REDUC system status	: NOT STARTED
+ Shift adjustment every 	: 100.th record
+ Records Sorted		: 0
+ Bad records		: 0
+ --------------------------------------------------
+ Updated Wed Oct  1 02:14:30 2008
+

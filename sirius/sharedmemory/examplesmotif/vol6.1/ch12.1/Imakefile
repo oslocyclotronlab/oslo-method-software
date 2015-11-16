@@ -1,0 +1,9 @@
+SYS_LIBRARIES = -lXm -lXt -lX11 
+
+AllTarget(radio_box simple_radio toggle toggle_box toggle_pix)
+
+NormalProgramTarget(radio_box,radio_box.o,,,)
+NormalProgramTarget(simple_radio,simple_radio.o,,,)
+NormalProgramTarget(toggle,toggle.o,,,)
+NormalProgramTarget(toggle_box,toggle_box.o,,,)
+NormalProgramTarget(toggle_pix,toggle_pix.o,,,)

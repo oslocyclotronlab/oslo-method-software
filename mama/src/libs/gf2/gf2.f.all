@@ -1,0 +1,5572 @@
+      PROGRAM GF2
+
+C         new version of GF2/GELIFT 6.4    D. C. Radford    April 1991....
+
+C         modifications from version 6.3:
+C           **** GF2 and GELIFT combined into one file (GF2)****....
+C                this version has no menu....
+C                menu versions are separate (GF2MENU, GF2_UIS or GF2KP)....
+C                commands added:
+C                      NF: set-up new fit (no need to specify # of peaks)....
+C                      XA: x-axis; change x0,nx....
+C                      YA: y-axis; change y0,ny....
+C                      RF: reset free parameters....
+C                      FF: open new fit file (.gf2)....
+C                other minor miscellaneous changes....
+C                   e.g. to subroutines ask, gfinit, curse, sumcts,
+C                            main program and gfexec....
+C                   subroutine gfalt replaced with
+C                      subprograms chngmark, fixorfree, getmkrchnl....
+
+
+C         modifications from version 6.2:
+C                on-line help added (R.W. MacLeod)....
+C                command SP/C to use cursor for gate limits in matrix mode....
+
+C         modifications from version 6.1:
+C                commands accepted in lower case characters....
+C                command DS now clears screen before displaying spectrum....
+C                use command OV to not clear before displaying....
+C                command EX now expands all displayed spectra....
+C                commands MU, MD, OV, RD added....
+C                spectra and display info are stored in a scratch file
+C                  before display for later use in redrawing screen....
+
+      CHARACTER*40 ANS
+
+      COMMON /LUS/ IR,IW,IP,IG
+      DATA         IR,IW,IP,IG/5,6,8,9/
+
+
+C         open GF2 output (print) file....
+      ANS = 'gf2.out'
+5     OPEN(IP,FILE=ANS,STATUS='OLD',IOSTAT=IOS)
+      IF (IOS.EQ.0) THEN
+C             file already exists....
+         WRITE(IW,*) 'File ',ANS,' already exists...'
+         CALL CASKYN('  ...delete? (Y/N)',&900)
+         CLOSE(IP,STATUS='DELETE',IOSTAT=IOS)
+         IF (IOS.NE.0) THEN
+            WRITE(IW,*) 'Cannot delete file...'
+            GO TO 900
+         ENDIF
+      ENDIF
+      OPEN(IP,FILE=ANS,STATUS='NEW',IOSTAT=IOS)
+      IF (IOS.NE.0) THEN
+         WRITE(IW,*) 'Cannot open new file ',ANS
+         GO TO 900
+      ENDIF
+
+C         open scratch files for storage of spectra to be redisplayed....
+      OPEN(10,FORM='UNFORMATTED',STATUS='SCRATCH')
+      OPEN(11,FORM='UNFORMATTED',STATUS='SCRATCH')
+
+C        welcome and get data file....
+      CALL GFINIT(2)
+      CALL TXTCLR(0)
+      CALL TSCROL(0,10)
+
+C        get new command....
+10    CALL CASK('?',ANS,NC)
+
+C        decode and execute command....
+      IF (NC.GT.1) CALL GFEXEC(ANS,NC)
+
+C        get next command....
+      GO TO 10
+
+900   CLOSE(IP,IOSTAT=IOS)
+      CALL CASK(
+     +    '-- New GF2 print output file name = ? (default .EXT = .out)',
+     +        ANS,NC)
+      CALL SETEXT(ANS,'.out',J)
+      GO TO 5
+      END
+
+C=======================================================================
+
+      SUBROUTINE ADDDELPK(MODE,NPEAK,READY)
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      REAL          AREAS(15),DAREAS(15),CENTS(15)
+      COMMON /AREA/ AREAS,DAREAS,CENTS
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      REAL           FINEST(5), SWPARS(3)
+      INTEGER        INFIX(3), INFIXRW, INFIXW
+      COMMON /INEST/ FINEST,INFIX,SWPARS,INFIXRW,INFIXW
+
+      LOGICAL      READY
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      IF ((.NOT.READY) .OR. NPKS.LE.0) THEN
+         WRITE(IW,*) 'Cannot - no fit defined.'
+         RETURN
+      ENDIF
+
+      IF (MODE.EQ.1) THEN
+
+C                  AP; add peak to fit....
+         IF (NPKS.GE.15) THEN
+            WRITE(IW,*) 'Cannot - too many peaks.'
+            RETURN
+         ENDIF
+
+C            ask for peak position....
+30       N=NPKS+1
+         IF (.NOT.DISP) GO TO 50
+         WRITE(IW,*) ' New peak position?  (hit T to type, A to abort)'
+         CALL RETIC(X,Y,ANS)
+         IF (ANS(1:1).EQ.'A' .OR. ANS(1:1).EQ.'a') RETURN
+         IF (ANS(1:1).NE.'T' .AND. ANS(1:1).NE.'t') GO TO 60
+C            ....hit t for type....
+50       CALL ASK(15HPeak position=?,15,ANS,K)
+         CALL FFIN(ANS,K,PPOS(N),RJ1,RJ2,&50)
+         GO TO 70
+60       PPOS(N)=X-0.5
+70       IF (IFIX(PPOS(N)).LT.MCH(1)) GO TO 80
+         IF (IFIX(PPOS(N)).LT.MCH(2)) GO TO 90
+80       WRITE(IW,*) 'Peaks must be within limits - try again.'
+         GO TO 30
+90       IF (DISP) CALL DSPMKR(N+2)
+
+         NPKS=NPKS+1
+         NPARS=NPARS+3
+         AREAS(NPKS)=0.0
+         DAREAS(NPKS)=0.0
+         CENTS(NPKS)=PPOS(NPKS)
+         DO 120 I=NPARS-2,NPARS
+            ERRS(I)=0.0
+            IFIXED(I)=1
+120      CONTINUE
+         IFIXED(NPARS-1)=INFIXW
+         NFP=NFP+1-INFIXW
+
+         ILO=MCH(1)+1
+         IHI=MCH(2)+1
+         X0=(IHI+ILO)/2
+         PARS(NPARS-2)=PPOS(NPKS)
+         PARS(NPARS-1)=SQRT( SWPARS(1)
+     +                     + SWPARS(2)*PPOS(NPKS)
+     +                     + SWPARS(3)*PPOS(NPKS)*PPOS(NPKS) )
+         X=PPOS(NPKS)-X0+1.0
+         Y=PARS(1)+PARS(2)*X+PARS(3)*X*X
+         IPP=PPOS(NPKS)+1.5
+         PARS(NPARS)=SPEC(IPP)-Y
+
+         IF (INFIXW.EQ.1.AND.IRELW.EQ.0) THEN
+             CALL ASKYN(38HReset all non-fixed peak widths? (Y/N)
+     +                 ,38,&140)
+             DO 130 I=1,NPKS-1
+                J=3*I+5
+                IF (IFIXED(J).EQ.1) PARS(J) =
+     +                  SQRT( SWPARS(1)
+     +                     + SWPARS(2)*PPOS(I)
+     +                     + SWPARS(3)*PPOS(I)*PPOS(I) )
+130          CONTINUE
+         ENDIF
+
+140      IF (CENTS(NPKS).GE.CENTS(NPKS-1)) GO TO 1000
+         CALL ASKYN(40HRe-order peaks in order of energy? (Y/N)
+     +             ,40,&1000)
+
+         DO 180 I=1,NPKS-1
+            DO 170 J=I+1,NPKS
+               IF (CENTS(I).GT.CENTS(J)) THEN
+                  S=PPOS(I)
+                  PPOS(I)=PPOS(J)
+                  PPOS(J)=S
+                  S=AREAS(I)
+                  AREAS(I)=AREAS(J)
+                  AREAS(J)=S
+                  S=DAREAS(I)
+                  DAREAS(I)=DAREAS(J)
+                  DAREAS(J)=S
+                  S=CENTS(I)
+                  CENTS(I)=CENTS(J)
+                  CENTS(J)=S
+                  DO 150 K=3*I+4,3*I+6
+                     L=3*(J-I)+K
+                     S=PARS(K)
+                     PARS(K)=PARS(L)
+                     PARS(L)=S
+                     S=ERRS(K)
+                     ERRS(K)=ERRS(L)
+                     ERRS(L)=S
+                     JS=IFIXED(K)
+                     IFIXED(K)=IFIXED(L)
+                     IFIXED(L)=JS
+150               CONTINUE
+               ENDIF
+170         CONTINUE
+180      CONTINUE
+
+      ELSE
+
+C                  DP; delete peak from fit....
+         IF (NPKS.LE.1) THEN
+            WRITE(IW,*) 'Cannot - too few peaks.'
+            RETURN
+         ENDIF
+230      IF (NPEAK.LE.0.OR.NPEAK.GT.NPKS) THEN
+240         CALL ASK(32HNumber of peak to be deleted = ?,32,ANS,NC)
+            IF (NC.EQ.0) RETURN
+            CALL ININ(ANS,NC,NPEAK,J,J2,&240)
+            GO TO 230
+         ENDIF
+
+         NPARS=NPARS-3
+         J=3*NPEAK+4
+         NFP=NFP-3+IFIXED(J)+IFIXED(J+1)+IFIXED(J+2)
+         IF (NPEAK.NE.NPKS) THEN
+            DO 260 I=NPEAK,NPKS-1
+               PPOS(I)=PPOS(I+1)
+               AREAS(I)=AREAS(I+1)
+               DAREAS(I)=DAREAS(I+1)
+               CENTS(I)=CENTS(I+1)
+260         CONTINUE
+            DO 280 I=J,NPARS
+               PARS(I)=PARS(I+3)
+               ERRS(I)=ERRS(I+3)
+               IFIXED(I)=IFIXED(I+3)
+280         CONTINUE
+         ENDIF
+         NPKS=NPKS-1
+      ENDIF
+
+1000  RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE ADDSPEC(KK,ANS,NC)
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      REAL         SAVE(8192)
+      COMMON /SAV/ SAVE
+
+      CHARACTER*40 ANS
+      CHARACTER*8  NAMESP2
+      COMMON /LUS/ IR,IW,IP,IG
+
+C          KK = -1 :  add spectrum
+C          KK =  0 :  add counts
+C          KK =  1 :  multiply spectrum
+C          KK =  2 :  divide spectrum....
+
+      NAMESP(5:8) = '.MOD'
+      IF (NC.GE.3) THEN
+         ANS(1:2)='  '
+         IF (KK.GE.2) GO TO 130
+         IF (KK.EQ.1) CALL FFIN(ANS,NC,FACT,RJ1,RJ2,&130)
+      ELSE
+         IF (KK.GE.2) GO TO 120
+10       IF (KK.EQ.0) THEN
+            CALL ASK(15H Added counts=?,15,ANS,NC)
+         ELSEIF (KK.LT.0) THEN
+            CALL ASK(15H Mult. factor=?,15,ANS,NC)
+         ELSE
+            CALL ASK(38H Mult. factor or spectrum filename = ?,
+     +               38,ANS,NC)
+            CALL FFIN(ANS,NC,FACT,RJ1,RJ2,&130)
+         ENDIF
+         IF (NC.EQ.0) RETURN
+      ENDIF
+
+      CALL FFIN(ANS,NC,FACT,RJ1,RJ2,&10)
+      IF (KK.EQ.0) THEN
+
+C             add fact to each channel....
+         DO 30 I=1,MAXCH+1
+30       SPEC(I)=SPEC(I)+FACT
+         RETURN
+      ELSEIF (KK.EQ.1) THEN
+
+C             multiply spectrum by fact....
+         DO 40 I=1,MAXCH+1
+40       SPEC(I)=SPEC(I)*FACT
+         RETURN
+      ENDIF
+
+C         open and read second spectrum file....
+
+120   CALL ASK(23HSpectrum file or ID = ?,23,ANS,NC)
+      IF (NC.EQ.0) RETURN
+130   CALL READSP(ANS,SAVE,NAMESP2,NUMCH,8192,&120)
+      IF (NUMCH.NE.MAXCH+1)
+     +  WRITE(IW,*) 'Warning -- the two spectra have different lengths.'
+      IF (NUMCH.GT.MAXCH+1) NUMCH=MAXCH+1
+
+      IF (KK.LE.0) THEN
+
+C             add other spect. multiplied by fact....
+         DO 150 I=1,NUMCH
+150      SPEC(I)=SPEC(I)+FACT*SAVE(I)
+      ELSEIF (KK.EQ.1) THEN
+
+C             multiply spectrum by second spectrum....
+         DO 160 I=1,NUMCH
+160      SPEC(I)=SPEC(I)*SAVE(I)
+      ELSE
+
+C             divide spectrum by second spectrum....
+         DO 170 I=1,NUMCH
+170      IF (SAVE(I).GT.0.001) SPEC(I)=SPEC(I)/SAVE(I)
+      ENDIF
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE ADDWIN(WINMOD,*)
+
+C          add window(s) to look-up file or slice input file....
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      CHARACTER*40 ANS
+
+      INTEGER WINMOD
+C         WINMOD = 0 : no mode defined....
+C         WINMOD = 1 : look-up file mode....
+C         WINMOD = 2 : slice file mode....
+
+      INTEGER*2 LOOKTAB(8192)
+      INTEGER   NCLOOK,LOOKMIN,LOOKMAX
+      COMMON /LOOK/ NCLOOK,LOOKMIN,LOOKMAX,LOOKTAB
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      IF (WINMOD.EQ.0) THEN
+         WRITE(IW,*) 'Bad command: No window file open...'
+         RETURN 1
+      ELSEIF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+         RETURN 1
+      ENDIF
+
+      WRITE (IW,*) 'Hit X to exit...'
+
+C           get limits for integration, background....
+
+100   CALL RETIC(X,Y,ANS)
+      IF (ANS(1:1).EQ.'X'.OR.ANS(1:1).EQ.'x') GO TO 900
+      ILO=X
+      Y1=Y
+      CALL RETIC(X,Y,ANS)
+      IF (ANS(1:1).EQ.'X'.OR.ANS(1:1).EQ.'x') GO TO 900
+      IHI=X
+      Y2=Y
+      IF (ILO.GT.IHI) THEN
+         IHI=ILO
+         ILO=X
+         Y2=Y1
+         Y1=Y
+      ENDIF
+      IF (WINMOD.EQ.1.AND.ILO.GE.NCLOOK) THEN
+         WRITE (IW,120) NCLOOK
+120      FORMAT(' Cannot - lower limit exceeds dimension of look-up',
+     +          ' table (',I4,')')
+         GO TO 100
+      ENDIF
+
+C           display limits....
+
+      ISAVE=MCH(1)
+      MCH(1)=ILO
+      CALL DSPMKR(1)
+      MCH(1)=IHI
+      CALL DSPMKR(1)
+      MCH(1)=ISAVE
+
+      SUM=0.0
+      AREA=0.0
+      CENT=0.0
+      FNC=IHI-ILO
+      IF (FNC.EQ.0.0) FNC = 1.0
+
+      IF (WINMOD.EQ.2) THEN
+
+C           slice mode : background to be subtracted....
+C           display background....
+
+         CALL INITG(NX,NY)
+         X=FLOAT(ILO)+0.5
+         CALL PSPOT(X,Y1)
+         X=FLOAT(IHI)+0.5
+         CALL VECT(X,Y2)
+         CALL FINIG
+
+         DO 150 I=ILO,IHI
+            SUM = SUM + SPEC(I+1)
+            COU = SPEC(I+1) - (Y1+(Y2-Y1)*FLOAT(I-ILO)/FNC)
+            AREA = AREA + COU
+            CENT = CENT + COU*FLOAT(I-ILO)
+150      CONTINUE
+
+         IF (AREA.EQ.0.0) THEN
+            CENT = 0.0
+            GO TO 200
+         ENDIF
+
+         CENT = CENT/AREA + FLOAT(ILO)
+         AREA = AREA/SUM
+         DC = 0.0
+         CALL ENERGY(CENT,DC,EG,DEG,&200)
+
+C          write out results....
+
+         WRITE (IW,190,ERR=180) ILO,IHI,AREA,EG
+180      WRITE (13,190,ERR=100) ILO,IHI,AREA,EG
+190      FORMAT('  Chs',I5,' to',I5,'   P/T =',F8.4,'   Energy =',F9.3)
+         GO TO 100
+
+C          no energy calibration defined or zero area....
+
+200      WRITE (IW,230,ERR=220) ILO,IHI,AREA,CENT
+220      WRITE (13,230,ERR=100) ILO,IHI,AREA,CENT
+230      FORMAT('  Chs',I5,' to',I5,'   P/T =',F8.4,'    Cent. =',F9.3)
+
+      ELSE
+
+C           look-up mode : no background to be subtracted....
+
+         DO 310 I=ILO,IHI
+            AREA=AREA+SPEC(I+1)
+            CENT=CENT+SPEC(I+1)*FLOAT(I-ILO)
+310      CONTINUE
+
+         IF (AREA.EQ.0.0) THEN
+            CENT = 0.0
+            GO TO 350
+         ENDIF
+
+         CENT = CENT/AREA + FLOAT(ILO)
+         DC = 0.0
+         CALL ENERGY(CENT,DC,EG,DEG,&350)
+
+C          write out results....
+
+         WRITE (IW,330,ERR=400) ILO,IHI,EG
+330      FORMAT(' Chs',I5,' to',I5,'   Energy =',F9.3)
+         GO TO 400
+
+C          no energy calibration defined or zero area....
+
+350      WRITE (IW,360,ERR=400) ILO,IHI,CENT
+360      FORMAT(' Chs',I5,' to',I5,'    Cent. =',F9.3)
+
+C          ask for look-up value....
+
+400      CALL ASK(32H  Look-up value = ? (A to abort),32,ANS,NC)
+         IF (NC.EQ.0) GO TO 400
+         IF (ANS(1:1).EQ.'A'.OR.ANS(1:1).EQ.'a') GO TO 100
+         CALL ININ(ANS,NC,LUV,J1,J2,&400)
+         IF (LUV.LT.LOOKMIN) LOOKMIN=LUV
+         IF (LUV.GT.LOOKMAX) LOOKMAX=LUV
+         IF (IHI.GE.NCLOOK) IHI=NCLOOK-1
+         DO 450 I=ILO+1,IHI+1
+            LOOKTAB(I)=LUV
+450      CONTINUE
+
+      ENDIF
+      GO TO 100
+
+900   RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE ADJGAIN(MODE,OC1,OC2,RNC1,RNC2,OLD,NEW,NCO,NCN,FACT)
+      REAL OLD(*),NEW(*)
+      LOGICAL FLAG
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+C       adjust gain of old spectrum to get new....
+C          MODE=-1: set NEW to new values * FACT
+C          MODE=0:  ask for OC1,OC2,RNC1,RNC2
+C                      then set NEW to new values * FACT
+C          MODE=1:  add (new values * FACT) to NEW
+
+C          NCO = no. of chs in OLD
+C          NCN = no. of chs in NEW
+
+      IF (MODE.EQ.0) THEN
+10       CALL ASK2(34HType Oldch1,Oldch2,Newch1,Newch2 ?,34,ANS,K,39)
+         IF (K.EQ.0) RETURN
+         DO 20 I=2,K
+            IF (ANS(I:I).EQ.' ') ANS(I:I)=','
+20       CONTINUE
+         ANS(K+1:K+1)=','
+         READ(ANS,30,ERR=10) OC1,OC2,RNC1,RNC2
+30       FORMAT(4F20.0)
+      ENDIF
+      IF (MODE.LE.0) THEN
+         DO 50 I=1,NCN
+            NEW(I)=0.0
+50       CONTINUE
+      ENDIF
+
+      IF (RNC1.EQ.RNC2) GO TO 100
+      A=(OC2-OC1)/(RNC2-RNC1)
+      IF (A.LE.0.0) GO TO 100
+      B=OC2-A*RNC2
+      IST=(-0.5-B)/A+0.5
+      IF (IST.LT.0) IST=0
+      OL=(FLOAT(IST)-0.5)*A+B
+      IF (OL.LT.-0.5) OL=-0.5
+      IOL=OL+1.5
+      CL=OLD(IOL)*(FLOAT(IOL)-0.5-OL)
+      FLAG=.FALSE.
+
+      DO 80 NEWCH=IST+1,NCN
+         OH=(FLOAT(NEWCH)-0.5)*A+B
+         IOH=OH+1.5
+         IF (IOH.GT.NCO) THEN
+            OH=FLOAT(NCO)-0.5
+            IOH=NCO
+            FLAG=.TRUE.
+         ENDIF
+         CH=OLD(IOH)*(FLOAT(IOH)-0.5-OH)
+60       IOL=IOL+1
+         IF (IOL.LE.IOH) THEN
+            CL=CL+OLD(IOL)
+            GO TO 60
+         ENDIF
+         NEW(NEWCH)=NEW(NEWCH)+(CL-CH)*FACT
+         IF (FLAG) RETURN
+         CL=CH
+         IOL=IOH
+80    CONTINUE
+      RETURN
+
+100   WRITE(IW,110)OC1,OC2,RNC1,RNC2
+110   FORMAT(' Error - cannot continue.'/' Present values',
+     +' of OC1,OC2,NC1,NC2 are:',4F10.3)
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE ASK(MESAG,NCM,ANS,NCA)
+
+C         mesag: question to be asked (integer array)
+C         ncm:   number of characters in question (integer)
+C         ans:   answer recieved (character*40)
+C         nca:   number of characters received in answer (integer)
+C         mca:   max. number of characters asked for in answer (integer)
+
+      BYTE         MESAG(80)
+      INTEGER      NCM, NCA
+C        grabchar is a C function which returns the ascii value of the pressed key, 
+C        (this value is grabbed - the return key does not have to be hit)
+
+      INTEGER   GRABCHAR
+      EXTERNAL  GRABCHAR
+
+      LOGICAL        CFLOG
+      COMMON /CFLOG/ CFLOG
+      DATA           CFLOG /.FALSE./
+      INTEGER        ICF   /4/
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      IMCA=40
+      GO TO 10
+
+           ENTRY ASK2(MESAG,NCM,ANS,NCA,MCA)
+
+      IMCA=MCA
+
+C         output prompt message....
+10    IF (NCM.GT.0) WRITE(IW,20) (MESAG(I),I=1,NCM)
+20    FORMAT(<NCM>A1,$)
+      IF (IR.NE.5 .AND. NCM.GT.3) WRITE(IW,*) CHAR(13)
+
+C         read response....
+      IF (IMCA.EQ.0) RETURN
+
+      ANS=' '
+      IF (IR.NE.5) THEN
+         READ(IR,50,ERR=998,END=999) ANS
+50       FORMAT(A40)
+         NCA=IMCA
+      ELSE
+         IF (IMCA.EQ.1) THEN
+            JCHAR = GRABCHAR()
+            ANS(1:1) = CHAR(JCHAR)
+            NCA = 1
+         ELSE
+            READ(IR,'(A40)') ANS
+            NCA = 40
+         ENDIF
+      ENDIF
+
+      IF (NCA.GT.IMCA) NCA=IMCA
+      IF (NCA.LE.0) GO TO 70
+
+C            replace <CR> with a space....
+      IF (ANS(NCA:NCA).EQ.CHAR(13) .OR.
+     +    ANS(NCA:NCA).EQ.CHAR(10)) THEN
+         ANS(NCA:NCA)=' '
+         NCA=NCA-1
+         IF (NCA.LE.0) GO TO 70
+      ELSEIF (IR.EQ.5 .AND. IMCA.EQ.1) THEN
+C           since no <CR> or <LF> echoed, force new line....
+         WRITE(IW,*) CHAR(13)
+      ENDIF
+
+C           remove trailing blanks....
+      DO 60 I=NCA,1,-1
+         IF (ANS(I:I).NE.' ') GO TO 70
+         NCA=NCA-1
+60    CONTINUE
+
+C          if log command file open, copy response to lu ICF....
+70    IF (CFLOG) WRITE(ICF,'(A)') ANS(1:NCA)
+
+      RETURN
+
+998   WRITE(IW,*) 'Command file not completed; read error on file.'
+999   IR=5
+      ANS = 'CF END'
+      NCA = 9
+      RETURN
+
+      END
+
+C=======================================================================
+
+      SUBROUTINE CHNGMARK(IDATA)
+
+C        Allows the user to change the fitting limits and/or 
+C        the peak positions and to optionally reset the free parameters 
+C        to their initial estimates.
+C
+C        INPUT:            - the marker number     - IDATA .
+C        OUTPUT: Changes:  - the marker[s]         - MCH, and/or 
+C                          - the peak position[s]  - PPOS.
+C        CALLed by GFEXEC.
+C        CALLs function GETMKRCHNL
+
+C        local variables....
+      INTEGER        MN
+      REAL           GETMKRCHNL
+
+C        common blocks....
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      MN = IDATA
+C        MN is the Marker Number....
+C        MCH(MN),    (MN = 1,2) are the lower and upper bounds
+C                                 of the fitting region....
+C        PPOS(MN-2), (MN = 3,4,5..,NPKS+2) are the peak positions....
+
+      IF (MN.LE.0 .OR. MN.GT.NPKS+2) THEN
+c           the data passed does not correspond to a marker
+c           or there was no data passed....
+         CALL ASKYN(20HChange limits? (Y/N),20,&30)
+         DO 20 MN = 1, 2
+            MCH(MN) = NINT(GETMKRCHNL(MN))
+            IF (DISP) CALL DSPMKR(MN)
+20       CONTINUE
+30       CALL ASKYN(28HChange peak positions? (Y/N),28,&100)
+         DO 40 MN = 3, NPKS + 2
+            PPOS(MN-2) = GETMKRCHNL(MN)
+            IF (DISP) CALL DSPMKR(MN)
+40       CONTINUE
+      ELSE
+c           if the user knows what s/he wants to change, do it, &return....
+         IF (MN.LE.2) THEN
+            WRITE (IW,*) '     New marker position? (type T for type)'
+            MCH(MN) = GETMKRCHNL(MN)
+         ELSEIF (MN.GT.2) THEN
+            WRITE (IW,*) '     New peak position? (type T for type)'
+            PPOS(MN-2) = GETMKRCHNL(MN)
+         ENDIF
+         IF (DISP) CALL DSPMKR(MN)
+      ENDIF
+
+100   CALL ASKYN(44HReset free pars. to initial estimates? (Y/N),44,
+     +                                                           &110)
+      CALL PARSET(0)
+110   RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE COMFIL(ANS,K)
+
+      CHARACTER*40 ANS
+      INTEGER      K
+
+      LOGICAL        CFLOG
+      COMMON /CFLOG/ CFLOG
+
+      LOGICAL        CFOPEN /.FALSE./
+      INTEGER        ICF /4/, ICON /5/
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      ANS(1:2) = '  '
+      IF (K.GE.3) GO TO 15
+
+C         ask for command file name....
+10    IR = ICON
+      CALL CASK('Command file name = ? (default .EXT = .cmd)',ANS,K)
+      IF (K.EQ.0) RETURN
+
+15    CALL SETEXT(ANS,'.cmd',J)
+
+      IF (ANS(1:3).EQ.'END' .OR. ANS(1:3).EQ.'end') THEN
+C           ....close command file, lu IR = console....
+         CFOPEN = .FALSE.
+         CFLOG = .FALSE.
+         IR = ICON
+         CLOSE(ICF,ERR=900)
+
+      ELSEIF (ANS(1:3).EQ.'CON' .OR. ANS(1:3).EQ.'con') THEN
+         IF (CFOPEN) THEN
+            IR = ICF
+         ELSE
+            WRITE(IW,*) 'Command file not open.'
+         ENDIF
+
+      ELSEIF (ANS(1:3).EQ.'CHK' .OR. ANS(1:3).EQ.'chk') THEN
+         IF (CFOPEN) THEN
+            IR = ICON
+            CALL CASKYN('Proceed? (Y/N)',&900)
+            IR = ICF
+         ELSEIF (.NOT.CFLOG) THEN
+            WRITE(IW,*) 'Command file not open.'
+         ENDIF
+
+      ELSEIF (ANS(1:3).EQ.'ERA' .OR. ANS(1:3).EQ.'era') THEN
+         CALL ERASE
+         CALL TXTMOD
+
+      ELSEIF (ANS(1:3).EQ.'LOG' .OR. ANS(1:3).EQ.'log') THEN
+         IF (CFOPEN.OR.CFLOG) CLOSE(ICF,ERR=50)
+50       CFOPEN = .FALSE.
+         CFLOG = .FALSE.
+         IR = ICON
+         CALL CASK(
+     +        'File name for command logging = ? (default .EXT = .cmd)',
+     +        ANS,K)
+         IF (K.EQ.0) RETURN
+
+         CALL SETEXT(ANS,'.cmd',J)
+         IF (ANS(1:3).EQ.'END' .OR. ANS(1:3).EQ.'end' .OR.
+     +       ANS(1:3).EQ.'CON' .OR. ANS(1:3).EQ.'con' .OR.
+     +       ANS(1:3).EQ.'CHK' .OR. ANS(1:3).EQ.'chk' .OR.
+     +       ANS(1:3).EQ.'ERA' .OR. ANS(1:3).EQ.'era' .OR.
+     +       ANS(1:3).EQ.'LOG' .OR. ANS(1:3).EQ.'log') THEN
+            WRITE(IW,*) '*** That is an illegal command file name. ***'
+            GO TO 50
+         ENDIF
+
+C          ....open log command file for output....
+C          ....all input from lu IR to be copied to lu ICF....
+         OPEN(ICF,FILE=ANS,STATUS='NEW',ERR=990)
+         CFLOG = .TRUE.
+
+      ELSE
+C         CF filename....
+C          ....open command file for input on lu IR....
+         IF (CFOPEN.OR.CFLOG) CLOSE(ICF,ERR=80)
+80       CFLOG = .FALSE.
+         OPEN(ICF,FILE=ANS,STATUS='OLD',ERR=920)
+         CFOPEN = .TRUE.
+         IR = ICF
+      ENDIF
+
+900   RETURN
+
+920   WRITE(IW,*) 'File does not exist.'
+      CFOPEN = .FALSE.
+      CLOSE(ICF,ERR=10)
+      GO TO 10
+
+990   WRITE(IW,*) '*** Could not open new command file. ***'
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE CONTRACT(IDATA)
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      REAL*8         GAIN(6)
+      INTEGER        ICAL, NTERMS
+      COMMON /CALIB/ GAIN, ICAL, NTERMS
+
+      CHARACTER*40 ANS
+      CHARACTER*71 CMESS
+
+C          contract spectrum by factor idata....
+
+      IF (IDATA.LT.2) THEN
+10       CALL ASK(22HContraction factor = ?,22,ANS,NC)
+         IF (NC.EQ.0) RETURN
+         CALL ININ(ANS,NC,IDATA,J1,J2,&10)
+         IF (IDATA.LT.2) GO TO 10
+      ENDIF
+
+      MAXCH=((MAXCH+1)/IDATA)-1
+      DO 1610 I=1,MAXCH+1
+         II=(I-1)*IDATA+1
+         SPEC(I)=SPEC(II)
+         DO 1605 J=II+1,I*IDATA
+1605        SPEC(I)=SPEC(I)+SPEC(J)
+1610  CONTINUE
+      NAMESP(5:8) = '.MOD'
+      IF (ICAL.EQ.0) RETURN
+
+      F=IDATA
+      F1=(F-1.0)/2.0
+      CALL ENERGY(F1,F,A,B,&1650)
+      C=GAIN(3)*F*F
+      IF (NTERMS.GT.3) THEN
+        D=GAIN(4)*F*F*F
+        C=GAIN(4)*F*F*F1*3.0+C
+        IF (NTERMS.GT.4) THEN
+          E=GAIN(5)*F*F*F*F
+          D=GAIN(5)*F*F*F*F1*4.0+D
+          C=GAIN(5)*F*F*F1*F1*6.0+C
+          IF (NTERMS.GT.5) THEN
+            E=GAIN(6)*F*F*F*F*F1*5.0+E
+            D=GAIN(6)*F*F*F*F1*F1*10.0+D
+            C=GAIN(6)*F*F*F1*F1*F1*10.0+C
+            ENDIF
+          ENDIF
+        ENDIF
+      WRITE(CMESS,1620) A,B,C
+1620  FORMAT(' New gain coeffs',3D15.6,'etc (Y/N)?')
+      CALL CASKYN(CMESS,&1650)
+      GAIN(1)=A
+      GAIN(2)=B
+      GAIN(3)=C
+      IF (NTERMS.GT.3) GAIN(4)=D
+      IF (NTERMS.GT.4) GAIN(5)=E
+      IF (NTERMS.GT.5) GAIN(6)=GAIN(6)*F*F*F*F*F
+1650  RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE CURSE(IDATA)
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      CHARACTER*4 ANS
+      DATA DX/0.0/
+      COMMON /LUS/ IR,IW,IP,IG
+
+C          call or display cursor....
+
+      IF (IDATA.EQ.0) GO TO 40
+      ISAVE=MCH(1)
+      MCH(1)=IDATA
+      CALL DSPMKR(1)
+      MCH(1)=ISAVE
+      CALL ENERGY(FLOAT(IDATA),DX,EG,DEG,&10)
+      WRITE(IW,5,ERR=30)IDATA,SPEC(IDATA+1),EG
+5     FORMAT(5X,'Ch =',I5,'  Cnts =',F10.0,'  Energy =',F9.2)
+      GO TO 30
+10    WRITE(IW,20,ERR=30)IDATA,SPEC(IDATA+1)
+20    FORMAT(5X,'Ch =',I5,'  Cnts =',F10.0)
+30    RETURN
+
+40    WRITE(IW,*) 'Type any character; X to exit, T to type ch. no.'
+60    CALL RETIC(X,Y,ANS)
+      IF (ANS(1:1).EQ.'X' .OR. ANS(1:1).EQ.'x') RETURN
+      IF (ANS(1:1).EQ.'T' .OR. ANS(1:1).EQ.'t') THEN
+65       CALL ASK(18HChannel number = ?,18,ANS,NC)
+         IF (NC.EQ.0) GO TO 60
+         CALL ININ(ANS,NC,IDATA,J1,J2,&65)
+         ISAVE=MCH(1)
+         MCH(1)=IDATA
+         CALL DSPMKR(1)
+         MCH(1)=ISAVE
+         CALL ENERGY(FLOAT(IDATA),DX,EG,DEG,&67)
+         WRITE(IW,5,ERR=30)IDATA,SPEC(IDATA+1),EG
+         GO TO 60
+67       WRITE(IW,20,ERR=30)IDATA,SPEC(IDATA+1)
+         GO TO 60
+      ENDIF
+
+      IDATA=X
+      CALL ENERGY(FLOAT(IDATA),DX,EG,DEG,&80)
+      WRITE(IW,70,ERR=60)IDATA,SPEC(IDATA+1),Y,EG
+70    FORMAT(5X,'Ch =',I5,'  Cnts =',F10.0,
+     +       '  Y =',F10.0,'  Energy =',F9.2)
+      GO TO 60
+80    WRITE(IW,90,ERR=60)IDATA,SPEC(IDATA+1),Y
+90    FORMAT(5X,'Ch =',I5,'  Cnts =',F10.0,'   Y =',F10.0)
+      GO TO 60
+      END
+
+C=======================================================================
+
+      SUBROUTINE DISPWIN(WINMOD,*)
+
+C          display windows as they are presently defined....
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      INTEGER WINMOD
+C         WINMOD = 0 : no mode defined....
+C         WINMOD = 1 : look-up file mode....
+C         WINMOD = 2 : slice file mode....
+
+      INTEGER*2 LOOKTAB(8192)
+      INTEGER   NCLOOK,LOOKMIN,LOOKMAX
+      COMMON /LOOK/ NCLOOK,LOOKMIN,LOOKMAX,LOOKTAB
+
+      CHARACTER*8 CLUV
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      IF (WINMOD.EQ.0) THEN
+         WRITE(IW,*) 'Bad command: No window file open...'
+         RETURN 1
+      ELSEIF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+         RETURN 1
+      ENDIF
+      ISAVE=MCH(1)
+
+      IF (WINMOD.EQ.2) THEN
+
+C           slice mode....
+
+         REWIND(13)
+         LUV=0
+
+100      READ(13,120,ERR=100,END=900) ILO,IHI,PTOT
+120      FORMAT(5X,I5,3X,I5,8X,F8.4)
+         LUV=LUV+1
+         IF (ILO.GT.HICH.OR.IHI.LT.LOCH) GO TO 100
+
+C           display limits....
+
+         MCH(1)=ILO
+         CALL DSPMKR(1)
+         MCH(1)=IHI
+         CALL DSPMKR(1)
+
+C        display background....
+
+         SUM = 0.0
+         DO 150 I=ILO,IHI
+            SUM = SUM + SPEC(I+1)
+150      CONTINUE
+         BG = SUM*(1.0-PTOT)/FLOAT(IHI-ILO+1)
+
+         CALL INITG(NX,NY)
+         X=FLOAT(ILO)+0.5
+         CALL PSPOT(X,BG)
+         X=FLOAT(IHI)+0.5
+         CALL VECT(X,BG)
+
+C        display window number....
+
+         Y = (SPEC(IHI+1) + LOCNT)/2
+         CALL PSPOT(X,Y)
+         WRITE (CLUV,160) LUV
+160      FORMAT(I8)
+         CALL PUTG(CLUV,8,9,1)
+         CALL FINIG
+
+         GO TO 100
+
+      ELSE
+
+C           look-up mode....
+
+         ILO=0
+         LUV=0
+         DO 200 I=1,NCLOOK
+            IF (LOOKTAB(I).EQ.LUV) GO TO 200
+            IF (LUV.EQ.0) GO TO 180
+
+            IHI=I-2
+            IF (ILO.GT.HICH.OR.IHI.LT.LOCH) GO TO 180
+
+C           display limits....
+
+            MCH(1)=ILO
+            CALL DSPMKR(1)
+            MCH(1)=IHI
+            CALL DSPMKR(1)
+
+C           display background....
+
+            CALL INITG(NX,NY)
+            X=FLOAT(ILO)+0.5
+            CALL PSPOT(X,SPEC(ILO+1))
+            X=FLOAT(IHI)+0.5
+            CALL VECT(X,SPEC(IHI+1))
+
+C           display look-up value....
+
+            Y = (SPEC(IHI+1) + LOCNT)/2
+            CALL PSPOT(X,Y)
+            WRITE (CLUV,160) LUV
+            CALL PUTG(CLUV,8,9,1)
+            CALL FINIG
+
+180         LUV=LOOKTAB(I)
+            ILO=I-1
+200      CONTINUE
+
+      ENDIF
+
+900   MCH(1)=ISAVE
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE DIVEFF(ANS,K)
+
+C         correct spectrum for detector efficiency....
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      REAL*8         GAIN(6)
+      INTEGER        ICAL, NTERMS
+      COMMON /CALIB/ GAIN, ICAL, NTERMS
+
+      CHARACTER*40 ANS
+      REAL         PARS(9)
+      REAL*8       X1,X2,F1,F2,U3,G
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      IF (ICAL.EQ.0) GO TO 950
+      ANS(1:2)='  '
+      IF (K.GE.3) GO TO 15
+
+C         ask for efficiency parameter data file....
+
+10    CALL ASK(28HEff. parameter data file = ?,28,ANS,K)
+      IF (K.EQ.0) RETURN
+15    CALL SETEXT(ANS,'.eff',J)
+
+C          read parameters from disk file....
+
+      OPEN(1,FILE=ANS,FORM='UNFORMATTED',STATUS='OLD',ERR=320)
+      READ(1,ERR=340)JUNK
+      READ(1,ERR=340)PARS
+      CLOSE(1)
+
+C          divide sp. by calculated efficiency....
+
+      G=PARS(7)
+      DCH=0.0
+      DO 200,ICH=0,MAXCH
+         CH=ICH
+         CALL ENERGY(CH,DCH,X,DX,&950)
+         IF (X.LE.0.0) GO TO 200
+         X1=LOG(X/PARS(8))
+         X2=LOG(X/PARS(9))
+         F1=PARS(1)+PARS(2)*X1+PARS(3)*X1*X1
+         F2=PARS(4)+PARS(5)*X2+PARS(6)*X2*X2
+         IF (F1.LE.0.0D0 .OR. F2.LE.0.0D0) GO TO 200
+         U3=EXP(-G*LOG(F1))+EXP(-G*LOG(F2))
+         IF (U3.LE.0.0D0) GO TO 200
+         EFF=EXP(EXP(-LOG(U3)/G))
+         SPEC(ICH+1)=SPEC(ICH+1)/EFF
+200   CONTINUE
+
+      NAMESP(5:8) = '.MOD'
+      RETURN
+
+C            error messages....
+
+320   WRITE(IW,*) 'File does not exist.'
+      GO TO 10
+340   WRITE(IW,*) 'Cannot read file.'
+      CLOSE(1)
+      GO TO 10
+950   WRITE(IW,*) 'Cannot - no energy calibration.'
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE DOFIT(IDATA,READY)
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      LOGICAL READY
+      CHARACTER*40 ANS
+
+C          get limits etc. and/or do fit....
+
+      IF (IDATA.GT.0) THEN
+C          get limits, peak positions and fixed parameters....
+         NPKS=IDATA
+         CALL GFSET
+         IF (NPKS.LE.0) THEN
+            READY = .FALSE.
+            RETURN
+         ENDIF
+         READY=.TRUE.
+      ELSEIF (IDATA.LT.0) THEN
+C          reset initial parameter estimates....
+         CALL PARSET(0)
+      ENDIF
+
+130   CALL ASK(37H Max. no. of iterations=?(rtn for 50),37,ANS,K)
+      MAXITS=50
+      IF (K.NE.0) THEN
+         CALL ININ(ANS,K,MAXITS,J1,J2,&130)
+         IF (MAXITS.LE.0) RETURN
+      ENDIF
+
+C          do fit....
+      CALL FITTER(MAXITS,&160,&150)
+
+C          display fit and difference and list parameters....
+      CALL GFFIN(0)
+      RETURN
+150   CALL GFFIN(1)
+160   RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE DSPFIT
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      REAL         SAVE(8192)
+      COMMON /SAV/ SAVE
+
+      REAL B(51)
+
+
+      LO=MCH(1)
+      HI=MCH(2)
+      IF (LO.LT.LOCH) LO=LOCH
+      IF (HI.GT.HICH) HI=HICH
+      LO=LO+1
+      IF (HI.LE.LO) RETURN
+      HI=HI+1
+
+C          display background....
+
+      CALL EVAL(PARS,IFIXED(4),Y,NPKS,-9)
+      CALL EVAL(PARS,LO,Y,NPKS,-1)
+      SAVE(LO)=Y
+      X1=FLOAT(LO)-0.5
+      CALL INITG(NX,NY)
+      CALL PSPOT(X1,Y)
+      DO 20 I=LO+1,HI
+         X1=X1+1.0
+         CALL EVAL(PARS,I,Y,NPKS,-1)
+         SAVE(I)=Y
+         CALL VECT(X1,Y)
+20    CONTINUE
+
+C          display fit....
+
+      CALL EVAL(PARS,LO,Y,NPKS,0)
+      X1=FLOAT(LO)-0.5
+      CALL PSPOT(X1,Y)
+      DO 30 I=LO+1,HI
+         X1=X1+1.0
+         CALL EVAL(PARS,I,Y,NPKS,0)
+         CALL VECT(X1,Y)
+30    CONTINUE
+
+C          display difference....
+
+      Y1=(Y+FLOAT(LOCNT))/2.0
+      X1=FLOAT(LO)-0.5
+      CALL EVAL(PARS,LO,Y,NPKS,0)
+      Y=SPEC(LO)-Y+Y1
+      CALL PSPOT(X1,Y)
+      DO 40 I=LO+1,HI
+         X1=X1+1.0
+         CALL EVAL(PARS,I,Y,NPKS,0)
+         Y=SPEC(I)-Y+Y1
+         CALL VECT(X1,Y)
+40    CONTINUE
+
+C          display each peak seperately....
+
+      IF (NPKS.EQ.1) GO TO 90
+      DO 45 I=1,6
+45       B(I)=0.0
+      B(4)=PARS(4)
+      B(5)=PARS(5)
+      DO 80 J=1,NPKS
+         DO 50 I=4,6
+50          B(I+3)=PARS(3*J+I)
+         CALL EVAL(B,IFIXED(4),Y,1,-9)
+         ILO=B(7)-3.0*B(8)
+         IHI=B(7)+3.0*B(8)
+         IF (ILO.LT.LO) ILO=LO
+         IF (IHI.GT.HI) IHI=HI
+         CALL EVAL(B,ILO,Y,1,0)
+         X1=FLOAT(ILO)-0.5
+         CALL PSPOT(X1,Y+SAVE(ILO))
+         DO 60 I=ILO+1,IHI
+            X1=X1+1.0
+            CALL EVAL(B,I,Y,1,0)
+            CALL VECT(X1,Y+SAVE(I))
+60       CONTINUE
+80    CONTINUE
+90    CALL FINIG
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE DSPMKR(K)
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      CHARACTER*15  MCHAR /'123456789ABCDEF'/
+
+
+      CALL INITG(NX,NY)
+      I=K
+      IF (K.EQ.99) I=1
+20    IF (I.GT.2) THEN
+         X=PPOS(I-2)+0.5
+         ICH=X
+      ELSE
+         ICH=MCH(I)
+      ENDIF
+
+      IF (ICH.GE.LOCH.AND.ICH.LE.HICH) THEN
+         IF (I.GT.2) THEN
+            Y=SPEC(ICH+1)
+            CALL CVXY(X,Y,IX,IY,1)
+            CALL CVXY(X1,Y,IX,IY-10,2)
+            CALL SYMBG(9,X,Y,7,90.0)
+            CALL MSPOT(IX,IY-10)
+            CALL IVECT(IX,IY-30)
+            CALL MSPOT(IX,IY-45)
+            CALL PUTG(MCHAR(I-2:I-2),1,5,1)
+         ELSE
+            X=FLOAT(ICH)+0.5
+            Y=LOCNT
+            CALL PSPOT(X,Y)
+            CALL VECT(X,SPEC(ICH+1))
+         ENDIF
+      ENDIF
+
+      I=I+1
+      IF (K.EQ.99.AND.I.LE.NPKS+2) GO TO 20
+      CALL FINIG
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE DSPSP(I1,I2,I3,*)
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      INTEGER COLORMAP(15)
+      COMMON /COLORMAP/ COLORMAP
+
+      LOGICAL PKFIND
+      INTEGER IFWHM, ISIGMA, IPERCENT
+      COMMON /PKF/ PKFIND, IFWHM, ISIGMA, IPERCENT
+
+      CHARACTER*28 HEADING
+
+
+      LOY=0
+      CALL INITG(NX,NY)
+      IF (I1.GT.0 .AND. I2.GT.0) THEN
+         IF (I1.GT.I2) I1=I2
+         NY=NY/I2
+         LOY=NY*(I1-1)
+         ICOL=I1+1
+      ELSE
+         ICOL=2
+      ENDIF
+      ICOL = COLORMAP(MOD(ICOL-1,15)+1)
+      CALL LIMG(NX,0,NY,LOY)
+      LOCH=LOX
+      NCHS=NUMX
+      IF ((I1.EQ.1 .AND. I2.EQ.0) .OR. I3.EQ.1 .OR. NUMX.EQ.0) THEN
+        LOCH=0
+        NCHS=MAXCH+1
+      ENDIF
+      HICH=LOCH+NCHS-1
+      IF (HICH.GT.MAXCH) HICH=MAXCH
+      IF (LOCH.GE.(HICH-1)) GO TO 999
+      NCHS=HICH-LOCH+1
+      NCC=(NCHS-1)/NX+1
+      HICNT=LOCNT+NCNTS
+      IF (NCNTS.LE.0) THEN
+         DO 25 I=LOCH+1,HICH+1
+            IF (HICNT.LT.SPEC(I)) HICNT=SPEC(I)
+25       CONTINUE
+      ENDIF
+
+      X0=LOCH
+      DX=NCHS
+      Y0=LOCNT
+      DY=HICNT-FLOAT(LOCNT-1)
+      IF (PKFIND) DY = 1.1*DY
+
+      CALL SETCOLOR(1)
+      CALL TRAX(DX,X0,DY,Y0,IYAXIS)
+      CALL SETCOLOR(ICOL)
+      X=LOCH
+      IF (NCC.EQ.1) THEN
+        CALL PSPOT(X,SPEC(LOCH+1))
+        DO 40 I=LOCH+1,HICH+1
+           CALL VECT(X,SPEC(I))
+           X=X+1.0
+           CALL VECT(X,SPEC(I))
+   40   CONTINUE
+      ELSE
+        Y=0.
+        DO 50 I=1,NCC
+   50      Y=Y+SPEC(LOCH+I)
+        FNCC=FLOAT(NCC)
+        Y=Y/FNCC
+        CALL PSPOT(X,Y)
+        DO 55 ICH=LOCH,LOCH+(NCHS/NCC-1)*NCC,NCC
+           Y=0.
+           DO 60 I=1,NCC
+   60         Y=Y+SPEC(ICH+I)
+           Y=Y/FNCC
+           CALL VECT(X,Y)
+           X=X+FNCC
+           CALL VECT(X,Y)
+   55   CONTINUE
+      ENDIF
+      CALL SETCOLOR(1)
+      CALL DATETIME(HEADING)
+      HEADING(21:28) = NAMESP
+      CALL MSPOT(NX-90,LOY+NY-10)
+      CALL PUTG(HEADING,28,8,1)
+      CALL FINIG
+      DISP = .TRUE.
+
+      IF (PKFIND) CALL FINDPKS
+      RETURN
+
+999   CALL FINIG
+      RETURN 1
+      END
+
+C=======================================================================
+
+      SUBROUTINE DUMP(ANS,K,MODE,READY)
+
+      LOGICAL READY
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      REAL          AREAS(15),DAREAS(15),CENTS(15)
+      COMMON /AREA/ AREAS,DAREAS,CENTS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER         IWMODE
+      CHARACTER*8     NWTSP
+      REAL            WTSP(8192)
+      COMMON /WTMODE/ IWMODE,NWTSP,WTSP
+
+      REAL           STOC(15,20),STODC(15,20),STOA(15,20),STODA(15,20)
+      REAL           STOE(15,20),STODE(15,20)
+      INTEGER        ISTO(20)
+      CHARACTER*28   NAMSTO(20)
+      COMMON /STORE/ STOC,STODC,STOA,STODA,STOE,STODE,ISTO,NAMSTO
+
+      REAL           FINEST(5), SWPARS(3)
+      INTEGER        INFIX(3), INFIXRW, INFIXW
+      COMMON /INEST/ FINEST,INFIX,SWPARS,INFIXRW,INFIXW
+
+      INTEGER COLORMAP(15)
+      COMMON /COLORMAP/ COLORMAP
+      LOGICAL PKFIND
+      INTEGER IFWHM, ISIGMA, IPERCENT
+      COMMON /PKF/ PKFIND, IFWHM, ISIGMA, IPERCENT
+
+      REAL*8         GAIN(6)
+      INTEGER        ICAL, NTERMS
+      COMMON /CALIB/ GAIN, ICAL, NTERMS
+
+      CHARACTER*40 ANS
+      CHARACTER*20 HEAD1/'GELIFT DUMP VER. 1.0'/
+      CHARACTER*20 HEAD2/'GELIFT ver. 6.1 dump'/
+      CHARACTER*20 DATTIM
+      COMMON /LUS/ IR,IW,IP,IG
+
+      ANS(1:2)='  '
+      IF (K.GE.3) GO TO 15
+
+C         ask for dump file name....
+10    CALL ASK(40HDump file name = ? (default .EXT = .dmp),40,ANS,K)
+      IF (K.EQ.0) RETURN
+
+15    CALL SETEXT(ANS,'.dmp',J)
+
+C          mode = 0/1 to write/read dump....
+
+      IF (MODE.NE.1) GO TO 400
+
+C          read dump from disk....
+
+      OPEN(1,FILE=ANS,FORM='UNFORMATTED',STATUS='OLD',ERR=320)
+      READ(1,ERR=330) ANS(1:20),DATTIM
+      IF (ANS(1:20).NE.HEAD1.AND.ANS(1:20).NE.HEAD2) GO TO 380
+      WRITE(IW,*) 'Dump was done at ',DATTIM
+      CALL ASKYN(27HProceed to read dump? (Y/N),27,&300)
+      ICSAVE=ICAL
+      CALL ASKYN(46HTake stored areas & centroids from dump? (Y/N),
+     +  46,&250)
+
+      IF (ANS(1:20).EQ.HEAD1) THEN
+         READ(1,ERR=340) MCH,PPOS,SW,PARS,IFIXED,NPARS,NFP,ERRS
+     +    ,NPKS,IRELPOS,AREAS,DAREAS,CENTS,READY,IWMODE
+     +    ,FINEST,INFIX,GAIN,ICAL,NTERMS,LOX,NUMX,LOCNT,NCNTS,IYAXIS
+     +    ,STOC,STODC,STOA,STODA,STOE,STODE,ISTO,NAMSTO
+         IRELW = 0
+         IF (SW.GT.0.0) IRELW = 1
+      ELSE
+         READ(1,ERR=340) MCH,PPOS,IRELW,PARS,IFIXED,NPARS,NFP,ERRS
+     +    ,NPKS,IRELPOS,AREAS,DAREAS,CENTS,READY,IWMODE
+     +    ,FINEST,INFIX,GAIN,ICAL,NTERMS,LOX,NUMX,LOCNT,NCNTS,IYAXIS
+     +    ,SWPARS,INFIXRW,INFIXW,COLORMAP,PKFIND,IFWHM,ISIGMA,IPERCENT
+     +    ,STOC,STODC,STOA,STODA,STOE,STODE,ISTO,NAMSTO
+      ENDIF
+      GO TO 270
+
+250   IF (ANS(1:20).EQ.HEAD1) THEN
+         READ(1,ERR=340) MCH,PPOS,SW,PARS,IFIXED,NPARS,NFP,ERRS
+     +    ,NPKS,IRELPOS,AREAS,DAREAS,CENTS,READY,IWMODE
+     +    ,FINEST,INFIX,GAIN,ICAL,NTERMS,LOX,NUMX,LOCNT,NCNTS,IYAXIS
+         IRELW = 0
+         IF (SW.GT.0.0) IRELW = 1
+      ELSE
+         READ(1,ERR=340) MCH,PPOS,IRELW,PARS,IFIXED,NPARS,NFP,ERRS
+     +    ,NPKS,IRELPOS,AREAS,DAREAS,CENTS,READY,IWMODE
+     +    ,FINEST,INFIX,GAIN,ICAL,NTERMS,LOX,NUMX,LOCNT,NCNTS,IYAXIS
+     +    ,SWPARS,INFIXRW,INFIXW,COLORMAP,PKFIND,IFWHM,ISIGMA,IPERCENT
+      ENDIF
+
+270   IF (ICSAVE.GT.1) THEN
+         IF (ICAL.LE.0) THEN
+            ICAL = ICSAVE
+            NC=0
+            CALL ENCAL(ANS,NC)
+         ENDIF
+         ICAL = ICSAVE
+      ELSE
+         IF (ICAL.GT.1) ICAL=1
+      ENDIF
+      IF (IWMODE.GT.0) CALL WEIGHT(3)
+300   CLOSE(1)
+      RETURN
+
+C          write dump to disk....
+
+400   OPEN(1,FILE=ANS,FORM='UNFORMATTED',STATUS='OLD',ERR=405)
+      WRITE(IW,*) 'A file with this name already exists.'
+      CALL CASKYN('Dump to this old file? (Y/N)',&510)
+      CLOSE(1,STATUS='DELETE')
+405   OPEN(1,FILE=ANS,FORM='UNFORMATTED',STATUS='NEW',ERR=410)
+      CALL DATETIME(DATTIM)
+      WRITE(1,ERR=430) HEAD2,DATTIM
+      WRITE(1,ERR=430) MCH,PPOS,IRELW,PARS,IFIXED,NPARS,NFP,ERRS
+     +    ,NPKS,IRELPOS,AREAS,DAREAS,CENTS,READY,IWMODE
+     +    ,FINEST,INFIX,GAIN,ICAL,NTERMS,LOX,NUMX,LOCNT,NCNTS,IYAXIS
+     +    ,SWPARS,INFIXRW,INFIXW,COLORMAP,PKFIND,IFWHM,ISIGMA,IPERCENT
+     +    ,STOC,STODC,STOA,STODA,STOE,STODE,ISTO,NAMSTO
+      GO TO 300
+
+510   CLOSE(1)
+      GO TO 10
+
+C          error messages....
+
+320   WRITE(IW,*) 'File does not exist.'
+      GO TO 10
+340   READY=.FALSE.
+330   WRITE(IW,*) 'Cannot read file - no dump read.'
+      GO TO 300
+380   WRITE(IW,*) ANS,' is not a dump file!'
+      GO TO 10
+410   WRITE(IW,*) 'Cannot open new file with this name.'
+      GO TO 300
+430   WRITE(IW,*) 'Cannot write file - no dump written.'
+      GO TO 300
+      END
+
+C=======================================================================
+
+      SUBROUTINE EDIT(ANS,NC)
+
+C          edit fit parameter file....
+C                   (file name stored in ANS)....
+C          default file name = .gf2....
+
+      LOGICAL          GF2OPEN
+      COMMON /GF2OPEN/ GF2OPEN
+
+      REAL         SAVE(8192)
+      COMMON /SAV/ SAVE
+
+      INTEGER*4 GF2DATA(30,200),PEAKS(200)
+      EQUIVALENCE (GF2DATA,SAVE),(PEAKS,SAVE(6001))
+
+C           gf2data(1,2)  = limits of fit segment....
+C           gf2data(3)    = IX0 ( = midpoint of original fit )....
+C           gf2data(4)    = total counts in spectrum.....
+C           gf2data(5)    = number of peaks in fit segment....
+C           gf2data(6-29) = parameters of fit....
+
+      CHARACTER*40 ANS
+      INTEGER*4    GF2INT(6)
+      REAL*4       GF2REAL(6)
+      EQUIVALENCE (GF2INT,GF2REAL)
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+C            if necessary, open new (but existing!) .gf2 file....
+      IF (.NOT.GF2OPEN) THEN
+C            mode = 1 : open existing file only....
+         MODE = 1
+         CALL OPENGF2(ANS,NC,MODE)
+         IF (.NOT.GF2OPEN) RETURN
+      ENDIF
+
+      REWIND (12)
+      READ (12,END=340,ERR=340) J
+      DO 60 NDATA = 1,200
+         READ (12,END=100,ERR=340) (GF2DATA(J,NDATA),J=1,30)
+         PEAKS(NDATA) = NDATA
+60    CONTINUE
+      NDATA = 201
+
+100   NDATA = NDATA - 1
+      IF (NDATA.LT.1) THEN
+         WRITE (IW,*) 'No data in file...'
+         RETURN
+      ENDIF
+
+C          put fit segments in order of lower limit....
+      IF (NDATA.GT.1) THEN
+         DO 150 I=1,NDATA-1
+            NEWI = I
+            NEWP = PEAKS(I)
+            DO 140 J=I+1,NDATA
+               IF (GF2DATA(1,PEAKS(J)).LT.GF2DATA(1,NEWP)) THEN
+                  NEWI=J
+                  NEWP=PEAKS(J)
+               ENDIF
+140         CONTINUE
+            PEAKS(NEWI)=PEAKS(I)
+            PEAKS(I)=NEWP
+150      CONTINUE
+      ENDIF
+
+C          list data on terminal....
+200   IF (NDATA.LT.1) THEN
+         WRITE (IW,*) 'No data in file...'
+      ELSE
+         CALL ERASE
+         CALL TXTMOD
+         CALL TXTCLR(0)
+         WRITE (IW,240)
+         DO 220 I = 1,NDATA
+            IPK=PEAKS(I)
+            NP = GF2DATA(5,IPK)
+            DO 210 J = 1,NP
+               GF2INT(J)=GF2DATA(3*J+9,IPK)
+210         CONTINUE
+            WRITE (IW,260) I,(GF2DATA(J,IPK),J=1,2),(GF2REAL(J),J=1,NP)
+220      CONTINUE
+      ENDIF
+240   FORMAT ('          Limits      Peaks')
+260   FORMAT (I4,  2X,   2I5,   3X,  6F9.2)
+
+C          ask for command (L/P/D/X)....
+300   WRITE(IW,*) 'Type L/P/D to List/Print/Delete data,'
+      CALL CASK2( '     X     to exit                   ?',ANS,K,1)
+      IF (K.EQ.0) GO TO 300
+
+      IF (ANS(1:1).EQ.'L' .OR. ANS(1:1).EQ.'l') THEN
+         GO TO 200
+
+      ELSEIF (ANS(1:1).EQ.'P' .OR. ANS(1:1).EQ.'p') THEN
+
+C              list data on lineprinter....
+         IF (NDATA.LT.1) THEN
+            WRITE (IW,*) 'No data in file...'
+         ELSE
+            OPEN(3,FILE='gf2.prt',STATUS='NEW')
+            WRITE (3,240)
+            DO 370 I = 1,NDATA
+               IPK=PEAKS(I)
+               NP = GF2DATA(5,IPK)
+               DO 360 J = 1,NP
+                  GF2INT(J)=GF2DATA(3*J+9,IPK)
+360            CONTINUE
+               WRITE(3,260) I,(GF2DATA(J,IPK),J=1,2),(GF2REAL(J),J=1,NP)
+370         CONTINUE
+            CALL PR_AND_DEL_FILE(3)
+            WRITE (IW,*) 'Output on lineprinter...'
+            WRITE (IW,*) ' '
+         ENDIF
+         GO TO 300
+
+      ELSEIF (ANS(1:1).EQ.'D' .OR. ANS(1:1).EQ.'d') THEN
+
+C              delete fit segment(s)....
+         IF (NDATA.LT.1) THEN
+            WRITE (IW,*) 'No data in file...'
+         ELSE
+410         CALL CASK(' ...Delete data point no. = ? (rtn when done)',
+     +                ANS,K)
+            IF (K.NE.0) THEN
+               CALL ININ(ANS,K,I,J1,J2,&410)
+               IF (I.GE.1.AND.I.LE.NDATA) PEAKS(I)=0
+               GO TO 410
+            ENDIF
+
+            I = 1
+430         IF (PEAKS(I).EQ.0) THEN
+               NDATA = NDATA - 1
+               IF (NDATA.LT.I) GO TO 200
+               DO 440 J = I,NDATA
+                  PEAKS(J) = PEAKS(J+1)
+440            CONTINUE
+               GO TO 430
+            ENDIF
+            I = I+1
+            IF (I.LE.NDATA) GO TO 430
+         ENDIF
+         GO TO 200
+
+      ELSEIF (ANS(1:1).EQ.'X' .OR. ANS(1:1).EQ.'x') THEN
+
+C              renew current .gf2 file....
+C              mode = 2 : renew existing file (i.e. delete and re-create)....
+         MODE = 2
+         CALL OPENGF2(ANS,NC,MODE)
+C              write parameters to disk....
+         IF (NDATA.GT.0) THEN
+            DO 560 I = 1,NDATA
+               WRITE (12,ERR=600) (GF2DATA(J,PEAKS(I)),J=1,30)
+560         CONTINUE
+         ENDIF
+         CALL TXTCLR(0)
+         RETURN
+
+      ELSE
+         GO TO 300
+      ENDIF
+
+C           error messages....
+
+340   WRITE(IW,*) 'Cannot read file.'
+      RETURN
+600   WRITE(IW,*) 'Cannot write file - no data written.'
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE ENCAL(FN,K)
+
+      REAL*8         GAIN(6)
+      INTEGER        ICAL, NTERMS
+      COMMON /CALIB/ GAIN, ICAL, NTERMS
+
+      CHARACTER*40 ANS,FN
+      CHARACTER*80 TITLE
+      REAL*4       G(3)
+      COMMON /LUS/ IR,IW,IP,IG
+
+C          define/change/delete energy calibration....
+
+      FN(1:2)='  '
+      IF (K.GE.3) GO TO 110
+10    IF (ICAL.LE.1) THEN
+         ICAL=0
+         CALL ASKYN(40HDo you want an energy calibration? (Y/N),40,&90)
+         ICAL=1
+      ENDIF
+15    WRITE(IW,20)(GAIN(I),I=1,NTERMS)
+20    FORMAT(' The energy calibration (in keV) is',
+     +       '    E = A + B*X +C*X*X  etc.  (X = ch. no.)'/
+     +       ' Current values are :',4D14.5/22X,2D14.5)
+30    CALL ASK(
+     +      57HNew values? (rtn for old values, filename for ENCAL file)
+     +     ,57,ANS,NC)
+      IF (NC.EQ.0) RETURN
+      CALL FFIN(ANS,NC,G(1),G(2),G(3),&100)
+      IF (G(2).LE.0.0) THEN
+         WRITE(IW,*) 'B must be greater than zero.'
+         GO TO 30
+      ENDIF
+      NTERMS=3
+      GAIN(1) = G(1)
+      GAIN(2) = G(2)
+      GAIN(3) = G(3)
+90    RETURN
+
+C         take coeffs from encal output file....
+100   FN = ANS
+110   CALL SETEXT(FN,'.cal',J)
+      OPEN(1,FILE=FN,STATUS='OLD',FORM='UNFORMATTED',ERR=320)
+      READ(1,ERR=330)FN(1:18),TITLE
+      IF (FN(1:18).NE.' ENCAL OUTPUT FILE') GO TO 380
+      READ(1,ERR=330)IORDER,GAIN
+      NTERMS=IORDER+1
+      WRITE(IW,*) TITLE
+      CLOSE(1)
+      ICAL=1
+      RETURN
+
+320   WRITE(IW,*) 'File does not exist.'
+      GO TO 15
+330   WRITE(IW,*) 'Cannot read file.'
+      CLOSE(1)
+      GO TO 10
+380   WRITE(IW,*) 'That is not an ENCAL output file.'
+      CLOSE(1)
+      GO TO 15
+      END
+
+C=======================================================================
+
+      SUBROUTINE ENERGY(X,DX,EG,DEG,*)
+
+      REAL*8         GAIN(6)
+      INTEGER        ICAL, NTERMS
+      COMMON /CALIB/ GAIN, ICAL, NTERMS
+
+
+      IF (ICAL.EQ.0) RETURN 1
+      DEG=0.0
+      EG=GAIN(NTERMS)
+      DO 15 JJ=NTERMS-1,1,-1
+         DEG=FLOAT(JJ)*GAIN(JJ+1)+DEG*X
+         EG=GAIN(JJ)+EG*X
+15    CONTINUE
+      DEG=DEG*DX
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE EVAL(PARS,II,FIT,NPKS,MODE)
+
+C       this eval is for use with 'GF2' version V....
+C          D. C. Radford     July 1985
+
+      REAL    PARS(51),Y(15),Y1(15),Y2(15)
+      LOGICAL NOTAIL
+
+      REAL           DERIVS(51)
+      COMMON /DERIV/ DERIVS
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+C       calculate the fit using present values of the pars....
+
+      IF (MODE.EQ.-9) THEN
+
+C         mode = -9 ; initialise, i.e calculate  IX0,NOTAIL,Y,Y1,Y2....
+
+         IX0=(MCH(1)+MCH(2)+2)/2
+         NOTAIL=.TRUE.
+         IF (II.EQ.0 .AND. PARS(4).EQ.0.0) RETURN
+         NOTAIL=.FALSE.
+         DO 10 I=1,NPKS
+            Y(I)=PARS(3*I+5)/(3.33021838*PARS(5))
+            Y1(I)=ERFC(Y(I))
+            IF (Y1(I).EQ.0.0) THEN
+               NOTAIL=.TRUE.
+            ELSE
+               Y2(I)=EXP(-Y(I)*Y(I))*1.12837917/Y1(I)
+            ENDIF
+10       CONTINUE
+         RETURN
+      ENDIF
+
+      X=II-IX0
+      FIT=PARS(1)+PARS(2)*X+PARS(3)*X*X
+      IF (MODE.GE.1) THEN
+         DERIVS(2)=X
+         DERIVS(3)=X*X
+         DERIVS(4)=0.
+         DERIVS(5)=0.
+         DERIVS(6)=0.
+      ENDIF
+      X1=II-1
+
+      DO 50 I=1,NPKS
+         WIDTH=PARS(3*I+5)/2.35482
+         H=PARS(3*I+6)
+         X=X1-PARS(3*I+4)
+
+         W=X/(1.41421356*WIDTH)
+         IF (ABS(W).GT.4.0) THEN
+            U1=0.0
+            U3=0.0
+            IF (X.LT.0.0) U3=2.0
+         ELSE
+            U1=EXP(-W*W)
+            U3=ERFC(W)
+         ENDIF
+
+         IF (MODE.EQ.-1) THEN
+C               mode = -1; calculate background only....
+            FIT=FIT+H*PARS(6)*U3/200.0
+            GO TO 50
+         ENDIF
+
+         IF (NOTAIL) THEN
+C               notail = true; pur gaussians only....
+            U=U1+PARS(6)*U3/200.0
+            FIT=FIT+H*U
+C             calculate derivs only for mode.ge.1....
+            IF (MODE.GE.1) THEN
+               DERIVS(6)=DERIVS(6)+H*U3/200.0
+               A=U1*(W+PARS(6)/354.49077)*2.0
+               DERIVS(3*I+4)=H*A/(1.41421356*WIDTH)
+               DERIVS(3*I+5)=H*W*A/WIDTH
+               DERIVS(3*I+6)=U
+            ENDIF
+            GO TO 50
+         ENDIF
+
+         R=PARS(4)/100.0
+         R1=1.0-R
+         BETA=PARS(5)
+         Z=W+Y(I)
+         IF (ABS(X/BETA).GT.12.0) THEN
+            U5=0.0
+            U6=0.0
+            U7=0.0
+         ELSE
+            U7=EXP(X/BETA)/Y1(I)
+            IF (ABS(Z).GT.4.0) THEN
+               U5=0.0
+               IF (Z.LT.0.0) U5=2.0
+               U6=0.0
+            ELSE
+               U5=ERFC(Z)
+               U6=EXP(-Z*Z)*1.12837917
+            ENDIF
+         ENDIF
+         U2=U7*U5
+
+         U=R1*U1+R*U2+PARS(6)*U3/200.0
+         FIT=FIT+H*U
+
+C          calculate derivs only for mode.ge.1....
+         IF (MODE.GE.1) THEN
+            U8=U5*Y2(I)
+            DERIVS(4)=DERIVS(4)+H*(U2-U1)/100.0
+            DERIVS(5)=DERIVS(5)+R*H*U7*(Y(I)*(U6-U8)-U5*X/BETA)/BETA
+            DERIVS(6)=DERIVS(6)+H*U3/200.0
+            A=U1*(R1*W+PARS(6)/354.49077)*2.0
+            DERIVS(3*I+4)=H*(A+R*U7*(U6-2.0*U5*Y(I)))/(1.41421356*WIDTH)
+            DERIVS(3*I+5)=H*(W*A+R*U7*(U6*(W-Y(I))+U8*Y(I)))/WIDTH
+            DERIVS(3*I+6)=U
+         ENDIF
+
+50    CONTINUE
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE FINDPKS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      LOGICAL PKFIND
+      COMMON /PKF/ PKFIND, IFWHM, ISIGMA, IPERCENT
+
+      CHARACTER*6 MCHAR
+      REAL        CHANX(100), PSIZE(100)
+
+
+C             do peak search....
+
+      RSIGMA = ISIGMA
+      MAXPK = 2.355 * FLOAT(HICH-LOCH+1) / FLOAT(IFWHM)
+      IF (MAXPK.GT.100) MAXPK = 100
+      CALL PFIND(CHANX,PSIZE,LOCH+1,HICH+1,IFWHM,RSIGMA,MAXPK,NPK)
+
+      PMAX = -100.
+      DO 10 IPK = 1, NPK
+         IF (PSIZE(IPK).GT.PMAX) PMAX = PSIZE(IPK)
+10    CONTINUE
+      REF = FLOAT(IPERCENT)*PMAX/100.
+
+C             display markers and energies at peak positions....
+
+      CALL INITG(NX,NY)
+      DO 100 IPK = 1, NPK
+         IF (PSIZE(IPK).GT.REF) THEN
+            XCHAN = CHANX(IPK) - 1.0
+            DX = 0.0
+            EG = XCHAN
+            CALL ENERGY(XCHAN,DX,EG,DEG,&30)
+30          ICH = XCHAN + 0.5
+            Y = SPEC(ICH+1)
+            X = XCHAN + 0.5
+            WRITE(MCHAR,'(F6.1)') EG
+            CALL CVXY(X,Y,IX,IY,1)
+            CALL MSPOT(IX,IY+10)
+            CALL IVECT(IX,IY+30)
+            CALL MSPOT(IX,IY+35)
+            CALL PUTG(MCHAR,6,5,1)
+         ENDIF
+100   CONTINUE
+      CALL FINIG
+
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE FITTER(MAXITS,*,*)
+
+C        this subroutine is a modified version of 'CURFIT', in Bevington....
+C        ....see page 237....
+
+C          designed for use with GF2, Version IV
+C          D. C. Radford        March 1984
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      INTEGER         IWMODE
+      CHARACTER*8     NWTSP
+      REAL            WTSP(8192)
+      COMMON /WTMODE/ IWMODE,NWTSP,WTSP
+
+      REAL           DERIVS(51)
+      COMMON /DERIV/ DERIVS
+
+      REAL         BETA(51),DELTA(51),B(51),ERS(51),FIXED(51)
+      INTEGER      NEXTP(51)
+      LOGICAL      CONV,TEST,RWFIXED,RPFIXED
+      REAL*8       ARRAY(51,51),ALPHA(51,51),DDAT
+      CHARACTER*12 WTC(3)/'fit.','data.','sp. '/
+      CHARACTER*20 DATTIM
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+      ILO=MCH(1)+1
+      IHI=MCH(2)+1
+      NIP=NPARS-NFP
+C            NIP=no. of independent (non-fixed) pars
+C            NFP=no. of fixed pars
+C            NPARS=total no. of pars = 3 * no.of peaks + 6
+C            NDF=no. of degrees of freedom....
+
+      IF (IWMODE.GT.0) WTC(3)(5:12) = NWTSP
+
+      DO 10 I=7,NPARS
+10       FIXED(I)=IFIXED(I)
+
+C           set up fixed relative widths....
+
+      RWFIXED=.FALSE.
+      IF (IRELW.LE.0) THEN
+         NIW=0
+         DO 20 J=8,NPARS-1,3
+            IF (IFIXED(J).EQ.1) MIW=J
+C                MIW=highest fitted (non-fixed) width par. no.....
+            NIW=NIW+IFIXED(J)
+20       CONTINUE
+C                NIW=no. of fitted (non-fixed) widths....
+         IF (NIW.GT.1) THEN
+            DO 30 J=8,MIW,3
+30             IFIXED(J)=0
+            RWFIXED=.TRUE.
+            NIP=NIP-NIW+1
+            NIP1=NIP
+         ENDIF
+      ENDIF
+
+C           set up fixed relative positions....
+
+      RPFIXED=.FALSE.
+      IF (IRELPOS.LE.0) THEN
+         NIPOS=0
+         DO 40 J=7,NPARS-2,3
+            IF (IFIXED(J).EQ.1) MIP=J
+C                MIP=highest fitted (non-fixed) position par. no.....
+            NIPOS=NIPOS+IFIXED(J)
+40       CONTINUE
+C                NIPOS=no. of fitted (non-fixed) positions....
+         IF (NIPOS.GT.1) THEN
+            DO 45 J=7,MIP,3
+45             IFIXED(J)=0
+            RPFIXED=.TRUE.
+            NIP=NIP-NIPOS+1
+            NIP1=NIP-1
+         ENDIF
+      ENDIF
+
+      NDF=IHI-ILO+1-NIP
+      IF (NDF.LT.1) GO TO 510
+      IF (NIP.LT.2) GO TO 530
+
+C          set up array nextp, pointing to free pars....
+
+      K=0
+      DO 50 J=1,NPARS
+         IF (IFIXED(J).EQ.0) GO TO 50
+         K=K+1
+         NEXTP(K)=J
+50    CONTINUE
+      IF (RWFIXED) THEN
+         K=K+1
+         NEXTP(K)=MIW
+      ENDIF
+      IF (RPFIXED) THEN
+         K=K+1
+         NEXTP(K)=MIP
+      ENDIF
+      IF (K.NE.NIP) GO TO 570
+
+C           initialise for fitting....
+
+      FLAMDA=0.001
+      NITS=0
+      TEST=.FALSE.
+      DERIVS(1)=1.0
+      DO 60 I=1,NPARS
+         ERRS(I)=0.0
+         B(I)=PARS(I)
+60    CONTINUE
+
+C        evaluate fit, alpha & beta matrices, & chisq....
+
+70    DO 80 J=1,NIP
+         BETA(J)=0.0
+         DO 75 K=1,J
+            ALPHA(J,K)=0.0
+75       CONTINUE
+80    CONTINUE
+      CHISQ1=0.0
+      CALL EVAL(PARS,IFIXED(4),FIT,NPKS,-9)
+      DO 180 I=ILO,IHI
+         CALL EVAL(PARS,I,FIT,NPKS,1)
+         DIFF=SPEC(I)-FIT
+C          weight with fit/data/weight sp. for iwmode=-1/0/1....
+         IF (IWMODE.LT.0) THEN
+            DAT=FIT
+         ELSEIF (IWMODE.EQ.0) THEN
+            DAT=SPEC(I)
+         ELSE
+            DAT=WTSP(I)
+         ENDIF
+         IF (DAT.LT.1.0) DAT=1.0
+         DDAT=DBLE(DAT)
+         CHISQ1=CHISQ1+DIFF*DIFF/DAT
+         IF (RWFIXED) THEN
+            DO 140 K=8,MIW-3,3
+               DERIVS(MIW)=DERIVS(MIW)+FIXED(K)*DERIVS(K)
+140         CONTINUE
+         ENDIF
+         IF (RPFIXED) THEN
+            DO 150 K=7,MIP-3,3
+               DERIVS(MIP)=DERIVS(MIP)+FIXED(K)*DERIVS(K)
+150         CONTINUE
+         ENDIF
+         DO 170 L=1,NIP
+            J=NEXTP(L)
+            BETA(L)=BETA(L)+DIFF*DERIVS(J)/DAT
+            DO 160 M=1,L
+               ALPHA(L,M) = ALPHA(L,M)
+     +            + DBLE(DERIVS(J))*DBLE(DERIVS(NEXTP(M)))/DDAT
+160         CONTINUE
+170      CONTINUE
+180   CONTINUE
+      CHISQ1=CHISQ1/FLOAT(NDF)
+
+C        invert modified curvature matrix to find new parameters....
+
+190   ARRAY(1,1)=1.0+FLAMDA
+      DO 210 J=2,NIP
+         DO 200 K=1,J-1
+            IF (ALPHA(J,J)*ALPHA(K,K).EQ.0.0D0) GO TO 590
+            ARRAY(J,K)=ALPHA(J,K)/DSQRT(ALPHA(J,J)*ALPHA(K,K))
+            ARRAY(K,J)=ARRAY(J,K)
+200      CONTINUE
+         ARRAY(J,J)=1.0+FLAMDA
+210   CONTINUE
+      CALL MATINV(ARRAY,NIP,51)
+      IF (TEST) GO TO 350
+      DO 240 J=1,NIP
+         IF (ALPHA(J,J)*ALPHA(J,J).EQ.0.0D0) GO TO 590
+         DELTA(J)=0.0
+         DO 230 K=1,NIP
+            DELTA(J) = DELTA(J)
+     +           + BETA(K)*ARRAY(J,K)/DSQRT(ALPHA(J,J)*ALPHA(K,K))
+230      CONTINUE
+240   CONTINUE
+
+C              calculate new par. values....
+
+      DO 260 L=1,NIP
+         J=NEXTP(L)
+         B(J)=PARS(J)+DELTA(L)
+260   CONTINUE
+      IF (RWFIXED) THEN
+         DO 270 J=8,MIW-3,3
+            B(J)=PARS(J)+FIXED(J)*DELTA(NIP1)
+270      CONTINUE
+      ENDIF
+      IF (RPFIXED) THEN
+         DO 290 J=7,MIP-3,3
+            B(J)=PARS(J)+FIXED(J)*DELTA(NIP)
+290      CONTINUE
+      ENDIF
+
+C         if chisq increased, increase flamda & try again....
+
+      CHISQ=0.0
+      CALL EVAL(B,IFIXED(4),FIT,NPKS,-9)
+      DO 340 I=ILO,IHI
+         CALL EVAL(B,I,FIT,NPKS,0)
+         DIFF=SPEC(I)-FIT
+C          weight with fit/data/weight sp. for iwmode=-1/0/1....
+         IF (IWMODE.LT.0) THEN
+            DAT=FIT
+         ELSEIF (IWMODE.EQ.0) THEN
+            DAT=SPEC(I)
+         ELSE
+            DAT=WTSP(I)
+         ENDIF
+         IF (DAT.LT.1.0) DAT=1.0
+         CHISQ=CHISQ+DIFF*DIFF/DAT
+340   CONTINUE
+      CHISQ=CHISQ/FLOAT(NDF)
+      IF (CHISQ.GT.CHISQ1) THEN
+         FLAMDA=FLAMDA*10.0
+         GO TO 190
+      ENDIF
+
+C        evaluate parameters and errors....
+C        test for convergence....
+
+350   CONV=.TRUE.
+      DO 360 J=1,NIP
+         IF (ARRAY(J,J).LT.0.D0) ARRAY(J,J)=0.D0
+         ERS(J)=DSQRT(ARRAY(J,J)/ALPHA(J,J))*SQRT(1.0+FLAMDA)
+         IF (ABS(DELTA(J)).GE.(ERS(J)/100.)) CONV=.FALSE.
+360   CONTINUE
+
+      IF (.NOT.TEST) THEN
+         DO 370 J=1,NPARS
+370         PARS(J)=B(J)
+         FLAMDA=FLAMDA/10.0
+         NITS=NITS+1
+         IF ((.NOT.CONV) .AND. NITS.LT.MAXITS) GO TO 70
+
+C             re-do matrix inversion with FLAMDA=0
+C                  to calculate errors....
+
+         FLAMDA=0.
+         TEST=.TRUE.
+         GO TO 190
+      ENDIF
+
+C          list data and exit....
+
+      DO 390 L=1,NIP
+390      ERRS(NEXTP(L))=ERS(L)
+      IF (RWFIXED) THEN
+         DO 400 J=8,MIW,3
+            IFIXED(J)=FIXED(J)
+            ERRS(J)=FIXED(J)*ERS(NIP1)
+400      CONTINUE
+      ENDIF
+      IF (RPFIXED) THEN
+         DO 410 J=7,MIP,3
+            IFIXED(J)=FIXED(J)
+            ERRS(J)=FIXED(J)*ERS(NIP)
+410      CONTINUE
+      ENDIF
+
+      CALL DATETIME(DATTIM)
+      WRITE(IW,420,ERR=430)FILNAM,NAMESP,DATTIM,MCH,NPKS,NIP,NDF,
+     +                     WTC(IWMODE+2)
+420   FORMAT(' File ',A40,2X,'Spectrum ',A,5X,A/
+     +' Fitted chs',I5,' to',I5,I8,' Peaks'/I4,
+     +' indept. pars',I7,' degrees of freedom     weighted with ',3A4)
+
+430   IF (RPFIXED.AND.RWFIXED) THEN
+         WRITE(IW,*) 'Relative peak positions and widths fixed.'
+      ELSEIF (RPFIXED) THEN
+         WRITE(IW,*) 'Relative peak positions fixed.'
+      ELSEIF (RWFIXED) THEN
+         WRITE(IW,*) 'Relative widths fixed.'
+      ENDIF
+
+      IF (CONV) THEN
+         WRITE(IW,440,ERR=450)NITS,CHISQ
+440      FORMAT(1X,I3,' iterations,  Chisq/d.o.f.= ',F6.3)
+450      WRITE(IP,*) ' '
+         WRITE(IP,*) ' '
+         WRITE(IP,420,ERR=470)FILNAM,NAMESP,DATTIM,MCH,NPKS,NIP,NDF,
+     +                        WTC(IWMODE+2)
+470      IF (RPFIXED.AND.RWFIXED) THEN
+            WRITE(IP,*) 'Relative peak positions and widths fixed.'
+         ELSEIF (RPFIXED) THEN
+            WRITE(IP,*) 'Relative peak positions fixed.'
+         ELSEIF (RWFIXED) THEN
+            WRITE(IP,*) 'Relative widths fixed.'
+         ENDIF
+         WRITE(IP,440,ERR=480)NITS,CHISQ
+480      RETURN
+      ENDIF
+
+      WRITE(IW,500,ERR=505)NITS,CHISQ
+500   FORMAT(' Failed to converge after',I3,' iterations,  Chisq/',
+     +'d.o.f.= ',F6.3/'    Warning - do not believe quoted errors.')
+505   RETURN 2
+
+C       error messages....
+
+510   WRITE(IW,*) 'No d.o.f.'
+      GO TO 550
+530   WRITE(IW,*) 'Too many fixed pars.'
+550   IF (RWFIXED.OR.RPFIXED) THEN
+         DO 560 I=7,NPARS
+            IFIXED(I)=FIXED(I)
+560      CONTINUE
+      ENDIF
+      RETURN 1
+570   WRITE(IW,*) 'NIP.NE.sum(IFIXED)'
+      GO TO 550
+590   WRITE(IW,*) 'Cannot - diag. element eq. to zero.'
+      GO TO 550
+      END
+
+C=======================================================================
+
+      SUBROUTINE FIXORFREE(KOMMAND,ANS,NC)
+
+C        Fixs or frees the parameters, PARS or the Relative Widths
+C        and/or Relative Peak positions.
+C        INPUT:          KOMMAND (command number), ANS, NC
+C        OUTPUT: changes IFIXED, IRELW, IRELPOS, PARS, & NFP.
+C        CALLed by GFEXEC and GFSET.
+
+      INTEGER      KOMMAND, NC
+      CHARACTER*40 ANS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+C        local variables....
+      LOGICAL        NEED_PARA, ERR_FLG, FIX
+      CHARACTER*40   PNIN
+      INTEGER        PARAM
+
+      CHARACTER*4    FIXTAG(51)
+      CHARACTER*3    PARC(51)
+     +           /' A ',' B ',' C ',' R ','BTA','STP','P1 ','W1 ','H1 ',
+     +            'P2 ','W2 ','H2 ','P3 ','W3 ','H3 ','P4 ','W4 ','H4 ',
+     +            'P5 ','W5 ','H5 ','P6 ','W6 ','H6 ','P7 ','W7 ','H7 ',
+     +            'P8 ','W8 ','H8 ','P9 ','W9 ','H9 ','PA ','WA ','HA ',
+     +            'PB ','WB ','HB ','PC ','WC ','HC ','PD ','WD ','HD ',
+     +            'PE ','WE ','HE ','PF ','WF ','HF '/
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+C            KOMMAND = 1   5   6
+C            command = FT  FX  FR
+
+      IF (KOMMAND.EQ.1) THEN
+C            asking for fixed parameter(s) to set up a fit...
+         FIX = .TRUE.
+      ELSEIF (KOMMAND.EQ.5) THEN
+         FIX = .TRUE.
+      ELSEIF (KOMMAND.EQ.6) THEN
+         FIX = .FALSE. 
+      ELSE
+         WRITE(IW,*) 'FIXORFREE called with wrong KOMMAND. KOMMAND= ',
+     +        KOMMAND
+         CALL EXIT
+      ENDIF 
+
+10    IF (NC.GT.2) THEN
+C           parameter specified in command line....
+
+         NEED_PARA = .FALSE.
+C           strip off two letter command....
+         PNIN(1:38) = ANS(3:40)
+         PNIN(39:40) = '  '
+         ANS = PNIN
+         NC = NC - 2
+
+      ELSE
+C           no parameter specified in command line....
+C           list name and status of the parameters....
+
+         NEED_PARA = .TRUE.
+         DO 20 I = 1, NPARS
+            IF (IFIXED(I).EQ.0) THEN
+               FIXTAG(I) = '  * '
+            ELSE
+               WRITE (FIXTAG(I),'(1X,I2,1X)') I
+            ENDIF
+20       CONTINUE
+         LO = 1
+         IF (NPARS.GT.27) THEN
+            WRITE (IW,'(2X,27A4)') (FIXTAG(I),I = LO,27)
+            WRITE (IW,'(3X,27(A3,1X))') (PARC(I),I = LO,27)
+            LO = 28
+         ENDIF
+         WRITE (IW,'(2X,27A4)') (FIXTAG(I),I = LO,NPARS)
+         WRITE (IW,'(3X,27(A3,1X))') (PARC(I),I = LO,NPARS)
+      ENDIF
+
+      IF (FIX) THEN
+C           fix parameter(s)....
+
+         IF (NEED_PARA) WRITE (IW,*) 
+     +           'Parameters to be fixed =? (one per line,RTN to end)'
+30       IF (NEED_PARA) THEN
+            CALL ASK2(J,0,PNIN,NC,38)
+            IF (NC.LT.1) RETURN
+         ENDIF
+
+         ANS(1:38) = PNIN(1:38)
+C           pull N out of PNIN....
+         CALL ININ_FLG(PNIN,NC,PARAM,J1,J2,ERR_FLG)
+         IF (ERR_FLG) THEN
+            CALL PARA2NUM(ANS,PARAM,ERR_FLG)
+         ENDIF
+         IF (ERR_FLG) THEN
+            WRITE (IW,*) 'Parameter unknown, try again.'
+            IF (.NOT. NEED_PARA) THEN
+c                 pretend that ANS = 'FX       '....
+               NC = 2
+               GO TO 10
+            ENDIF
+            GO TO 30
+         ENDIF
+         CALL FIX_PARA(PARAM,FIX)
+
+C           get next parameter to be fixed....
+         IF (NEED_PARA) GO TO 30
+
+      ELSE
+C           free parameter(s)....
+
+         IF (NEED_PARA)
+     +        WRITE (IW,*) 'Parameter[s] to free =? (rtn to end)'
+80       IF (NEED_PARA) THEN
+            CALL ASK2(J,0,PNIN,NC,38)
+            IF (NC.LT.1) RETURN
+         ENDIF
+         LO = 1
+100      DO 110 I = LO, NC
+            IF ((PNIN(I:I).EQ.' ').OR.(PNIN(I:I).EQ.',')) GO TO 120
+110      CONTINUE
+
+C           since the user can free many parameters in one call
+C           search for a parameter seperator....
+C           then point I to next possible parameter....
+120      IHI = I - 1
+         IF (IHI.LT.LO) THEN
+C              eg. if two spaces in a row, etc. ....
+            LO=LO+1
+            GO TO 100
+         ENDIF
+         MC = I - LO
+         ANS(1:MC) = PNIN(LO:IHI)
+         ANS(MC+1:MC+1) = ' '
+
+         CALL ININ_FLG(PNIN(LO:IHI),MC,PARAM,J1,J2,ERR_FLG)
+         IF (ERR_FLG) THEN
+            CALL PARA2NUM(ANS,PARAM,ERR_FLG)
+         ENDIF
+         IF (ERR_FLG) THEN
+C              error message depends on parameter location in string....
+            IF ((NC.GT.2) .AND. (PNIN(IHI+2:IHI+6).NE.'    ')) THEN
+C                 there is a list and the parameter is not at the end....
+               WRITE (IW,'(3A)') ' Parameter ',PNIN(LO:IHI),
+     +                           ' unknown, try again.'
+               WRITE (IW,'(3A)') ' Only freed up to parameter ',
+     +                           PNIN(LO:IHI),'.'
+            ELSEIF ((NC.GT.2) .AND. (PNIN(IHI+2:IHI+6).EQ.'    ')) THEN
+C                 there is a list and the parameter is at the end....
+               WRITE (IW,*) 'Last parameter unknown, try again.'
+            ELSE
+               WRITE (IW,*) 'Parameter unknown, try again.'
+            ENDIF
+            IF (.NOT. NEED_PARA) THEN
+C                 pretend that ANS = 'FR      '....
+               NC = 2
+               GO TO 10
+            ENDIF
+            GO TO 80
+         ENDIF
+         CALL FIX_PARA(PARAM,FIX)
+
+         LO = IHI + 2
+
+C           if not done list, loop again....
+         IF (LO.LE.NC) GO TO 100
+C           or get more parameters....
+         IF (NEED_PARA) GO TO 80
+
+      ENDIF
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE FIX_PARA(PARAM,FIX_FLAG)
+      
+C     fixes or frees, depending on the value of FIX_FLAG, 
+C     a parameter to an inputed value....
+C     CALLED by FIXORFREE
+      
+      INTEGER PARAM
+      LOGICAL FIX_FLAG
+      
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+      
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+      
+      
+      IF (FIX_FLAG) THEN
+C                 fix parameter....
+         IF (PARAM.LE.0) THEN
+C                 no input or negative number so....
+            RETURN
+         ELSEIF (PARAM.EQ.101) THEN
+            IRELPOS = 0
+            WRITE (IW,*) 'Relative peak positions fixed.'
+         ELSEIF (PARAM.EQ.102) THEN
+            IRELW = 0
+            WRITE (IW,*) 'Relative widths fixed.'
+         ELSEIF (PARAM.GT.NPARS) THEN
+            WRITE (IW,*) 'Parameter number too large, try again.'
+         ELSEIF ((NFP+IFIXED(PARAM)).EQ.(NPARS-1)) THEN
+            WRITE (IW,*) '     Cannot - too many fixed pars.'
+
+         ELSE
+            NFP = NFP + IFIXED(PARAM)
+            IFIXED(PARAM) = 0
+            CALL LINEUP(1,10)
+ 60         CALL ASK(30HValue=?(rtn for present value),30,ANS,NC)
+            IF (NC.GT.0) THEN
+               CALL FFIN(ANS,NC,VAL,RJ1,RJ2,&60)
+               IF (VAL.EQ.0.0 .AND.
+C                    ...    .AND. if PARAM is a width or beta....
+     +             ((PARAM+1)/3)*3.EQ.PARAM+1 .AND. PARAM.NE.2) THEN
+                  WRITE (IW,*) 'Value must be nonzero.'
+                  GO TO 60
+               ENDIF
+            ELSE
+               VAL = PARS(PARAM)
+            ENDIF
+
+            IF (PARAM.NE.4 .OR. VAL.NE.0.0) THEN
+               PARS(PARAM) = VAL
+            ELSEIF ((NFP+IFIXED(5)).EQ.(NPARS-1)) THEN
+               WRITE (IW,*) '     Cannot - too many fixed pars.'
+               GO TO 60
+            ELSE
+               NFP = NFP + IFIXED(5)
+               IFIXED(5) = 0
+               CALL LINEUP(1,50)
+               WRITE (IW,'(A,F10.3)') 'Beta fixed at',PARS(5)
+               PARS(PARAM) = VAL
+            ENDIF
+         ENDIF
+      
+      ELSE
+C                 free parameter....
+
+         IF (PARAM.GT.0) THEN
+            IF (PARAM.EQ.101) THEN
+               IRELPOS = 1
+               WRITE (IW,*) 'Relative peak positions free to vary.'
+            ELSEIF (PARAM.EQ.102) THEN
+               IRELW = 1
+               WRITE (IW,*) 'Relative widths free to vary.'
+            ELSEIF (PARAM.GT.NPARS) THEN
+               WRITE (IW,*) 'Parameter number too large, try again.'
+            ELSE
+               NFP = IFIXED(PARAM) + NFP - 1
+               IFIXED(PARAM) = 1
+            ENDIF
+         ENDIF
+         
+      ENDIF
+      RETURN
+      END
+
+C=======================================================================
+
+      REAL FUNCTION GETMKRCHNL(MN)
+C     note: a function not a SUBROUTINE ....
+C     above line is a flag for searches....
+
+C        gets a channel that is within the acceptable fitting range....
+C        INPUT: MN the Marker Number.
+C        OUTPUT: GETMKRCHNL the channel number.
+C        CALLed by CHNGMARK
+
+C        local variables....
+C                    MN is the Marker Number....
+      INTEGER        MN
+      CHARACTER*40   ANS
+
+C        common blocks....
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+10    IF (DISP .AND. HICH.GE.MCH(2) .AND. LOCH.LE.MCH(1)) THEN
+         CALL RETIC(X,Y,ANS)
+         IF (ANS(1:1).NE.'T' .AND. ANS(1:1).NE.'t') GO TO 30
+      ENDIF
+20    CALL ASK(33HNew position=?(rtn for old value),33,ANS,JK)
+      IF (JK.EQ.0) THEN
+         IF (MN.GT.2) THEN
+            GETMKRCHNL = PPOS(MN-2)
+         ELSE
+            GETMKRCHNL = MCH(MN)
+         ENDIF
+         RETURN
+      ENDIF
+      CALL FFIN(ANS,JK,X,RJ1,RJ2,&20)
+      X = X + 0.5
+      IF (X.LT.0.5 .OR. IFIX(X).GT.MAXCH) THEN
+         WRITE (IW,*) ' Marker ch. outside spectrum - try again.'
+         GO TO 10
+      ENDIF
+30    IF (MN.GT.2) THEN
+         IF (MCH(1).GT.IFIX(X) .OR. MCH(2).LT.IFIX(X)) THEN
+            WRITE (IW,*) ' Peaks must be within limits - try again.'
+            GO TO 10
+         ENDIF
+         GETMKRCHNL = X - 0.5
+      ELSE
+C        boundary markers....
+         DO 40 I = 1, NPKS
+            IF ((MN.EQ.1 .AND. IFIX(X).GT.IFIX(PPOS(I))) .OR. 
+     +          (MN.EQ.2 .AND. IFIX(X).LT.IFIX(PPOS(I)))) THEN
+               WRITE(IW,*)' Peaks must be within limits, try again.'
+               GO TO 10
+            ENDIF
+40       CONTINUE
+         GETMKRCHNL = X
+      ENDIF
+      END
+
+C=======================================================================
+
+      SUBROUTINE GETSP(ANS,NC)
+
+C          ask for spectrum file name and read spectrum from disk....
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      COMMON /LUS/ IR,IW,IP,IG
+      CHARACTER*40 ANS
+
+      ANS(1:2)='  '
+      IF (NC.GT.2) GO TO 30
+10    CALL ASK(23HSpectrum file or ID = ?,23,ANS,K)
+      IF (K.EQ.0) RETURN
+30    CALL READSP(ANS,SPEC,NAMESP,NUMCH,8192,&10)
+      WRITE(IW,40)NAMESP,NUMCH
+40    FORMAT(' Sp. ',A,I8,' chs   read.')
+      FILNAM=ANS
+      DISP=.FALSE.
+      MAXCH=NUMCH-1
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE GFEXEC(ANS,NC)
+C          this subroutine decodes and executes the commands....
+
+      CHARACTER*40 ANS
+      INTEGER      NC
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      REAL*8         GAIN(6)
+      INTEGER        ICAL, NTERMS
+      COMMON /CALIB/ GAIN, ICAL, NTERMS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER         IWMODE
+      CHARACTER*8     NWTSP
+      REAL            WTSP(8192)
+      COMMON /WTMODE/ IWMODE,NWTSP,WTSP
+
+      REAL         SAVE(8192)
+      COMMON /SAV/ SAVE
+
+      INTEGER COLORMAP(15)
+      COMMON /COLORMAP/ COLORMAP
+      LOGICAL PKFIND
+      INTEGER IFWHM, ISIGMA, IPERCENT
+      COMMON /PKF/ PKFIND, IFWHM, ISIGMA, IPERCENT
+
+      INTEGER*2 ICMNDS(60),ICMND
+      DATA ICMNDS/
+     +    'FT','LP','WM','SW','FX','FR','MA','DM','SP','DS',
+     +    'X0','NX','Y0','NY','CR','CT','DF','SA','HE','AS',
+     +    'AC','MS','DV','WS','SU','SB','SC','AG','EX','RP',
+     +    'DU','IN','EC','CF','RW','CO','AP','DP','HC','PF',
+     +    'MU','MD','OV','RD','NF','XA','YA','RF','FF','  ',
+     +    'SF','LU','SL','WI','DW','EF','ME','DE','  ','ST'/
+
+      INTEGER WINMOD, MAXSPEC/0/
+      LOGICAL READY, NOT_INT
+
+C           initialization values....
+      DATA DISP/.FALSE./,READY/.FALSE./,LOX/0/,HICH/1023/,NUMX/1024/,
+     +    IWMODE/-1/,LOCNT/0/,NCNTS/0/,NPKS/1/,IYAXIS/-1/,
+     +    IRELPOS/1/,ICAL/1/,GAIN(2)/0.5/,NTERMS/2/,MAXCH/1023/,
+     +    NAMESP/'JUNK'/,FILNAM/'JUNK'/
+      DATA COLORMAP /1,2,3,4,5,6,7,8,9,10,11,12,13,14,15/
+      DATA PKFIND /.FALSE./
+      DATA IFWHM, ISIGMA, IPERCENT / 5, 4, 5 /
+      DATA WINMOD/0/
+C           end initialization values....
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+C          this subroutine decodes and executes the commands....
+C         convert lower case to upper case characters....
+      DO 10 I=1,2
+         IC=ICHAR(ANS(I:I))
+         IF (IC.GE.97.AND.IC.LE.122) ANS(I:I)=CHAR(IC-32)
+10    CONTINUE
+
+15    READ(ANS,'(A2)')ICMND
+      DO 20 K=1,60
+         IF (ICMND.EQ.ICMNDS(K)) GO TO 70
+20    CONTINUE
+
+C          command cannot be recognized....
+
+999   WRITE(IW,*) 'Bad command.'
+      IF (IR.NE.5) THEN
+         WRITE(IW,*) ' Bad command: ',ANS
+         ANS='CF CHK'
+         NC=6
+         GO TO 15
+      ENDIF
+30    RETURN
+
+70    IDATA = 0
+      GO TO (
+     +  80,  90,  80,  90,  90,  90,  80,  90,  90,  80,
+     +  80,  80,  80,  80,  80,  80,  90,  80,  90,  90,
+     +  90,  90,  90,  90,  80,  90,  80,  90,  80,  80,
+     +  90,  90,  90,  90,  80,  90,  90,  80,  90,  80,
+     +  90,  90,  80,  80,  90,  90,  90,  90,  90,  90,
+     +  90,  90,  90,  90,  90,  90,  90,  90,  90,  90),K
+C       FT   LP   WM   SW   FX   FR   MA   DM   SP   DS
+C       X0   NX   Y0   NY   CR   CT   DF   SA   HE   AS
+C       AC   MS   DV   WS   SU   SB   SC   AG   EX   RP
+C       DU   IN   EC   CF   RW   CO   AP   DP   HC   PF
+C       MU   MD   OV   RD   NF   XA   YA   RF   FF
+C       SF   LU   SL   WI   DW   EF   ME   DE        ST
+
+C          decode integer input string where required....
+80    CALL ININ(ANS(3:40),NC-2,IDATA,IN,IN2,&999)
+
+C          branch to execute GF2 command....
+90    GO TO (
+     +  100,  200,  300,  400,  600,  600,  700,  800,  900, 1000,
+     + 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000,
+     + 2000, 2000, 2000, 2400, 2500, 2500, 2700, 2800, 2900, 3000,
+     + 3100, 3100, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000,
+     + 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5900,
+     + 5100, 5200, 5300, 5400, 5500, 5600, 5700, 5800, 5900, 6000),K
+C       FT    LP    WM    SW    FX    FR    MA    DM    SP    DS
+C       X0    NX    Y0    NY    CR    CT    DF    SA    HE    AS
+C       AC    MS    DV    WS    SU    SB    SC    AG    EX    RP
+C       DU    IN    EC    CF    RW    CO    AP    DP    HC    PF
+C       MU    MD    OV    RD    NF    XA    YA    RF    FF
+C       SF    LU    SL    WI    DW    EF    ME    DE          ST
+
+C          get limits etc. and/or do fit....
+100   IF (IDATA.LE.0 .AND. (.NOT.READY .OR. MCH(2).GT.MAXCH))
+     +   GO TO 999
+      IF (IDATA.GT.15) GO TO 999
+      CALL DOFIT(IDATA,READY)
+      GO TO 30
+
+C          list pars....
+200   CALL TYPEIT(1)
+      GO TO 30
+
+C          change weighting mode....
+300   CALL WEIGHT(IDATA)
+      GO TO 30
+
+C          change starting width....
+400   CALL STARTWID(ANS,NC)
+      CALL ASKYN(44HReset free pars. to initial estimates? (Y/N),44,&30)
+      CALL PARSET(0)
+      GO TO 30
+
+C          fix or free parameters....
+600   CALL FIXORFREE(K,ANS,NC)
+      GO TO 30
+
+C          change limits or peak positions....
+700   CALL CHNGMARK(IDATA)
+      GO TO 30
+
+C          display markers....
+800   IF (.NOT.READY) THEN
+         WRITE(IW,*) 'Bad command: No fit defined...'
+      ELSEIF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+      ELSE
+         CALL DSPMKR(99)
+      ENDIF
+      GO TO 30
+
+C          get new spectrum....
+900   IF (NC.GT.2) THEN
+         CALL ININ_FLG(ANS(3:40),NC-2,IDATA,J1,J2,NOT_INT)
+         IF (NOT_INT .OR. IDATA.GE.0) THEN
+            CALL GETSP(ANS,NC)
+         ELSE
+            CALL GFINIT(-IDATA)
+         ENDIF
+      ELSE
+         CALL GETSP(ANS,NC)
+      ENDIF
+      IF (IWMODE.GE.1) THEN
+         CALL ASKYN(33HGet new weighting spectrum? (Y/N),33,&30)
+         CALL WEIGHT(3)
+      ENDIF
+      GO TO 30
+
+C          clear graphics screen and display spectrum....
+1000  CALL ERASE
+      REWIND(10)
+      MAXSPEC = 0
+C           save display data for later redrawing....
+      GO TO 4300
+
+C          change X0, NX, Y0, NY or y-axis scale for sp. display....
+1100  IF (IDATA+2.GT.MAXCH) GO TO 999
+      LOX=IDATA
+      GO TO 30
+1200  NUMX=IDATA
+      GO TO 30
+1300  LOCNT=IDATA
+      GO TO 30
+1400  IF (IDATA.LT.-3) GO TO 999
+      IF (IDATA.LT.0) GO TO 1405
+      NCNTS=IDATA
+      GO TO 30
+1405  IYAXIS=IDATA
+      GO TO 30
+
+C          call or dislay cursor....
+1500  IF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+      ELSEIF (IDATA.NE.0 .AND. (IDATA.LT.LOCH .OR. IDATA.GT.HICH)) THEN
+         WRITE(IW,*) 'Bad command: Channel outside displayed region...'
+      ELSE
+         CALL CURSE(IDATA)
+      ENDIF
+      GO TO 30
+
+C          contract spectrum by factor idata....
+1600  CALL CONTRACT(IDATA)
+      IF (IDATA.GT.1) DISP=.FALSE.
+      GO TO 30
+
+C          display fit....
+1700  IF (.NOT.READY) THEN
+         WRITE(IW,*) 'Bad command: No fit defined...'
+      ELSEIF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+      ELSE
+         CALL DSPFIT
+      ENDIF
+      GO TO 30
+
+C          store areas and centroids for later analysis....
+1800  CALL STORAC(IDATA,&999)
+      GO TO 30
+
+1900  CALL GFHELP(ANS)
+      GO TO 30
+
+C            add spectrum / add counts / multiply/divide spectrum....
+2000  K=K-21
+      CALL ADDSPEC(K,ANS,NC)
+      DISP=.FALSE.
+      GO TO 30
+
+C            write spectrum to disk....
+2400  CALL WRTSP(ANS,NC)
+      GO TO 30
+
+C            sum counts using cursor....
+2500  K=K-25
+      CALL SUMCTS(K,IDATA,IN)
+      GO TO 30
+
+C            set counts using cursor....
+2700  IF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+      ELSE
+         CALL SETCTS
+      ENDIF
+      GO TO 30
+
+C            adjust gain of spectrum....
+2800  NUMCH=MAXCH+1
+      DO 2810 I=1,NUMCH
+2810     SAVE(I)=SPEC(I)
+      CALL ADJGAIN(0,OC1,OC2,RNC1,RNC2,SAVE,SPEC,NUMCH,NUMCH,1.0)
+      NAMESP(5:8) = '.MOD'
+      DISP=.FALSE.
+      GO TO 30
+
+C          expand spectrum display using cursor....
+2900  IF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+         GO TO 30
+      ENDIF
+      CALL RETIC(X1,Y,ANS)
+      CALL RETIC(X2,Y,ANS)
+      NUMX=ABS(X2-X1)
+      LOX=X1
+      IF (X1.GT.X2) LOX=X2
+      GO TO 4400
+
+C       fix/free relative peak positions....
+3000  IRELPOS=IDATA
+      IF (IDATA.LT.1) THEN
+         IRELPOS = 0
+         WRITE(IW,*) 'Relative peak positions fixed.'
+      ELSE
+         IRELPOS = 1
+         WRITE(IW,*) 'Relative peak positions free to vary.'
+      ENDIF
+      GO TO 30
+
+C       dump/indump parameters,markers,areas,wtmode etc....
+3100  K=K-31
+      CALL DUMP(ANS,NC,K,READY)
+      GO TO 30
+
+C          define/change/delete energy calibration....
+3300  CALL ENCAL(ANS,NC)
+      GO TO 30
+
+C          open command file for input on lu IR....
+3400  CALL COMFIL(ANS,NC)
+      GO TO 30
+
+C       fix/free relative widths....
+3500  IF (IDATA.LT.1) THEN
+         IRELW = 0
+         WRITE(IW,*) 'Relative widths fixed.'
+      ELSE
+         IRELW = 1
+         WRITE(IW,*) 'Relative widths free to vary.'
+      ENDIF
+      GO TO 30
+
+C            change color map....
+3600  IF (NC.LT.3) THEN
+         WRITE(IW,3610) (COLORMAP(I)-1,I=2,15)
+3610     FORMAT('  Present color map =',I4,13(',',I2))
+         CALL ASK(22H     New color map = ?,22,ANS,NC)
+         IHI = -1
+      ELSE
+         ANS(1:2) = '  '
+         IHI = 1
+      ENDIF
+
+      DO 3690 IMAP=2,15
+         LO = IHI + 2
+         IF (LO.GT.NC) GO TO 30
+C             find first non-blank character....
+         DO 3630 I=LO,NC
+            IF (ANS(I:I).NE.' ') GO TO 3640
+3630     CONTINUE
+         GO TO 30
+
+3640     LO = I
+         IF (ANS(LO:LO).EQ.',') THEN
+C              comma only; no value entered....
+            IHI = LO - 1
+            GO TO 3690
+         ENDIF
+
+C             find upper delimiter (blank or comma)....
+         DO 3650 I=LO,NC
+            IF (ANS(I:I).EQ.' '.OR.ANS(I:I).EQ.',') GO TO 3660
+3650     CONTINUE
+         I = NC + 1
+3660     IHI = I - 1
+C             decode value and set colormap....
+         CALL ININ(ANS(LO:IHI),IHI-LO+1,IDATA,J1,J2,&999)
+         COLORMAP(IMAP) = MOD(IDATA,15) + 1
+3690  CONTINUE
+      GO TO 30
+
+C            AP; add peak to fit....
+3700  MODE=1
+      CALL ADDDELPK(MODE,IDATA,READY)
+      GO TO 30
+C            DP; delete peak from fit....
+3800  MODE=2
+      CALL ADDDELPK(MODE,IDATA,READY)
+      GO TO 30
+
+C            HC; generate hardcopy of graphics screen....
+3900  CALL HCOPY
+      GO TO 30
+
+C            PF; set up peak find on spectrum display....
+4000  IF (IDATA.NE.0) THEN
+         PKFIND = .TRUE.
+         IFWHM = IDATA
+         IF (IN.NE.0) ISIGMA = IN
+         IF (IN2.NE.0) IPERCENT = IN2
+         WRITE(IW,4010) IFWHM, ISIGMA, IPERCENT
+4010     FORMAT(' Peak find activated; FWHM, SIGMA, % = ',3I6)
+         GO TO 30
+      ELSE
+         PKFIND = .FALSE.
+         CALL ASKYN(38HDo you want peak find activated? (Y/N),38,&30)
+         PKFIND = .TRUE.
+         WRITE(IW,4020) IFWHM, ISIGMA, IPERCENT
+4020     FORMAT(' Current values of FWHM, SIGMA, % are: ',3I6)
+         CALL flush(6)
+4030     CALL ASK(35HNew values = ? (rtn for old values),35,ANS,NC)
+         IF (NC.EQ.0) GO TO 30
+         CALL ININ(ANS,NC,IDATA,IN,IN2,&4030)
+         GO TO 4000
+      ENDIF
+
+C         shift display using cursor....
+
+4100  IF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+         GO TO 30
+      ENDIF
+      WRITE (IW,*) '    Lower channel limit = ?'
+      CALL RETIC(X,Y,ANS)
+      LOX=X
+      GO TO 4400
+
+4200  IF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+         GO TO 30
+      ENDIF
+      WRITE (IW,*) '    Upper channel limit = ?'
+      CALL RETIC(X,Y,ANS)
+      LOX=X-NUMX
+      IF (LOX.LT.0) LOX=0
+      GO TO 4400
+
+C          overlay spectrum....
+4300  CALL DSPSP(IDATA,IN,IN2,&999)
+C          write display parameters and spectrum to scratch file
+C                         for redrawing later....
+      IF (MAXSPEC.LT.20) THEN
+         WRITE(10) COLORMAP,LOCNT,NCNTS,IYAXIS,IDATA,IN,NAMESP,MAXCH
+         WRITE(10) (SPEC(I),I=1,MAXCH+1)
+         MAXSPEC = MAXSPEC + 1
+      ENDIF
+      GO TO 30
+
+C        clear and redraw graphics screen with new display limits....
+4400  REWIND(11)
+      WRITE(11) COLORMAP,LOCNT,NCNTS,IYAXIS,IDATA,IN,NAMESP,MAXCH
+      WRITE(11) (SPEC(I),I=1,MAXCH+1)
+      
+      IN2 = IDATA
+      CALL ERASE
+      CALL TXTMOD
+      REWIND(10)
+      DO 4450 NUMSPEC = 1,MAXSPEC
+C          read display parameters and spectra back from scratch file...
+         READ(10) COLORMAP,LOCNT,NCNTS,IYAXIS,IDATA,IN,NAMESP,MAXCH
+         READ(10) (SPEC(I),I=1,MAXCH+1)
+         IF (IDATA*IN.EQ.0) IDATA=0
+         CALL DSPSP(IDATA,IN,IN2,&4450)
+4450  CONTINUE
+
+      REWIND(11)
+      READ(11) COLORMAP,LOCNT,NCNTS,IYAXIS,IDATA,IN,NAMESP,MAXCH
+      READ(11) (SPEC(I),I=1,MAXCH+1)
+      GO TO 30
+
+C        NF: define new fit; use X with cursor to exit....
+4500  IDATA = 99
+      CALL DOFIT(IDATA,READY)
+      GO TO 30
+
+C        XA: modify X0,NX....
+4600  WRITE (IW,4610) 'X0',LOX
+4610  FORMAT('  Old value for ',A2' =',I10)
+      CALL ASK(37H New value = ? (return for old value),37,ANS,NC)
+      IF (NC.NE.0) THEN
+         CALL ININ(ANS,NC,IDATA,J1,J2,&4600)
+         IF (IDATA+2.GT.MAXCH) GO TO 4600
+         LOX=IDATA
+      ENDIF
+4650  WRITE (IW,4610) 'NX',NUMX
+      CALL ASK(37H New value = ? (return for old value),37,ANS,NC)
+      IF (NC.NE.0) THEN
+         CALL ININ(ANS,NC,IDATA,J1,J2,&4650)
+         IF (IDATA.LT.0) GO TO 4650
+         NUMX=IDATA
+      ENDIF
+      GO TO 30
+
+C        YA: modify Y0,NY....
+4700  WRITE (IW,4610) 'Y0',LOCNT
+      CALL ASK(37H New value = ? (return for old value),37,ANS,NC)
+      IF (NC.NE.0) THEN
+         CALL ININ(ANS,NC,IDATA,J1,J2,&4700)
+         LOCNT=IDATA
+      ENDIF
+4750  WRITE (IW,4610) 'NY',NCNTS
+      CALL ASK(37H New value = ? (return for old value),37,ANS,NC)
+      IF (NC.NE.0) THEN
+         CALL ININ(ANS,NC,IDATA,J1,J2,&4750)
+         IF (IDATA.LT.0) GO TO 4750
+         NCNTS=IDATA
+      ENDIF
+      GO TO 30
+
+C         reset free parameters....
+4800  CALL PARSET(0)
+      GO TO 30
+
+C         open .gf2 file....
+4900  I = 0
+      CALL OPENGF2(ANS,NC,I)
+      GO TO 30
+
+C         SF ; store fit (or segment of fit) parameters in .gf2 file....
+5100  IF (NPKS.LT.1 .OR. (.NOT.READY)) THEN
+         WRITE(IW,*) 'Bad command: No fit defined...'
+      ELSEIF (.NOT.DISP) THEN
+         WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+      ELSE
+         CALL STORFIT(ANS,NC)
+      ENDIF
+      GO TO 30
+
+C         LU [fn] ; create look-up table file (fn = file name)....
+5200  CALL LOOKUP(ANS,NC,WINMOD)
+      GO TO 30
+
+C         SL [fn] ; create slice input file  (fn = file name)....
+5300  CALL SLICE(ANS,NC,WINMOD)
+      GO TO 30
+
+C         WI ; add windows to look-up table or slice file using cursor....
+5400  CALL ADDWIN(WINMOD,&999)
+      GO TO 30
+
+C         DW ; display windows as they are presently defined....
+5500  CALL DISPWIN(WINMOD,&999)
+      GO TO 30
+
+C         EF ; edit fit parameter file....
+5600  CALL TSCROL(0,0)
+      CALL TXTCLR(0)
+      CALL EDIT(ANS,NC)
+      CALL TSCROL(0,10)
+      GO TO 30
+
+C         ME ; go to menu mode....
+5700  GO TO 30
+
+C         DE ; divide the spectrum by the detector efficiency....
+5800  CALL DIVEFF(ANS,NC)
+      DISP=.FALSE.
+      GO TO 30
+
+5900  WRITE (IW,*)' This command is not yet implemented.'
+      GO TO 999
+
+C         ST ; stop and exit....
+6000  CALL ASKYN(36HAre you sure you want to exit? (Y/N),36,&30)
+C             close .sto file...
+      CALL STORAC(-1,&6010)
+6010  CLOSE(2,ERR=6020)
+C             close .gf2 file...
+6020  CLOSE(12,ERR=6030)
+C             close .win or .tab file...
+6030  IF (WINMOD.EQ.1) CALL WRTLOOK
+      IF (WINMOD.NE.0) CLOSE(13,ERR=6040)
+
+6040  CALL ASK2(41HType P/D/S for Print/Del/Save printfile ?,
+     +          41,ANS,NC,1)
+      IF (NC.EQ.0.OR.ANS(1:1).EQ.'P'.OR.ANS(1:1).EQ.'p') THEN
+         CALL PR_AND_DEL_FILE(IP)
+      ELSEIF (ANS(1:1).EQ.'D'.OR.ANS(1:1).EQ.'d') THEN
+         CLOSE(IP,STATUS='DELETE')
+      ELSEIF (ANS(1:1).EQ.'S'.OR.ANS(1:1).EQ.'s') THEN
+         CLOSE(IP)
+      ELSE
+         GO TO 6040
+      ENDIF
+
+C        clear graphics screen....
+      CALL ERASE
+C        select text mode....
+      CALL TXTMOD
+C        select 80x24 text screen....
+      CALL TXTSCN(0)
+      CALL TSCROL(0,0)
+      IF (ANS(1:1).EQ.'S'.OR.ANS(1:1).EQ.'s') WRITE(IW,*)
+     +                      'Do not forget to rename gf2.out file!'
+
+      CALL EXIT
+      END
+
+C=======================================================================
+
+      SUBROUTINE GFFIN(MODE)
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      REAL          AREAS(15),DAREAS(15),CENTS(15)
+      COMMON /AREA/ AREAS,DAREAS,CENTS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+C       calc. areas, centroids and errors....
+
+      R=PARS(4)/50.0
+      R1=1.0-0.5*R
+      BET=PARS(5)
+      DO 320 I=1,NPKS
+         IC=3*I+4
+         Y=PARS(IC+1)/(BET*3.33021838)
+         D=EXP(-Y*Y)/ERFC(Y)
+         A=R*BET*D+1.06446705*PARS(IC+1)*R1
+         AREAS(I)=A*PARS(IC+2)
+         EH=A*ERRS(IC+2)
+         ER=(2.0*BET*D-1.06446705*PARS(IC+1))*ERRS(4)/100.0
+         EB=R*D*(1.0+2.0*Y*Y-1.12837917*D*Y)*ERRS(5)
+         EW=(R1*1.06446705+0.600561216*R*D*(D/1.77245385-Y))*ERRS(IC+1)
+         DAREAS(I)=SQRT(EH*EH+PARS(IC+2)*PARS(IC+2)*(ER*ER+EB*EB+EW*EW))
+         CENTS(I)=PARS(IC)-R*BET*D*BET/A
+320   CONTINUE
+
+      IF (DISP) THEN
+         IF (MODE.GT.0) CALL ASKYN(18HDisplay fit? (Y/N),18,&780)
+C           display fit....
+         CALL DSPFIT
+      ENDIF
+
+780   CALL ASKYN(22HType parameters? (Y/N),22,&800)
+      CALL TYPEIT(2)
+800   CALL ASKYN(23HPrint parameters? (Y/N),23,&900)
+      CALL TYPEIT(3)
+
+900   RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE GFHELP(ANS)
+
+C         ....on-line help....
+
+      CHARACTER*40  ANS
+      CHARACTER*80  LINE
+      CHARACTER*200 FULLNAME
+      COMMON /LUS/  IR,IW,IP,IG
+
+
+C        convert ANS to upper case characters....
+      DO 50 I=1,40
+         IC=ICHAR(ANS(I:I))
+         IF (IC.GE.97.AND.IC.LE.122) ANS(I:I)=CHAR(IC-32)
+50    CONTINUE
+
+      IF (ANS(1:4).EQ.'HE/P' .OR. ANS(1:6).EQ.'HELP/P') THEN
+C           print help....
+         ILU = 3
+         OPEN(ILU,FILE='gf2.hlp',STATUS='NEW')
+         ANS = 'HE SUM'
+      ELSE
+         ILU = IW
+      ENDIF
+
+C           replace "HE(LP)" with spaces....
+      ANS(1:2)='  '
+      IF (ANS(3:4).EQ.'LP') ANS(3:4)='  '
+C           then leading spaces are removed and 
+C           the end of command pointer, J, is returned....
+      CALL SETEXT(ANS,'    ',J)
+C           are there enough characters to specify a command?....
+      IF (J.LE.1) THEN
+         ANS = 'TOPICS'
+      ELSEIF (J.LT.3) THEN
+         GO TO 630
+      ENDIF
+
+      CALL GET_DIRECTORY('GFONLINE_LOC',FULLNAME,IOFFSET)
+      FULLNAME(IOFFSET:) = 'gfonline.hlp'
+      OPEN(1,FILE=FULLNAME,STATUS='OLD',ERR=600)
+C           clear text screen, scroll whole screen....
+      IF (ILU.EQ.IW) THEN
+         CALL TSCROL(0,0)
+         CALL TXTCLR(0)
+      ENDIF
+
+C           search for indicator plus two or three letter command....
+510   READ(1,'(A)',END=610) LINE
+      IF (LINE(1:6).NE.'>>>'//ANS(1:3)) GO TO 510
+
+C           have found command... now copy file to terminal or print file....
+520   READ(1,'(A)',END=620) LINE
+      IF (LINE(1:3).NE.'>>>') THEN
+C           write line to terminal....
+         DO 530 NC=80,2,-1
+            IF (LINE(NC:NC).NE.' ') GO TO 540
+530      CONTINUE
+540      WRITE(ILU,'(1X,A)') LINE(1:NC)
+
+      ELSEIF (ILU.EQ.IW .AND. LINE(1:8).EQ.'>>>>PAGE') THEN
+C              end of page....
+         CALL INVERC
+         CALL CASK2('   ....Press any key for more, X to eXit help....',
+     +              ANS,NC,1)
+         CALL NORMC
+         CALL TXTCLR(0)
+         IF (ANS(1:1).EQ.'X' .OR. ANS(1:1).EQ.'x') GO TO 580
+
+      ELSEIF (LINE(1:7).EQ.'>>>>END') THEN
+C              end of command listing....
+         GO TO 570
+
+      ENDIF
+
+C           get next line of help file....
+      GO TO 520
+
+C           ask for next topic....
+570   IF (ILU.EQ.IW) THEN
+         REWIND (1)
+         WRITE(IW,*) ' '
+572      CALL INVERC
+         CALL ASK(30H>Topic = ? (rtn to exit help) ,30,ANS,NC)
+         CALL NORMC
+         IF (NC.EQ.1) THEN
+            IF (ANS(1:1).EQ.'?') THEN
+               ANS = 'TOP'
+            ELSE
+               GO TO 572
+            ENDIF
+         ENDIF
+         CALL TXTCLR(0)
+         IF (NC.EQ.0) GO TO 580
+         DO 575 I=1,NC
+            IC=ICHAR(ANS(I:I))
+            IF (IC.GE.97.AND.IC.LE.122) ANS(I:I)=CHAR(IC-32)
+575      CONTINUE
+         GO TO 510
+      ENDIF
+
+C           exit....
+580   IF (ILU.EQ.IW) CALL TSCROL(0,10)
+590   CLOSE(1,ERR=595)
+595   IF (ILU.NE.IW) CALL PR_AND_DEL_FILE(ILU)
+      RETURN
+
+C        error messages....
+600   WRITE(IW,*) 'File ',FULLNAME(1:IOFFSET+12),' not found.'
+      GO TO 590
+610   CALL INVERC
+      WRITE(IW,*) 'Command ',ANS(1:3),' not found.'
+      CALL NORMC
+      REWIND (1)
+      ANS = 'TOP'
+      GO TO 510
+620   WRITE(IW,*) '******* End of file encountered. ********'
+      GO TO 570
+630   WRITE(IW,*) 'Need two or more characters of the command '
+      WRITE(IW,*) 'Type HE<rtn> to get list of topics.'
+      GO TO 590
+
+      END
+
+C=======================================================================
+
+      SUBROUTINE GFINIT(MODE)
+
+C        GF2 initialisation routine....
+C        mode > 2 : included for use by other programs....
+C        mode = 2 : check for existence of files gfinit.dat, .cmd....
+C        mode = 1 : welcome and ask for initial estimates....
+
+      REAL           FINEST(5), SWPARS(3)
+      INTEGER        INFIX(3), INFIXRW, INFIXW
+      COMMON /INEST/ FINEST,INFIX,SWPARS,INFIXRW,INFIXW
+      DATA           FINEST/5*0.0/, INFIX/3*0/, SWPARS/9.0,0.004,0.0/
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      CALL INITG(NX,NY)
+      CALL FINIG
+C           select 132x30 text screen....
+      CALL TXTSCN(1)
+      CALL TSCROL(0,0)
+
+      IF (MODE.GE.2) THEN
+         OPEN(1,FILE='gfinit.dat',STATUS='OLD',ERR=300)
+         READ (1,210) FINEST,INFIX
+210      FORMAT(5F8.0/3I5)
+         READ (1,220,ERR=585,END=585) SW1,SW2,SW3,INFIXW,INFIXRW
+220      FORMAT(3F8.0/2I5)
+         SWPARS(1)=SW1*SW1
+         SWPARS(2)=SW2*SW2/1000.0
+         SWPARS(3)=SW3*SW3/1000000.0
+         CLOSE(1)
+         OPEN(1,FILE='gfinit.cmd',STATUS='OLD',ERR=590)
+         GO TO 350
+
+300      OPEN(1,FILE='gfinit.cmd',STATUS='OLD',ERR=400)
+350      CLOSE(1)
+         CALL TXTCLR(0)
+         WRITE(IW,592)
+         CALL ASK2(29H    Press return for more....,29,ANS,NC,1)
+         CALL TXTCLR(0)
+         CALL TSCROL(0,10)
+         WRITE(IW,595)
+         CALL ASK2(28HPress any key to continue...,28,ANS,K,1)
+         ANS='CF gfinit'
+         NC=9
+         CALL COMFIL(ANS,NC)
+         RETURN
+      ENDIF
+
+400   WRITE(IW,410)
+410   FORMAT(' '//'  WELCOME TO GF2'//
+     +            '  Version 6.4   D.C. Radford   Jan. 1992'//)
+      CALL ASK2(28H  Hit return to continue....,28,ANS,NC,1)
+
+      WRITE(IW,500)
+500   FORMAT(' '/
+     +' This program fits portions of spectra with up to'/
+     +,'        fifteen peaks on a quadratic background.'//
+     +' The fitted parameters are :'/
+     +5X,'A,B and C :        Background = A + B*X + C*X*X'/
+     +21X,'where X is the channel number minus an offset.'/
+     +5X,'R,BETA and STEP :  These define the shape of the peaks.'/
+     +21X,'The peak is the sum of a gaussian of height H*(1-R/100)'/
+     +21X,'and a skew gaussian of height H*R/100, where BETA is '/
+     +21X,'the decay constant of the skew gaussian (in channels).'/
+     +21X,'STEP is the relative height (in % of the peak height)'/
+     +21X,'of a smoothed step function which increases the ',
+     +/21X,'background below each peak.'/
+     +5X,'Pn,Wn AND Hn :      The position (centroid of the non-skew',
+     +' gaussian),'/21X,'width and height of the nth peak.')
+      WRITE(IW,505)
+505   FORMAT(' Initial estimates of A,B and C are taken to give a ',
+     +'straight line'/10X,'between the limits for the fit.'/
+     +' Initial estimates for Pn and Hn are taken from the given peak',
+     +' positions'/10X,'( Hn = counts at peak position - background',
+     +' )'/' Initial estimate for R is taken as R = A + B*X',
+     +' (X = ch. no.)')
+510   CALL ASK(40HEnter A,B (rtn for default: A=10., B=0.),40,ANS,K)
+      FINEST(1)=10.0
+      FINEST(2)=0.0
+      IF (K.EQ.0) GO TO 520
+      CALL FFIN(ANS,K,FINEST(1),FINEST(2),RJ2,&510)
+520   INFIX(1)=1
+      CALL ASKYN(48HDo you want always to fix R at this value? (Y/N),
+     +           48,&530)
+      INFIX(1)=0
+530   WRITE(IW,*) 'Initial estimate for BETA is taken as ',
+     +            'BETA = C + D*X  (X = ch. no.)'
+540   CALL ASK(47HEnter C,D (rtn for default: BETA = st. width/2),
+     +47,ANS,K)
+      FINEST(3)=0.0
+      FINEST(4)=0.0
+      IF (K.EQ.0) GO TO 550
+      CALL FFIN(ANS,K,FINEST(3),FINEST(4),RJ2,&540)
+550   INFIX(2)=1
+      CALL ASKYN(51HDo you want always to fix BETA at this value? (Y/N),
+     +           51,&560)
+      INFIX(2)=0
+560   WRITE(IW,*) 'Initial estimate for STEP is taken as STEP = E'
+570   CALL ASK(38HEnter E (rtn for default: STEP = 0.25),38,ANS,K)
+      FINEST(5)=0.25
+      IF (K.EQ.0) GO TO 580
+      CALL FFIN(ANS,K,FINEST(5),RJ1,RJ2,&570)
+580   INFIX(3)=1
+      CALL ASKYN(51HDo you want always to fix STEP at this value? (Y/N),
+     +           51,&585)
+      INFIX(3)=0
+
+585   NC=2
+      CALL STARTWID(ANS,NC)
+ 
+590   CALL TXTCLR(0)
+      CALL INVERC
+      CALL BLINKC
+      WRITE(IW,*)' *** PLEASE READ THIS ***'
+      CALL NORMC
+      WRITE(IW,592)
+592   FORMAT(1X/
+     +'  New version of GF2 : version number 6.4.'//
+     +'         D. C. Radford, R. W. Macleod    Jan. 1992.'//
+     +'   Modifications from version 6.1:'/
+     +'       Lower case characters are now accepted.'/
+     +'       Command DS now clears screen before displaying spectrum.'/
+     +'       Use command OV to not clear before displaying.'/
+     +'       Command EX now expands all displayed spectra.'//
+     +' ***   ON-LINE help is now here! (type HE <command>)   ***'//
+     +'   New commands include:'/
+     +'       MU: move display up in spectrum using cursor'/ 
+     +'       MD: move display down in spectrum using cursor'/
+     +'       OV: overlay spectrum (i.e. no erase)'/
+     +'       RD: clear and redraw graphics display'/
+     +' *** SP/C: get gate limits from cursor (in matrix mode) ***'/
+     +'       NF: start a new fit with an arbitrary number of peaks.'/
+     +'       RF: reset free parameters.'/'       FF: open a new .gf2 ',
+     +'fit file.'/'       NX 0: autoscale the x-axis.'/'       XA: ',
+     +'change both X0 and NX.'/'       YA: change both Y0 and NY.'/)
+
+      CALL ASK2(29H    Press return for more....,29,ANS,NC,1)
+
+      CALL TXTCLR(0)
+      CALL TSCROL(0,10)
+      WRITE(IW,595)
+595   FORMAT(1X/
+     +'  <Return> or 0 as an answer to any (Y/N) question is',
+     +' equivalent to N'/
+     +14X,'1 as an answer to any (Y/N) question is equivalent to Y'/
+     +'  The default extension for all spectrum file names is .spe'/
+     +'  Type HE   to type  a list of available commands,'/
+     +'       HE/P to print a list of available commands.'//
+     +'         D. C. Radford    April 1989.'/)
+
+C          ask for spectrum file name and read spectrum from disk....
+      NC=0
+      CALL GETSP(ANS,NC)
+
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE GFSET
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+C       ask for limits for fit....
+
+10    WRITE(IW,*) '  Limits for fit?  (hit T to type)'
+      DO 70 N=1,2
+         IF (.NOT.DISP) GO TO 30
+         CALL RETIC(X,Y,ANS)
+         IF (ANS(1:1).NE.'T' .AND. ANS(1:1).NE.'t') GO TO 60
+30       CALL ASK(7HLimit=?,7,ANS,K)
+         CALL FFIN(ANS,K,CH,RJ1,RJ2,&30)
+         MCH(N)=CH+0.5
+         IF (MCH(N).GT.MAXCH) GO TO 40
+         IF (MCH(N).GE.0) GO TO 70
+40       WRITE(IW,*) 'Marker ch. outside spectrum - try again.'
+         GO TO 30
+60       MCH(N)=X
+70    CONTINUE
+      IF (MCH(2).GT.MCH(1)) GO TO 80
+      LO=MCH(2)
+      MCH(2)=MCH(1)
+      MCH(1)=LO
+80    IF (.NOT.DISP) GO TO 90
+      CALL DSPMKR(1)
+      CALL DSPMKR(2)
+
+C       ask for peak positions....
+
+90    IF (NPKS.LE.15) THEN
+         WRITE(IW,*)' Peak positions? (hit T to type, R to restart)'
+         DO 200 N=1,NPKS
+110         IF (DISP) THEN
+               CALL RETIC(X,Y,ANS)
+               IF (ANS(1:1).EQ.'R' .OR. ANS(1:1).EQ.'r') GO TO 10
+               IF (ANS(1:1).EQ.'T' .OR. ANS(1:1).EQ.'t') GO TO 120
+               PPOS(N)=X-0.5
+            ELSE
+C               ....hit t for type....
+120            CALL ASK(15HPeak position=?,15,ANS,K)
+               IF (ANS(1:1).EQ.'R' .OR. ANS(1:1).EQ.'r') GO TO 10
+               CALL FFIN(ANS,K,PPOS(N),RJ1,RJ2,&120)
+            ENDIF
+
+            IF (IFIX(PPOS(N)).LT.MCH(1) .OR. 
+     +          IFIX(PPOS(N)).GE.MCH(2)) THEN
+               WRITE(IW,*)' Peaks must be within limits - try again.'
+               GO TO 110
+            ENDIF
+            IF (DISP) CALL DSPMKR(N+2)
+200      CONTINUE
+
+      ELSE
+         WRITE(IW,*)
+     +     ' Peak positions? (hit X when done, T to type, R to restart)'
+         DO 300 N=1,15
+210         IF (DISP) THEN
+               CALL RETIC(X,Y,ANS)
+               IF (ANS(1:1).EQ.'X' .OR. ANS(1:1).EQ.'x') GO TO 310
+               IF (ANS(1:1).EQ.'R' .OR. ANS(1:1).EQ.'r') GO TO 10
+               IF (ANS(1:1).EQ.'T' .OR. ANS(1:1).EQ.'t') GO TO 220
+               PPOS(N)=X-0.5
+            ELSE
+C               ....hit t for type....
+220            CALL ASK(31HPeak position=? (rtn when done),31,ANS,K)
+               IF (K.EQ.0) GO TO 310
+               CALL FFIN(ANS,K,PPOS(N),RJ1,RJ2,&220)
+            ENDIF
+
+            IF (IFIX(PPOS(N)).LT.MCH(1) .OR. 
+     +          IFIX(PPOS(N)).GE.MCH(2)) THEN
+               WRITE(IW,*)' Peaks must be within limits - try again.'
+               GO TO 210
+            ENDIF
+            IF (DISP) CALL DSPMKR(N+2)
+300      CONTINUE
+310      NPKS = N - 1
+         IF (NPKS.LE.0) RETURN
+      ENDIF
+
+C       ask for fixed pars....
+
+      NPARS=3*(NPKS+2)
+      DO 340 I=1,NPARS
+340      IFIXED(I)=1
+      IRELPOS=1
+      NFP=0
+      CALL PARSET(-1)
+      K=5
+      NC=2
+      CALL FIXORFREE(K,ANS,NC)
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE LOOKUP(ANS,K,WINMOD)
+
+C          open old or create new look-up table file....
+C                   (file name stored in ANS)....
+C          default file name = .tab....
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      INTEGER WINMOD
+C         WINMOD = 0 : no mode defined....
+C         WINMOD = 1 : look-up file mode....
+C         WINMOD = 2 : slice file mode....
+
+      INTEGER*2 LOOKTAB(8192)
+      INTEGER   NCLOOK,LOOKMIN,LOOKMAX
+      COMMON /LOOK/ NCLOOK,LOOKMIN,LOOKMAX,LOOKTAB
+
+      CHARACTER*40 ANS
+      CHARACTER*45 CMESS
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      ANS(1:2)='  '
+      IF (K.GE.3) GO TO 15
+
+C          ask for output file name....
+
+10    CALL ASK(45HName of lookup file = ? (default .EXT = .tab),45,
+     +         ANS,K)
+      IF (K.EQ.0) RETURN
+
+C         save any files already created....
+
+15    IF (WINMOD.EQ.1) CALL WRTLOOK
+      IF (WINMOD.NE.0) CLOSE(13,ERR=20)
+20    WINMOD=1
+
+      CALL SETEXT(ANS,'.tab',J)
+
+C            try to open OLD output file....
+
+      OPEN (13,FILE=ANS,FORM='UNFORMATTED',STATUS='OLD',ERR=200)
+      READ (13,ERR=800) NCLOOK,LOOKMIN,LOOKMAX
+      IF (NCLOOK.LT.2.OR.NCLOOK.GT.8192) GO TO 800
+      READ (13,ERR=800) (LOOKTAB(I),I=1,NCLOOK)
+
+      CALL ASKYN(27HModify existing file? (Y/N),27,&100)
+      RETURN
+
+100   CLOSE (13)
+      GO TO 10
+
+C        open NEW output file....
+
+200   OPEN (13,FILE=ANS,FORM='UNFORMATTED',STATUS='NEW',ERR=800)
+
+C        ask for dimension of look-up table....
+C           ....(default = spectrum dimension)....
+
+      NCLOOK=MAXCH+1
+      WRITE(CMESS,220) NCLOOK
+220   FORMAT('Dimension of look-up table = ? (rtn for',I5,')')
+250   CALL CASK(CMESS,ANS,K)
+      IF (K.NE.0) THEN
+         CALL ININ(ANS,K,N,J1,J2,&250)
+         IF (N.GT.8192.OR.N.LT.2) GO TO 250
+         NCLOOK=N
+      ENDIF
+
+C         initialize look-up table....
+
+      LOOKMIN=0
+      LOOKMAX=0
+      DO 280 I=1,NCLOOK
+         LOOKTAB(I)=0
+280   CONTINUE
+
+      RETURN
+
+C           error messages....
+
+800   WRITE(IW,*) 'Error: cannot open file.'
+      WINMOD=0
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE MATINV(ARRAY,NORDER,IDIM)
+      REAL*8 ARRAY(IDIM,IDIM),AMAX,SAVE
+      INTEGER IK(100),JK(100)
+      DO 100 K=1,NORDER
+
+c        find largest element array(i,j) in rest of matrix....
+
+         AMAX=0.
+  21     DO 31 I=K,NORDER
+            DO 30 J=K,NORDER
+               IF (DABS(AMAX)-DABS(ARRAY(I,J))) 24,24,30
+  24           AMAX=ARRAY(I,J)
+               IK(K)=I
+               JK(K)=J
+  30        CONTINUE
+  31     CONTINUE
+
+C        interchange rows and columns to put amax in array(k,k)....
+
+         IF (AMAX) 41,140,41
+  41     I=IK(K)
+         IF (I-K) 21,51,43
+  43     DO 50 J=1,NORDER
+            SAVE=ARRAY(K,J)
+            ARRAY(K,J)=ARRAY(I,J)
+            ARRAY(I,J)=-SAVE
+  50     CONTINUE
+  51     J=JK(K)
+         IF (J-K) 21,61,53
+  53     DO 60 I=1,NORDER
+            SAVE=ARRAY(I,K)
+            ARRAY(I,K)=ARRAY(I,J)
+            ARRAY(I,J)=-SAVE
+  60     CONTINUE
+
+C        accumulate elements of inverse matrix....
+
+  61     DO 70 I=1,NORDER
+            IF (I-K) 63,70,63
+  63        ARRAY(I,K)=-ARRAY(I,K)/AMAX
+  70     CONTINUE
+         DO 81 I=1,NORDER
+            DO 80 J=1,NORDER
+               IF (I-K) 74,80,74
+  74           IF (J-K) 75,80,75
+  75           ARRAY(I,J)=ARRAY(I,J)+ARRAY(I,K)*ARRAY(K,J)
+  80        CONTINUE
+  81     CONTINUE
+         DO 90 J=1,NORDER
+            IF (J-K) 83,90,83
+  83        ARRAY(K,J)=ARRAY(K,J)/AMAX
+  90     CONTINUE
+         ARRAY(K,K)=1./AMAX
+ 100  CONTINUE
+
+C        restore ordering of matrix....
+
+      DO 130 L=1,NORDER
+         K=NORDER-L+1
+         J=IK(K)
+         IF (J-K) 111,111,105
+ 105     DO 110 I=1,NORDER
+            SAVE=ARRAY(I,K)
+            ARRAY(I,K)=-ARRAY(I,J)
+            ARRAY(I,J)=SAVE
+ 110     CONTINUE
+ 111     I=JK(K)
+         IF (I-K) 130,130,113
+ 113     DO 120 J=1,NORDER
+            SAVE=ARRAY(K,J)
+            ARRAY(K,J)=-ARRAY(I,J)
+            ARRAY(I,J)=SAVE
+ 120     CONTINUE
+ 130  CONTINUE
+ 140  RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE MATREAD(FN,SP,NAMESP,NUMCH,IDIMSP,SPMODE,*)
+
+C           subroutine to read spectrum from MATRIX file
+C              into array SP, of dimension IDIMSP....
+C              FN = file name, or contains range of channels to read....
+C              NUMCH = number of channels read....
+C              NAMESP = name of spectrum (char*8, set to ILO IHI)....
+C              SPMODE = 2/3 for .mat/.spn files...
+C              return1 = open/read error....
+C              file extension must be .mat
+
+C           D. Radford      Oct. 1986....
+
+C           modified to include reading from .spn files....
+C              SPMODE = 3 for .spn files....
+C           .mat files have 2 bytes/ch., .spn files have 4 bytes/ch....
+C           D. Radford      Oct. 1987....
+
+C           modified to read from .mat files using cursor....
+C           D. Radford      Feb. 1991....
+
+C           modified to add integer*2 matrix rows using integer*4 addition....
+C           this prevents overflows for larger counts/ch....
+C           D.C. Radford    Jan. 1992....
+
+      CHARACTER*40 FN
+      REAL         SP(*)
+      CHARACTER*8  NAMESP
+      INTEGER      NUMCH, IDIMSP, SPMODE
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      CHARACTER*40   ANS, FILNAM /' '/
+      LOGICAL        NOT_INT, FIL_EXIST
+      INTEGER*2      I2MAT(8192)
+      INTEGER*4      I4SPN(8192)
+      INTEGER*4      I4SUM(8192)
+      EQUIVALENCE   (I4SPN,I2MAT)
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      IF (DISP .AND.
+     +       (INDEX(FN,'/C').NE.0 .OR. INDEX(FN,'/c').NE.0 )) THEN
+
+C                 use cursor to get y-channel limits of gate....
+         WRITE(IW,*) ' Hit any character; A to abort...'
+         CALL RETIC(X,Y,ANS)
+         IF (ANS(1:1).EQ.'A' .OR. ANS(1:1).EQ.'a') RETURN
+         ILO = X
+         CALL RETIC(X,Y,ANS)
+         IF (ANS(1:1).EQ.'A' .OR. ANS(1:1).EQ.'a') RETURN
+         IHI = X
+
+         IF (SPMODE.NE.2) THEN
+C                spmode .ne. 2; ask for matrix file name....
+10          CALL SETEXT(FILNAM,'    ',J)
+            IF (FILNAM(J:J+3).EQ.'.MAT' .OR. FILNAM(J:J+3).EQ.'.mat')
+     +           WRITE(IW,*) '...Default filename = ',FILNAM
+            CALL CASK('...Matrix file = ? (default .EXT = .mat)',ANS,K)
+            IF (K.EQ.0) THEN
+               IF (FILNAM(J:J+3).NE.'.MAT' .AND.
+     +             FILNAM(J:J+3).NE.'.mat') RETURN 1
+            ELSE
+               CALL SETEXT(ANS,'.mat',J)
+               IF (ANS(J:J+3).NE.'.MAT' .AND.
+     +             ANS(J:J+3).NE.'.mat') GO TO 10
+               INQUIRE(FILE=ANS,EXIST=FIL_EXIST)
+               IF (.NOT.FIL_EXIST) THEN
+                  WRITE(IW,*) 'File does not exist.'
+                  GO TO 10
+               ENDIF
+               FILNAM = ANS
+            ENDIF
+            SPMODE = 2
+         ENDIF
+
+      ELSE
+C                 SP command does not include "/C"...
+C                 look for integer chan. no. limits....
+         NC=40
+         CALL ININ_FLG(FN,NC,ILO,IHI,IN3,NOT_INT)
+         IF (NOT_INT) THEN
+C                 not integers; FN = file name, check matrix file exists....
+            INQUIRE(FILE=FN,EXIST=FIL_EXIST)
+            IF (.NOT.FIL_EXIST) THEN
+               WRITE(IW,*) 'File does not exist.'
+               RETURN 1
+            ENDIF
+            FILNAM=FN
+C                 ask for range of Y-channels to be added together....
+80          CALL ASK(34HType range of y-channels (lo,hi) ?,34,ANS,NC)
+            IF (NC.EQ.0) RETURN
+            CALL ININ(ANS,NC,ILO,IHI,IN3,&80)
+         ENDIF
+      ENDIF
+
+      IF (IHI.EQ.0) IHI=ILO
+      IF (IHI.LT.ILO) THEN
+         I=ILO
+         ILO=IHI
+         IHI=I
+      ENDIF
+
+      OPEN(1,FILE=FILNAM,FORM='UNFORMATTED',STATUS='OLD',
+     +           RECL=2048*(SPMODE-1),ACCESS='DIRECT',ERR=800)
+      NUMCH = 4096
+      IF (ILO.LT.0 .OR. IHI.GT.NUMCH-1) THEN
+         WRITE(IW,*) 'Bad y-gate channel limits:',ILO,IHI
+         GO TO 900
+      ENDIF
+      IF (IHI-ILO.GT.256) THEN
+         WRITE(IW,*) 'Large range of channels to be read; will take',
+     +               ' a very long time.'
+         CALL CASKYN('...Proceed? (Y/N)',&80)
+      ENDIF
+
+C           initialize I4SUM....
+      DO 120 I=1,NUMCH
+         I4SUM(I) = 0
+120   CONTINUE
+
+      IF (SPMODE.EQ.2) THEN
+
+C          read matrix rows into I2MAT and add into I4SUM....
+         DO 140 IY=ILO+1,IHI+1
+            READ(1,REC=IY,ERR=900) (I2MAT(J),J=1,NUMCH)
+            DO 130 I=1,NUMCH
+               I4SUM(I) = I4SUM(I) + I2MAT(I)
+130         CONTINUE
+140      CONTINUE
+
+      ELSE
+
+C          read matrix rows into I4SPN and add into I4SUM....
+         DO 200 IY=ILO+1,IHI+1
+            READ(1,REC=IY,ERR=900) (I4SPN(J),J=1,NUMCH)
+            DO 180 I=1,NUMCH
+               I4SUM(I) = I4SUM(I) + I4SPN(I)
+180         CONTINUE
+200      CONTINUE
+
+      ENDIF
+
+C           convert to real format....
+      DO 250 I=1,NUMCH
+         SP(I)=FLOAT(I4SUM(I))
+250   CONTINUE
+
+      CLOSE(1)
+      FN=FILNAM
+      WRITE (NAMESP,'(2I4)') ILO,IHI
+      RETURN
+
+C             error messages....
+
+800   WRITE(IW,*) 'Cannot open file ',FILNAM
+      GO TO 910
+900   WRITE(IW,*) 'Cannot read file ',FILNAM
+910   CLOSE(1,ERR=920)
+920   RETURN 1
+      END
+
+C=======================================================================
+
+      SUBROUTINE OPENGF2(ANS,NC,MODE)
+
+C          open old or create new .gf2 file....
+C                   (file name stored in ANS)....
+C          default file name = .gf2....
+
+C         mode = 0 : open existing or new files....
+C         mode = 1 : open existing file only....
+C         mode = 2 : open new file only....
+
+      CHARACTER*40 ANS,NAMF
+      CHARACTER*20 HEAD/' GF2 FILE VER. 1.0  '/
+      CHARACTER*20 DATTIM
+
+      LOGICAL          GF2OPEN
+      COMMON /GF2OPEN/ GF2OPEN
+
+      INTEGER      GF2DATA(30)
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      CLOSE(12,ERR=5)
+5     IF (MODE.GT.1) GO TO 400
+      GF2OPEN = .FALSE.
+
+      ANS(1:2)='  '
+      IF (NC.GE.3) GO TO 15
+
+C         ask for .gf2 file name....
+
+10    CALL ASK(44H    .gf2 file name = ? (default .EXT = .gf2),44,ANS,K)
+      IF (K.EQ.0) RETURN
+15    NAMF=ANS
+      CALL SETEXT(NAMF,'.gf2',J)
+
+C            try to open old .gf2 file....
+
+      OPEN(12,FILE=NAMF,FORM='UNFORMATTED',STATUS='OLD',ERR=400)
+      READ (12,ERR=380) ANS(1:20),DATTIM
+      IF (ANS(1:20).NE.HEAD) GO TO 380
+
+      WRITE(IW,*) 'Existing file was created at ',DATTIM
+      CALL ASKYN(31H  Proceed with this file? (Y/N),31,&250)
+220   READ (12,END=405,ERR=340) GF2DATA
+      GO TO 220
+
+250   CLOSE(12)
+      GO TO 10
+
+C            open new .gf2 file (if mode .ne. 1)....
+
+400   IF (MODE.EQ.1) GO TO 10
+      OPEN(12,FILE=NAMF,FORM='UNFORMATTED',STATUS='NEW',ERR=415)
+      CALL DATETIME(DATTIM)
+      WRITE (12) HEAD,DATTIM
+405   GF2OPEN = .TRUE.
+      RETURN
+
+C           error messages....
+
+340   WRITE(IW,*) 'Cannot read file.'
+      GO TO 250
+380   WRITE(IW,385) NAMF
+385   FORMAT(' File ',A40,' is not a .gf2 file!')
+      GO TO 250
+415   WRITE(IW,*) 'Cannot open new file with this name.'
+      GO TO 10
+      END
+
+C=======================================================================
+
+      SUBROUTINE PARA2NUM(ANS,PARAM,ERR_FLG)
+
+C     change an alphanumeric ANSwer into PARAM (parameter number)....
+C     ERR_FLG = true for unrecognized parameter....
+C     called by FIXORFREE.... 
+
+      CHARACTER*40 ANS,TMP_ANS
+      INTEGER      PARAM
+      LOGICAL      ERR_FLG
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+C        local variables....
+      CHARACTER*3    PARC(51)
+     +           /' A ',' B ',' C ',' R ','BTA','STP','P1 ','W1 ','H1 ',
+     +            'P2 ','W2 ','H2 ','P3 ','W3 ','H3 ','P4 ','W4 ','H4 ',
+     +            'P5 ','W5 ','H5 ','P6 ','W6 ','H6 ','P7 ','W7 ','H7 ',
+     +            'P8 ','W8 ','H8 ','P9 ','W9 ','H9 ','PA ','WA ','HA ',
+     +            'PB ','WB ','HB ','PC ','WC ','HC ','PD ','WD ','HD ',
+     +            'PE ','WE ','HE ','PF ','WF ','HF '/
+
+
+      TMP_ANS = ANS
+C        remove leading spaces....
+140   IF (TMP_ANS(1:1).EQ.' ') THEN
+         TMP_ANS(1:39) = TMP_ANS(2:40)
+         TMP_ANS(40:40) = ' '
+         GO TO 140
+      ENDIF
+
+C         convert lower case to upper case characters....
+      DO 150 I = 1,4
+         IC = ICHAR(TMP_ANS(I:I))
+         IF (IC.GE.97.AND.IC.LE.122) TMP_ANS(I:I) = CHAR(IC-32)
+150   CONTINUE
+
+      ERR_FLG = .FALSE.
+      DO 160 PARAM = 1, 4
+C           put a space in front of possible one letter answer....
+         IF (' '//TMP_ANS(1:2).EQ.PARC(PARAM)) RETURN
+160   CONTINUE
+
+      DO 170 PARAM = 5, NPARS
+         IF (TMP_ANS(1:3).EQ.PARC(PARAM)) RETURN
+170   CONTINUE
+
+      IF (TMP_ANS(1:4).EQ.'BETA') THEN
+         PARAM = 5
+      ELSEIF (TMP_ANS(1:4).EQ.'STEP') THEN
+         PARAM = 6
+      ELSEIF (TMP_ANS(1:3).EQ.'RP ') THEN
+         PARAM = 101
+      ELSEIF (TMP_ANS(1:3).EQ.'RW ') THEN
+         PARAM = 102
+      ELSE
+C           no match so ....
+         ERR_FLG = .TRUE.
+      ENDIF
+
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE PARSET(MODE)
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      REAL          AREAS(15),DAREAS(15),CENTS(15)
+      COMMON /AREA/ AREAS,DAREAS,CENTS
+
+      REAL           FINEST(5), SWPARS(3)
+      INTEGER        INFIX(3), INFIXRW, INFIXW
+      COMMON /INEST/ FINEST,INFIX,SWPARS,INFIXRW,INFIXW
+
+      LOGICAL RESETP,RESETW
+
+
+      ILO=MCH(1)+1
+      IHI=MCH(2)+1
+      X0=(IHI+ILO)/2
+      DO 5 I=1,NPARS
+    5    ERRS(I)=0.0
+      X=0.0
+      DO 20 I=1,NPKS
+20       X=X+PPOS(I)
+      X=X/FLOAT(NPKS)
+      IF (IFIXED(1).EQ.1) PARS(1)=(SPEC(IHI)+SPEC(ILO))/2.0
+      IF (IFIXED(2).EQ.1) PARS(2)=(SPEC(IHI)-SPEC(ILO))/FLOAT(IHI-ILO)
+      IF (IFIXED(3).EQ.1) PARS(3)=0.0
+      IF (IFIXED(4).EQ.1) PARS(4)=FINEST(1)+FINEST(2)*X
+      IF (IFIXED(5).EQ.1) PARS(5)=FINEST(3)+FINEST(4)*X
+      IF (PARS(5).EQ.0.0) PARS(5)=0.5*SQRT
+     +                       ( SWPARS(1)
+     +                       + SWPARS(2)*X
+     +                       + SWPARS(3)*X*X )
+      IF (IFIXED(6).EQ.1) PARS(6)=FINEST(5)
+
+      IF (MODE.LT.0) THEN
+
+C            come here only during set-up....
+         RESETP=.TRUE.
+         RESETW=.TRUE.
+         NFP=3-INFIX(1)-INFIX(2)-INFIX(3)
+         IFIXED(4)=INFIX(1)
+         IFIXED(5)=INFIX(2)
+         IFIXED(6)=INFIX(3)
+         IF (IFIXED(4).EQ.0.AND.PARS(4).EQ.0.0) THEN
+            NFP=NFP+IFIXED(5)
+            IFIXED(5)=0
+         ENDIF
+         IRELW=INFIXRW
+         IF (INFIXW.EQ.0) THEN
+            DO 110 I=1,NPKS
+               IFIXED(3*I+5)=0
+110         CONTINUE
+            NFP=NFP+NPKS
+         ENDIF
+      ELSE
+         IF (IRELPOS.EQ.0) THEN
+            RESETP=.FALSE.
+            CALL ASKYN(
+     +       54HRelative positions fixed - reset peak positions? (Y/N)
+     +      ,54,&120)
+         ENDIF
+         RESETP=.TRUE.
+120      IF (IRELW.EQ.0) THEN
+            RESETW=.FALSE.
+            CALL ASKYN(
+     +         43HRelative widths fixed - reset widths? (Y/N),43,&140)
+         ENDIF
+         RESETW=.TRUE.
+      ENDIF
+140   DO 10 I=1,NPKS
+         AREAS(I)=0.0
+         DAREAS(I)=0.0
+         J=3*I+6
+         IF (RESETP.AND.IFIXED(J-2).EQ.1) PARS(J-2)=PPOS(I)
+         IF (MODE.LT.0.OR.(RESETW.AND.IFIXED(J-1).EQ.1))
+     +              PARS(J-1)=SQRT( SWPARS(1)
+     +                            + SWPARS(2)*PPOS(I)
+     +                            + SWPARS(3)*PPOS(I)*PPOS(I) )
+         IF (IFIXED(J).EQ.0) GO TO 10
+         X=PPOS(I)-X0+1.0
+         Y=PARS(1)+PARS(2)*X
+         IPP=PPOS(I)+1.5
+         PARS(J)=SPEC(IPP)-Y
+         CENTS(I)=PARS(J-2)
+10    CONTINUE
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE PFIND(CHANX,PSIZE,N1,N2,IFWHM,SIGMA,MAXPK,NPK)
+
+C        modified for GF2: data is real....
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      REAL         SAVE(8192)
+      COMMON /SAV/ SAVE
+
+      INTEGER   CTR,WINGS
+      REAL      CHANX(100),PSIZE(100)
+
+C     ****************************************************************
+C     PEAK-FINDER ROUTINE    ORNL 5/4/76 JDL.
+
+C     N1      = CHANNEL # AT START OF SCAN
+C     N2      = CHANNEL # AT STOP  OF SCAN
+C     IFWHM   = FWHM ESTIMATE SUPPLIED BY CALLING PROG
+C     SIGMA   = PEAK DETECTION THRESHOLD (STD DEV ABOVE BKG)
+C     SPEC(I) = DATA ARRAY TO BE SCANNED
+C     CHANX(I)= LOCATION OF ITH PEAK (INDEX BASIS, NOT CHAN# BASIS)
+C     PSIZE(I)= VERY ROUGH ESTIMATE OF PEAK AREA (MAY BY WAY! OFF!!)
+C     ****************************************************************
+
+      NPK=0
+      NP=0
+      N=0
+      LOCK=0
+      P1=0.0
+      P2=0.0
+      P3=0.0
+      PEAK1=0.0
+      PEAK2=0.0
+      PEAK3=0.0
+      SUM=0.0
+      SUM2=0.0
+
+      IF (IFWHM.LT.1) IFWHM=1
+      J1=-(2*IFWHM-1)/4
+      J2=J1+IFWHM-1
+      JODD=1-(IFWHM-2*(IFWHM/2))
+
+C     ****************************************************************
+C     tst for any negative, if yes add to data to make all positive
+C     ****************************************************************
+
+      MINY=0
+      IADD=0
+      DO 10 I=N1,N2
+         IF (SPEC(I).LT.MINY) MINY=SPEC(I)
+10    CONTINUE
+      IF (MINY.LT.0) THEN
+         IADD=-MINY
+         DO 15 I=N1,N2
+            SAVE(I)=SPEC(I)
+            SPEC(I)=SPEC(I)+IADD
+15       CONTINUE
+      ENDIF
+
+C     ****************************************************************
+C     now go ahead and do the peakfind bit
+C     ****************************************************************
+
+      DO 100 ND = N1+IFWHM, N2-IFWHM-1
+
+C              sum counts in center and wings of differential function
+         CTR=0
+         WINGS=0
+         DO 30 J=J1,J2
+            JD=ND+J
+            CTR=CTR+SPEC(JD)
+            IF (J.LE.0) GO TO 30
+            JL=ND-J+J1
+            JR=JD+J2
+            WINGS=WINGS+SPEC(JL)+SPEC(JR)
+30       CONTINUE
+
+C              if ifwhm is odd, average data in split cells at ends
+         W4=0.0
+         IF (JODD.EQ.0) THEN
+            JL=ND+J1+J1
+            JR=ND+J2+J2
+            W4=0.25*(SPEC(JL-1)+SPEC(JL)+SPEC(JR)+SPEC(JR+1))
+         ENDIF
+
+C              compute height of second derivative (neg) relative to noise
+         S2=SUM
+         SUM=FLOAT(CTR-WINGS)-W4
+         ROOT=SQRT(FLOAT(CTR+WINGS+1)+W4)
+         P1=P2
+         P2=P3
+         DENO=ROOT
+         IF (DENO.LT.1.0E-6) DENO=1.0E-6
+         P3=SUM/DENO
+         IF (LOCK.NE.0) THEN
+            IF (P2.GT.PEAK2 .AND. P3.GE.P2) THEN
+C                    save three values at relative maximum
+               PEAK1=P1
+               PEAK2=P2
+               PEAK3=P3
+               SUM2=S2
+               NP=ND-1
+            ENDIF
+
+            IF (P3.GE.SIGMA) GO TO 100
+
+C                 estimate location and crude size of peak
+            N=N+1
+            IF (N.GT.MAXPK) N=MAXPK
+            DENO=PEAK1-PEAK2+PEAK3-PEAK2
+            IF (ABS(DENO).LT.1.0E-6) DENO=1.0E-6
+            PC=0.5*(PEAK1-PEAK3)/DENO
+            CHANX(N)=FLOAT(NP)+PC+0.5*FLOAT(JODD)
+            PSIZE(N)=SUM2+SUM2
+            LOCK=0
+            PEAK2=0.0
+         ENDIF
+
+         IF (P3.GE.SIGMA) LOCK=1
+
+100   CONTINUE
+      NPK=N
+
+C     ****************************************************************
+C     tst for offset added - i.e. is data restore required
+C     ****************************************************************
+
+      IF (IADD.NE.0) THEN
+         DO 110 I=N1,N2
+            SPEC(I)=SAVE(I)
+110      CONTINUE
+      ENDIF
+
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE READSP(FILNAM,SP,NAMESP,NUMCH,IDIMSP,*)
+
+C           subroutine to read spectrum from file (or ID) = FILNAM,
+C              into array SP, of dimension IDIMSP....
+C              NUMCH = number of channels read....
+C              NAMESP = name of spectrum (character*8)....
+C              return1 = open/read error....
+C              default file extension = .spe
+C           D. Radford      Apr. 1989....
+
+C           modified to include reading from .spk and .mat files....
+C              SPMODE = 0/1/2 for .spe/.spk/.mat files....
+
+C           modified to include reading from .spn files....
+C              SPMODE = 3 for .spn files....
+C           D. Radford      Oct. 1987....
+
+C           modified to read from .mat files using cursor....
+C           D. Radford      Feb. 1991....
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      CHARACTER*40 FILNAM
+      REAL         SP(*)
+      CHARACTER*8  NAMESP
+      INTEGER      NUMCH, IDIMSP, SPMODE /0/
+      LOGICAL      NOT_INT
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+C         if in .spk, .mat or .spn mode, and FILNAM has integers,
+C            call SPKREAD or MATREAD....
+
+      IF   (INDEX(FILNAM,'/C').NE.0
+     + .OR. INDEX(FILNAM,'/c').NE.0 ) THEN
+         IF (.NOT.DISP) THEN
+            WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+            RETURN
+         ENDIF
+         CALL MATREAD(FILNAM,SP,NAMESP,NUMCH,IDIMSP,
+     +                SPMODE,&120)
+         SPMODE = 2
+         RETURN
+      ENDIF
+
+      IF (SPMODE.NE.0) THEN
+         NC=40
+         CALL ININ_FLG(FILNAM,NC,IN1,IN2,IN3,NOT_INT)
+         IF (.NOT. NOT_INT) THEN
+            IF (SPMODE.EQ.1) THEN
+               CALL SPKREAD(FILNAM,SP,NAMESP,NUMCH,IDIMSP,&120)
+               RETURN
+            ENDIF
+            IF (SPMODE.GE.2) THEN
+               CALL MATREAD(FILNAM,SP,NAMESP,NUMCH,IDIMSP,SPMODE,&120)
+               RETURN
+            ENDIF
+         ENDIF
+      ENDIF
+
+C       remove leading spaces from FILNAM....
+C       look for file extension in FILNAM....
+C            ....if there is none, put it to .spe....
+      CALL SETEXT(FILNAM,'.spe',I)
+
+C         ....if it is .spk, .mat or .spn, call SPKREAD or MATREAD....
+      IF (FILNAM(I:I+3).EQ.'.SPK'.OR.FILNAM(I:I+3).EQ.'.spk') THEN
+         IF (FILNAM(I:I+3).EQ.'.spk') FILNAM(I:I+3) = '.SPK'
+         CALL SPKREAD(FILNAM,SP,NAMESP,NUMCH,IDIMSP,&120)
+         SPMODE=1
+         RETURN
+      ENDIF
+      IF (FILNAM(I:I+3).EQ.'.MAT'.OR.FILNAM(I:I+3).EQ.'.mat') THEN
+         SPMODE=2
+         CALL MATREAD(FILNAM,SP,NAMESP,NUMCH,IDIMSP,SPMODE,&120)
+         RETURN
+      ENDIF
+      IF (FILNAM(I:I+3).EQ.'.SPN'.OR.FILNAM(I:I+3).EQ.'.spn') THEN
+         SPMODE=3
+         CALL MATREAD(FILNAM,SP,NAMESP,NUMCH,IDIMSP,SPMODE,&120)
+         RETURN
+      ENDIF
+
+C        read spectrum in standard GF2 format....
+
+      OPEN(1,FILE=FILNAM,FORM='UNFORMATTED',STATUS='OLD',ERR=70)
+      READ(1,ERR=90) NAMESP,IDIM1,IDIM2,IRED1,IRED2
+      NUMCH=IDIM1*IDIM2
+      IF (NUMCH.GT.IDIMSP) THEN
+        NUMCH=IDIMSP
+        WRITE(IW,60)IDIMSP
+60      FORMAT(' First',I6,' chs only taken.')
+      ENDIF
+      READ(1,ERR=90)(SP(I),I=1,NUMCH)
+      CLOSE(1)
+      SPMODE=0
+      RETURN
+
+C             error messages....
+
+70    WRITE(IW,*) 'File does not exist.'
+      GO TO 110
+90    WRITE(IW,*) 'Cannot read file.'
+110   CLOSE(1,ERR=120)
+120   RETURN 1
+      END
+
+C=======================================================================
+
+      SUBROUTINE SETCTS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+10    IF (.NOT.DISP) GO TO 20
+      WRITE(IW,*) 'Type any character; X to exit, T to type.'
+      CALL RETIC(X,Y,ANS)
+      IF (ANS(1:1).EQ.'T' .OR. ANS(1:1).EQ.'t') GO TO 20
+      IF (ANS(1:1).EQ.'X' .OR. ANS(1:1).EQ.'x') RETURN
+C            hit t for type, x to exit....
+      ILO=X
+      Y1=Y
+      CALL RETIC(X,Y,ANS)
+      IF (ANS(1:1).EQ.'T' .OR. ANS(1:1).EQ.'t') GO TO 20
+      IF (ANS(1:1).EQ.'X' .OR. ANS(1:1).EQ.'x') RETURN
+      IHI=X
+      Y2=Y
+      GO TO 80
+
+C          ask for typed limits....
+20    CALL ASK(17HType limits (chs),17,ANS,K)
+      IF (K.EQ.0) RETURN
+      CALL ININ(ANS,K,ILO,IHI,J2,&20)
+      IF (ILO.GT.0.AND.IHI.EQ.0) IHI=ILO
+      IF (ILO.GT.MAXCH.OR.IHI.GT.MAXCH.OR.ILO.LT.0.OR.IHI.LT.0) THEN
+         WRITE(IW,*) 'Marker ch. outside spectrum - try again.'
+         GO TO 20
+      ENDIF
+      CALL ASK(19HType counts per ch.,19,ANS,K)
+      CALL FFIN(ANS,K,Y,RJ1,RJ2,&20)
+      Y1=Y
+      Y2=Y
+
+80    IF (ILO.GT.IHI) THEN
+         ISAVE=IHI
+         IHI=ILO
+         ILO=ISAVE
+         Y2=Y1
+         Y1=Y
+      ENDIF
+
+C        modify contents of spectrum....
+      NAMESP(5:8) = '.MOD'
+      SPEC(ILO+1)=(Y1+Y2)/2.0
+      IF (ILO.EQ.IHI) GO TO 10
+      FNC=IHI-ILO
+      DO 110 I=ILO,IHI
+         SPEC(I+1)=Y1+(Y2-Y1)*FLOAT(I-ILO)/FNC
+110   CONTINUE
+
+C        display modified segment....
+      CALL INITG(NX,NY)
+      X=FLOAT(ILO)+0.5
+      CALL PSPOT(X,Y1)
+      X=FLOAT(IHI)+0.5
+      CALL VECT(X,Y2)
+      CALL FINIG
+
+      GO TO 10
+
+      END
+
+C=======================================================================
+
+      SUBROUTINE SLICE(ANS,K,WINMOD)
+
+C          open old or create new slice input file....
+C                   (file name stored in ANS)....
+C          default file name = .win....
+
+      INTEGER WINMOD
+C         WINMOD = 0 : no mode defined....
+C         WINMOD = 1 : look-up file mode....
+C         WINMOD = 2 : slice file mode....
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      ANS(1:2)='  '
+      IF (K.GE.3) GO TO 15
+
+C          ask for output file name....
+
+10    CALL ASK(45HName of window file = ? (default .EXT = .win),45,
+     +         ANS,K)
+      IF (K.EQ.0) RETURN
+
+C         save any files already created....
+
+15    IF (WINMOD.EQ.1) CALL WRTLOOK
+      IF (WINMOD.NE.0) CLOSE(13,ERR=20)
+20    WINMOD=2
+      CALL SETEXT(ANS,'.win',J)
+
+C            try to open OLD output file....
+
+      OPEN (13,FILE=ANS,STATUS='OLD',ERR=200)
+
+      CALL ASKYN(28H Add to existing file? (Y/N),28,&100)
+50    READ (13,'(A1)',END=70) J
+      GO TO 50
+70    RETURN
+
+100   CLOSE (13)
+      GO TO 10
+
+C        open NEW output file....
+
+200   OPEN (13,FILE=ANS,STATUS='NEW',ERR=800)
+      RETURN
+
+C           error messages....
+
+800   WRITE(IW,*) 'Error: cannot open file.'
+      WINMOD=0
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE SPKREAD(FN,SP,NAMESP,NUMCH,IDIMSP,*)
+
+C           subroutine to read spectrum from .spk file
+C              into array SP, of dimension IDIMSP....
+C              FN = file name, or ID of spectrum to be read....
+C              NUMCH = number of channels read....
+C              NAMESP = name of spectrum (char*8, set to ID)....
+C              return1 = open/read error....
+C              file extension must be .spk (ORNL format)....
+
+C           D.C. Radford    Oct. 1986....
+
+      CHARACTER*40 FN
+      REAL         SP(*)
+      CHARACTER*8  NAMESP
+      INTEGER      NUMCH, IDIMSP
+
+      REAL         SAVE(8192)
+      COMMON /SAV/ SAVE
+      INTEGER*4    ISAV(8192)
+      EQUIVALENCE (ISAV,SAVE)
+
+      CHARACTER*40 ANS, FILNAM /' '/
+      LOGICAL      NOT_INT
+      INTEGER      IHED(32), NDX(4)/1,3*0/, MAXH/64/
+      CHARACTER*80 TMPFN /' '/
+      INTEGER*4    ITMPFN(20)
+      EQUIVALENCE (TMPFN,ITMPFN)
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+      COMMON /LLL/ MSSG(28),NAMPROG(2),LOGUT,LOGUP,LISFLG,MSGF
+
+
+C        SPKIO error handling initialization....
+      DO I=1,28            ! blank message buffer....
+         MSSG(I) = '   '
+      ENDDO
+      NAMPROG(1)='GF2 '    ! 1st half of program name....
+      NAMPROG(2)='    '    ! 2nd half of program name....
+      LOGUT = IW           ! logical unit for: terminal....
+      LOGUP = IP           !                  log/print file....
+      LISFLG = 'LOF'       ! no log file output....
+      LUS = 1              ! SPK logical unit....
+
+      NC=40
+      CALL ININ_FLG(FN,NC,ID,IN2,IN3,NOT_INT)
+      IF (.NOT. NOT_INT) THEN
+         TMPFN(1:40) = FILNAM
+         CALL SPKMAN('OPEN',ITMPFN,LUS,'RO  ',IERR)
+         IF (IERR.NE.0) GO TO 800
+         GO TO 100
+      ENDIF
+
+C         FN = file name....
+C         ....open .spk file and ask "display directory?"....
+
+      TMPFN(1:40) = FN
+      CALL SPKMAN('OPEN',ITMPFN,LUS,'RO  ',IERR)
+      IF (IERR.NE.0) GO TO 800
+      FILNAM = FN
+
+      CALL ASKYN(24HDisplay directory? (Y/N),24,&80)
+
+C         list file directory....
+      READ(UNIT=1,REC=1,ERR=850) (ISAV(JJ),JJ=1,512)
+      NS=ISAV(3)
+      IF (NS.GT.254) NS=254
+      DO 50 I1=1,NS,10
+         I2=I1+9
+         IF (I2.GT.NS) I2=NS
+         WRITE(IW,40) (ISAV(2*I+3),I=I1,I2)
+40       FORMAT(' ',10I8)
+50    CONTINUE
+
+C         ask for spectrum ID....
+
+80    CALL ASK(15HSpectrum ID = ?,15,ANS,NC)
+      IF (NC.EQ.0) GO TO 900
+      CALL ININ(ANS,NC,ID,IN2,IN3,&80)
+100   IF (ID.LT.1) GO TO 850
+
+C        get number of chs in spectrum....
+
+      LU=1
+      CALL SPKIO(1,LU,ID,IHED,MAXH,ISAV,NDX,0,IERR)
+      IF (IERR.NE.0) GO TO 850
+      NUMCH=IHED(12)
+      IF (NUMCH.GT.IDIMSP) THEN
+        NUMCH=IDIMSP
+        WRITE(IW,60)IDIMSP
+60      FORMAT(' First',I6,' chs only taken.')
+      ENDIF
+
+C          read spectrum....
+
+      CALL SPKIO(1,LU,ID,IHED,MAXH,ISAV,NDX,NUMCH,IERR)
+      IF (IERR.NE.0) GO TO 850
+
+      CLOSE(1)
+
+C       convert to real format....
+
+      DO 250 I=1,NUMCH
+         SP(I)=FLOAT(ISAV(I))
+250   CONTINUE
+
+      FN=FILNAM
+      WRITE (NAMESP,'(I8)')ID
+      RETURN
+
+C             error messages....
+
+800   WRITE(IW,*) 'File does not exist.'
+      GO TO 900
+850   WRITE(IW,*) 'Cannot read file.'
+900   CLOSE(1,ERR=910)
+910   RETURN 1
+      END
+
+C=======================================================================
+
+      SUBROUTINE STARTWID(ANS,NC)
+
+      REAL           FINEST(5), SWPARS(3)
+      INTEGER        INFIX(3), INFIXRW, INFIXW
+      COMMON /INEST/ FINEST,INFIX,SWPARS,INFIXRW,INFIXW
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      IF (NC.GT.2) THEN
+          ANS(1:38)=ANS(3:40)
+          NC=NC-2
+      ELSE
+10        WRITE(IW,20) SQRT(SWPARS(1)),SQRT(1000.0*SWPARS(2))
+     +                 ,1000.0*SQRT(SWPARS(3))
+20        FORMAT(
+     + ' Initial estimates for the fitted peak widths are taken as:'/
+     + '       FWHM = SQRT(F*F + G*G*x + H*H*x*x)  (x = ch. no. /1000)'/
+     + '  Default values are:  F =', F7.2,', G =',F7.2,', H=',F7.2)
+          CALL ASK(36HEnter F,G,H (rtn for default values),36,ANS,NC)
+          IF (NC.EQ.0) GO TO 50
+      ENDIF
+
+      CALL FFIN(ANS,NC,SW1,SW2,SW3,&10)
+      IF (SW1.LE.0.0.OR.SW2.LT.0.0) THEN
+         WRITE(IW,*) 'Bad values. F must be .gt. 0, G must be .ge. 0.'
+         GO TO 10
+      ENDIF
+      SWPARS(1)=SW1*SW1
+      SWPARS(2)=SW2*SW2/1000.0
+      SWPARS(3)=SW3*SW3/1000000.0
+
+50    INFIXW = 1
+      CALL ASKYN(
+     +         52HDo you want all widths to be fixed by default? (Y/N),
+     +           52,&60)
+      INFIXW = 0
+60    INFIXRW = 1
+      CALL ASKYN(
+     +61HDo you want the relative widths to be fixed by default? (Y/N),
+     +           61,&70)
+      INFIXRW = 0
+
+70    RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE STORAC(IN,*)
+
+      INTEGER IN
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      REAL          AREAS(15),DAREAS(15),CENTS(15)
+      COMMON /AREA/ AREAS,DAREAS,CENTS
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      REAL           STOC(15,20),STODC(15,20),STOA(15,20),STODA(15,20)
+      REAL           STOE(15,20),STODE(15,20)
+      INTEGER        ISTO(20)
+      CHARACTER*28   NAMSTO(20)
+      COMMON /STORE/ STOC,STODC,STOA,STODA,STOE,STODE,ISTO,NAMSTO
+
+      CHARACTER*40 ANS
+      LOGICAL FILEOP
+      DATA FILEOP/.FALSE./
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+C          store areas and centroids for later analysis....
+
+      IDATA = IN
+1800  IF (IDATA.EQ.0) THEN
+         WRITE(IW,*)
+     +      'N = 1-20: store centroids and areas in one of 20 positions'
+         WRITE(IW,*)
+     +      'N = -1:   write stored values to disk file gf2.sto'
+         CALL CASK(' ...N = ?',ANS,K)
+         IF (K.EQ.0) RETURN
+         CALL ININ(ANS,K,IDATA,J1,J2,&1800)
+         GO TO 1800
+
+      ELSEIF (IDATA.GT.0) THEN
+         IF (IDATA.GT.20) THEN
+            IDATA = 0
+            GO TO 1800
+         ENDIF
+         IF (ISTO(IDATA).NE.0) THEN
+            WRITE(IW,*)
+     +          'Warning: already have values not written to disk.'
+            CALL CASKYN(' ...Proceed? (Y/N)',&1830)
+         ENDIF
+         ISTO(IDATA)=NPKS
+         DO 1825 I=1,NPKS
+            STOC(I,IDATA)=CENTS(I)
+            STODC(I,IDATA)=ERRS(4+3*I)
+            STOA(I,IDATA)=AREAS(I)
+            STODA(I,IDATA)=DAREAS(I)
+            STOE(I,IDATA)=0.0
+            STODE(I,IDATA)=0.0
+            CALL ENERGY(CENTS(I),ERRS(4+3*I),
+     +               STOE(I,IDATA),STODE(I,IDATA),&1825)
+1825     CONTINUE
+         NAMSTO(IDATA)(1:8) = NAMESP
+         CALL DATETIME(NAMSTO(IDATA)(9:28))
+1830     RETURN
+
+      ELSE
+         DO 1845 J=1,20
+            IF (ISTO(J).NE.0) GO TO 1850
+1845     CONTINUE
+         GO TO 999
+1850     IF (FILEOP) GO TO 1860
+         FILEOP=.TRUE.
+         OPEN(2,FILE='gf2.sto',STATUS='OLD',ERR=1855)
+C              read through to end of file in order to append data....
+1852     READ (2,'(A1)',END=1860) ANS
+         GO TO 1852
+
+1855     OPEN(2,FILE='gf2.sto',STATUS='NEW')
+         WRITE(2,1857)
+1857     FORMAT(' No.  Centroid +- error      Area +- error      ',
+     +          'Energy +- error    Sp.name      Date     Time')
+
+1860     DO 1890 I=1,15
+            DO 1880 J=1,20
+               IF (ISTO(J).LT.I) GO TO 1880
+               WRITE(2,1870,ERR=999)J,STOC(I,J),STODC(I,J),STOA(I,J),
+     +               STODA(I,J),STOE(I,J),STODE(I,J),
+     +               NAMSTO(J)(1:8),NAMSTO(J)(9:28)
+1870           FORMAT(I3,F11.4,F9.4,F11.0,F9.0,F11.4,F9.4,4X,A,2X,A)
+1880        CONTINUE
+1890     CONTINUE
+         DO 1895 J=1,20
+            ISTO(J)=0
+1895     CONTINUE
+         RETURN
+      ENDIF
+
+999   RETURN 1
+      END
+
+C=======================================================================
+
+      SUBROUTINE STORFIT(ANS,NC)
+
+C         store fit (or segment of fit) parameters in .gf2 file....
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      LOGICAL          GF2OPEN
+      COMMON /GF2OPEN/ GF2OPEN
+      DATA             GF2OPEN/.FALSE./
+
+      INTEGER*4    GF2DATA(30),GF2MKRS(3),NGF2PKS
+      REAL*4       GF2PARS(24)
+      EQUIVALENCE (GF2DATA(1),GF2MKRS)
+      EQUIVALENCE (GF2DATA(4),SPSUM)
+      EQUIVALENCE (GF2DATA(5),NGF2PKS)
+      EQUIVALENCE (GF2DATA(6),GF2PARS)
+
+      INTEGER      PEAKS(20)
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+C            if necessary, open new .gf2 file....
+
+      IF ((.NOT.GF2OPEN) .OR. NC.GT.2) THEN
+C           mode = 0 : open existing or new files....
+         MODE = 0
+         CALL OPENGF2(ANS,NC,MODE)
+         IF (.NOT.GF2OPEN) RETURN
+      ENDIF
+
+      GF2MKRS(3) = (MCH(1)+MCH(2)+2)/2
+      IF ((MCH(2)-MCH(1)).LT.128 .AND. NPKS.LE.6) THEN
+
+C          ask if complete fit to be stored....
+
+         CALL ASKYN(23H Store whole fit? (Y/N),23,&100)
+         GF2MKRS(1) = MCH(1)
+         GF2MKRS(2) = MCH(2)
+         NGF2PKS = NPKS
+         DO 80 I=1,NPKS
+            PEAKS(I) = I
+80       CONTINUE
+         GO TO 400
+      ENDIF
+
+C          if not, ask for limits of fit segment....
+
+100   WRITE(IW,*) 'Limits for stored segment of fit = ?'
+      WRITE(IW,*) '       ( hit T to type, A to abort )'
+
+      DO 170 N=1,2
+         CALL RETIC(X,Y,ANS)
+         IF (ANS(1:1).EQ.'A' .OR. ANS(1:1).EQ.'a') RETURN
+         IF (ANS(1:1).EQ.'T' .OR. ANS(1:1).EQ.'t') THEN
+130         CALL ASK(7HLimit=?,7,ANS,K)
+            CALL FFIN(ANS,K,CH,RJ1,RJ2,&130)
+            GF2MKRS(N)=CH+0.5
+            IF (GF2MKRS(N).GT.MAXCH.OR.GF2MKRS(N).LT.0) THEN
+               WRITE(IW,*) 'Marker ch. outside spectrum - try again.'
+               GO TO 130
+            ENDIF
+         ELSE
+            GF2MKRS(N)=X
+         ENDIF
+170   CONTINUE
+
+      IF (GF2MKRS(2).LT.GF2MKRS(1)) THEN
+         LO=GF2MKRS(2)
+         GF2MKRS(2)=GF2MKRS(1)
+         GF2MKRS(1)=LO
+      ENDIF
+      IF ((GF2MKRS(2)-GF2MKRS(1)).GE.128) THEN
+         WRITE(IW,*) 'Cannot - more than 128 channels.'
+         GO TO 100
+      ENDIF
+
+C          find all included peaks....
+
+      SLO = GF2MKRS(1)
+      SHI = GF2MKRS(2)
+      NGF2PKS = 0
+      DO 240 I=1,NPKS
+         P = PARS(3*I+4)
+         IF (P.GE.SLO.AND.P.LE.SHI) THEN
+            NGF2PKS = NGF2PKS + 1
+            PEAKS(NGF2PKS) = I
+            IF (NGF2PKS.GT.6) THEN
+               WRITE(IW,*) 'Cannot - more than 6 peaks.'
+               GO TO 100
+            ENDIF
+         ENDIF
+240   CONTINUE
+      IF (NGF2PKS.EQ.0) THEN
+         WRITE(IW,*) 'No peaks included.'
+         GO TO 100
+      ENDIF
+
+C           display segment limits....
+
+      ISAVE = MCH(1)
+      MCH(1) = GF2MKRS(1)
+      CALL DSPMKR(1)
+      MCH(1) = GF2MKRS(2)
+      CALL DSPMKR(1)
+      MCH(1) = ISAVE
+
+C           check that all excluded peaks
+C                 are far enough from segment limits....
+
+      IF (NGF2PKS.NE.NPKS) THEN
+         IF (PARS(4).GT.0.0) THEN
+             X = PARS(5)*LOG(PARS(4)/100.0)*4.0
+         ELSE
+             X = 0.0
+         ENDIF
+         DO 300 I=1,NPKS
+            P = PARS(3*I+4)
+            W = PARS(3*I+5)*1.2
+            IF ((P.GT.SHI .AND. ((P-W).LT.SHI.OR.(P-X).LT.SHI))) THEN
+               WRITE(IW,280) I
+280            FORMAT(' Warning - peak no.',I3,' overlaps segment.')
+               CALL ASKYN(25H         - Proceed? (Y/N),25,&100)
+            ENDIF
+300      CONTINUE
+      ENDIF
+
+C          put peaks in order of energy....
+
+400   IF (NGF2PKS.GT.1) THEN
+         DO 420 I=1,NGF2PKS-1
+            NEWI = I
+            NEWP = PEAKS(I)
+            DO 410 J=I+1,NGF2PKS
+               IF (PARS(3*PEAKS(J)+4).LT.PARS(3*NEWP+4)) THEN
+                  NEWI=J
+                  NEWP=PEAKS(J)
+               ENDIF
+410         CONTINUE
+            PEAKS(NEWI)=PEAKS(I)
+            PEAKS(I)=NEWP
+420      CONTINUE
+      ENDIF
+
+C          write parameters to disk....
+
+C           gf2data(1,2)  = limits of fit segment....
+C           gf2data(3)    = IX0 ( = midpoint of original fit )....
+C           gf2data(4)    = total counts in spectrum.....
+C           gf2data(5)    = number of peaks in fit segment....
+C           gf2data(6-29) = parameters of fit....
+
+      DO 450 I=1,6
+         GF2PARS(I)=PARS(I)
+450   CONTINUE
+      DO 480 I=1,NGF2PKS
+         IPK = PEAKS(I)
+         DO 470 J=4,6
+            GF2PARS(3*I+J)=PARS(3*IPK+J)
+470      CONTINUE
+480   CONTINUE
+
+      SPSUM = 0.0
+      DO 500 I=1,MAXCH+1
+         SPSUM = SPSUM + SPEC(I)
+500   CONTINUE
+
+      WRITE(12,ERR=600) GF2DATA
+      RETURN
+
+C           error messages....
+
+600   WRITE(IW,*) 'Cannot write file - no data written.'
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE SUMCTS(K,ILO,IHI)
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      LOGICAL         DISP
+      INTEGER         LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+      COMMON /DISPLA/ DISP,LOCH,HICH,LOCNT,NCHS,NCNTS,IYAXIS,LOX,NUMX
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      INTEGER         IWMODE
+      CHARACTER*8     NWTSP
+      REAL            WTSP(8192)
+      COMMON /WTMODE/ IWMODE,NWTSP,WTSP
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+C         K=0: sum without background subtraction....
+C         K=1: sum with    background subtraction....
+
+      IF (K.EQ.0 .AND. ILO.GE.0 .AND. IHI.GT.0
+     +     .AND. ILO.LE.MAXCH .AND. IHI.LE.MAXCH) GO TO 80
+
+C           get limits for integration, background....
+
+      IF (.NOT.DISP) THEN
+         IF (K.NE.0) THEN
+            WRITE(IW,*) 'Bad command: New spectrum not yet displayed...'
+            RETURN
+         ENDIF
+10       CALL ASK(26HLimits for integration = ?,26,ANS,NC)
+         IF (NC.EQ.0) RETURN
+         CALL ININ(ANS,NC,ILO,IHI,J2,&10)
+         IF (ILO.GE.0 .AND. IHI.GT.0
+     +        .AND. ILO.LE.MAXCH .AND. IHI.LE.MAXCH) GO TO 80
+         GO TO 10
+      ENDIF
+      IF (K.EQ.0) WRITE(IW,*) 'Type any character; T to type limits.'
+      CALL RETIC(X,Y,ANS)
+      IF (K.EQ.0 .AND. (ANS(1:1).EQ.'T' .OR. ANS(1:1).EQ.'t')) GO TO 10
+      ILO=X
+      Y1=Y
+      CALL RETIC(X,Y,ANS)
+      IF (K.EQ.0 .AND. (ANS(1:1).EQ.'T' .OR. ANS(1:1).EQ.'t')) GO TO 10
+      IHI=X
+      Y2=Y
+80    IF (ILO.GT.IHI) THEN
+         ISAV=IHI
+         IHI=ILO
+         ILO=ISAV
+         Y2=Y1
+         Y1=Y
+      ENDIF
+
+C           display limits....
+      IF (DISP) THEN
+         ISAVE=MCH(1)
+         MCH(1)=ILO
+         CALL DSPMKR(1)
+         MCH(1)=IHI
+         CALL DSPMKR(1)
+         MCH(1)=ISAVE
+      ENDIF
+      SUM=0.0
+      AREA=0.0
+      CENT=0.0
+      DC=0.0
+      FNC=IHI-ILO
+      IF (FNC.LT.0.5) FNC = 1.0
+
+      IF (K.NE.0) THEN
+C           background to be subtracted....
+         CALL INITG(NX,NY)
+         X=FLOAT(ILO)+0.5
+         CALL PSPOT(X,Y1)
+         X=FLOAT(IHI)+0.5
+         CALL VECT(X,Y2)
+         CALL FINIG
+         DO 100 I=ILO,IHI
+            COU=SPEC(I+1)-(Y1+(Y2-Y1)*FLOAT(I-ILO)/FNC)
+            AREA=AREA+COU
+            CENT=CENT+COU*FLOAT(I-ILO)
+100      CONTINUE
+      ELSE
+C           no background to be subtracted....
+         DO 110 I=ILO,IHI
+            AREA=AREA+SPEC(I+1)
+            CENT=CENT+SPEC(I+1)*FLOAT(I-ILO)
+110      CONTINUE
+      ENDIF
+
+      IF (AREA.EQ.0.0) GO TO 250
+      CENT=CENT/AREA+FLOAT(ILO)
+      IF (IWMODE.LT.1) THEN
+C            weight data with data....
+         DO 130 I=ILO,IHI
+            CTS=SPEC(I+1)
+            IF (CTS.LT.1.0) CTS=1.0
+            SUM=SUM+CTS
+            DC=DC+CTS*((FLOAT(I)-CENT)/AREA)**2
+130      CONTINUE
+      ELSE
+C           weight data with WTSP....
+         DO 140 I=ILO,IHI
+            CTS=WTSP(I+1)
+            IF (CTS.LT.1.0) CTS=1.0
+            SUM=SUM+CTS
+            DC=DC+CTS*((FLOAT(I)-CENT)/AREA)**2
+140      CONTINUE
+      ENDIF
+
+      DC=SQRT(DC)
+
+C          write results....
+
+      CALL ENERGY(CENT,DC,EG,DEG,&160)
+      WRITE(IW,150,ERR=180) ILO,IHI,AREA,SQRT(SUM),CENT,DC,EG,DEG
+150   FORMAT(5X,'Chs',I5,' to',I5,'    Area =',F13.0,' +-',F8.0/
+     + 5X,'Cent. =',F9.3,' +-',F6.3,'    Energy =',F9.3,' +-',F6.3)
+      RETURN
+160   WRITE(IW,170,ERR=180) ILO,IHI,AREA,SQRT(SUM),CENT,DC
+170   FORMAT(5X,'Chs',I5,' to',I5,'    Area =',F13.0,' +-',F8.0/
+     + 5X,'Cent. =',F9.3,' +-',F6.3)
+180   RETURN
+
+250   WRITE(IW,255,ERR=180) ILO,IHI,AREA
+255   FORMAT(5X,'Chs',I5,' to',I5,'    Area =',F13.0)
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE TYPEIT(IMODE)
+
+      INTEGER       MCH(2)
+      REAL          PPOS(15)
+      COMMON /MKRS/ MCH,PPOS
+
+      REAL          PARS(51), ERRS(51)
+      INTEGER       IFIXED(51), NPARS, NFP, NPKS, IRELW, IRELPOS
+      COMMON /PARA/ IRELW,PARS,IFIXED,NPARS,NFP,ERRS,NPKS,IRELPOS
+
+      REAL          AREAS(15),DAREAS(15),CENTS(15)
+      COMMON /AREA/ AREAS,DAREAS,CENTS
+
+      REAL*8         GAIN(6)
+      INTEGER        ICAL, NTERMS
+      COMMON /CALIB/ GAIN, ICAL, NTERMS
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      IF (IMODE.GE.3) GO TO 55
+
+      IF (IMODE.LE.1) THEN
+         WRITE(IW,10,ERR=25)(MCH(I),I=1,2),(PPOS(I),I=1,NPKS)
+10       FORMAT(' Mkr chs: limits ',2I5/12X,'Peaks ',8F8.2/18X,7F8.2)
+         IPAGE = 4 - (NPKS)/8
+      ELSE
+         IPAGE = 6
+      ENDIF
+
+25    WRITE(IW,30,ERR=31)(PARS(I),ERRS(I),I=1,6)
+30    FORMAT(' Background: A=',F10.2,' +-',F8.2,6X,'B=',F10.4,' +-',
+     +  F8.4,6X,'C=',F10.4,' +-',F8.4/6X,'Shape: R=',F10.2,' +-',
+     +  F8.2,'   Beta=',F10.3,' +-',F8.3,'   Step=',F10.4,' +-',F8.4)
+
+31    IF (ICAL.EQ.0) WRITE(IW,35)
+      IF (ICAL.NE.0) WRITE(IW,36)
+35    FORMAT(' Peaks:     position            width             height'
+     + ,'               area     centroid')
+36    FORMAT(' Peaks:     position            width             height'
+     + ,'               area     centroid          energy')
+      DO 50 I=1,NPKS
+         K=3*I+3
+         CALL ENERGY(CENTS(I),ERRS(K+1),EG,DEG,&47)
+         WRITE(IW,45,ERR=49) I,(PARS(J+K),ERRS(J+K),J=1,3),
+     +     IFIX(AREAS(I)),IFIX(DAREAS(I)),CENTS(I),EG,DEG
+45       FORMAT(I3,F10.3,' +-',F7.3,F8.3,' +-',F6.3,F10.2,' +-',F8.2,
+     +           I9' +-',I5,F10.3,F10.3,' +-',F6.3)
+         GO TO 49
+47       WRITE(IW,45,ERR=49) I,(PARS(J+K),ERRS(J+K),J=1,3),
+     +              IFIX(AREAS(I)),IFIX(DAREAS(I)),CENTS(I)
+49       IF (I.EQ.IPAGE.AND.I.LT.NPKS) THEN
+            CALL ASK2(28HPress any key to continue...,28,ANS,K,1)
+            IPAGE = IPAGE + 9
+         ENDIF
+50    CONTINUE
+      RETURN
+
+55    WRITE(IP,56)
+56    FORMAT(' ')
+      WRITE(IP,30,ERR=57)(PARS(I),ERRS(I),I=1,6)
+57    IF (ICAL.EQ.0) WRITE(IP,35)
+      IF (ICAL.NE.0) WRITE(IP,36)
+      DO 60 I=1,NPKS
+         K=3*I+3
+         CALL ENERGY(CENTS(I),ERRS(K+1),EG,DEG,&59)
+         WRITE(IP,45,ERR=60) I,(PARS(J+K),ERRS(J+K),J=1,3),
+     +           IFIX(AREAS(I)),IFIX(DAREAS(I)),CENTS(I),EG,DEG
+         GO TO 60
+59       WRITE(IP,45,ERR=60) I,(PARS(J+K),ERRS(J+K),J=1,3),
+     +           IFIX(AREAS(I)),IFIX(DAREAS(I)),CENTS(I)
+60    CONTINUE
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE WEIGHT(IDATA)
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      INTEGER         IWMODE
+      CHARACTER*8     NWTSP
+      REAL            WTSP(8192)
+      COMMON /WTMODE/ IWMODE,NWTSP,WTSP
+
+      CHARACTER*40 ANS
+      COMMON /LUS/ IR,IW,IP,IG
+
+C          change weighting mode....
+
+      IF (IDATA.LT.1 .OR. IDATA.GT.3) THEN
+         WRITE(IW,*) 'IWMODE=1 : weight fit with results of fit'
+         WRITE(IW,*) 'IWMODE=2 : weight fit with data'
+         WRITE(IW,*) 'IWMODE=3 : weight fit with another spectrum'
+250      CALL ASK2(8HIWMODE=?,8,ANS,K,1)
+         IF (K.EQ.0) RETURN
+         CALL ININ(ANS,K,IDATA,J1,J2,&250)
+         IF (IDATA.LT.1 .OR. IDATA.GT.3) GO TO 250
+      ENDIF
+
+      IWMODE=IDATA-2
+      IF (IWMODE.LT.1) RETURN
+310   CALL ASK(33HWeighting spectrum file or ID = ?,33,ANS,K)
+      CALL READSP(ANS,WTSP,NWTSP,NUMCH,8192,&310)
+      IF (NUMCH.NE.MAXCH+1) WRITE(IW,*) 'Warning -- no. of chs in ',
+     +   'weight spectrum different from no. of chs in fitted spectrum.'
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE WRTLOOK
+
+C          write out look-up table to disk file (l.u. 2)....
+
+      INTEGER*2 LOOKTAB(8192)
+      INTEGER   NCLOOK,LOOKMIN,LOOKMAX
+      COMMON /LOOK/ NCLOOK,LOOKMIN,LOOKMAX,LOOKTAB
+
+      COMMON /LUS/ IR,IW,IP,IG
+
+
+      REWIND(13)
+      WRITE (13,ERR=800) NCLOOK,LOOKMIN,LOOKMAX
+      WRITE (13,ERR=800) (LOOKTAB(I),I=1,NCLOOK)
+      RETURN
+
+C           error messages....
+
+800   WRITE(IW,*) 'Error: cannot write to look-up file.'
+      RETURN
+      END
+
+C=======================================================================
+
+      SUBROUTINE WRTSP(ANS,K)
+
+      INTEGER       MAXCH
+      CHARACTER*8   NAMESP
+      REAL          SPEC(8192)
+      CHARACTER*40  FILNAM
+      COMMON /SPEC/ MAXCH,NAMESP,SPEC,FILNAM
+
+      CHARACTER*40 ANS,FN
+      COMMON /LUS/ IR,IW,IP,IG
+
+C            write spectrum in SPEC array to disk file....
+C               default file extension = .spe....
+
+      ANS(1:2)='  '
+      FN=ANS
+      IF (K.GE.3) GO TO 15
+
+C          ask for output file name....
+
+      CALL ASK(22H Name of output file=?,22,FN,K)
+      IF (K.EQ.0) RETURN
+15    CALL SETEXT(FN,'.spe',I)
+
+C            open output file....
+C            ....ask for spectrum name....
+
+      OPEN(1,FILE=FN,FORM='UNFORMATTED',STATUS='NEW',ERR=800)
+      FILNAM = FN
+
+      FN(I:I+3)='    '
+      CALL ASK(43HSpectrum name=? (rtn for same as file name),43,ANS,K)
+      IF (K.GT.0) FN = ANS
+      NAMESP = FN(1:8)
+
+C          write out spectrum....
+
+      WRITE(1,ERR=800) NAMESP,MAXCH+1,1,1,1
+      WRITE(1,ERR=800) (SPEC(I),I=1,MAXCH+1)
+      CLOSE(1)
+      RETURN
+
+800   WRITE(IW,*) 'Open/write error - spectrum not written.'
+      CLOSE(1,STATUS='DELETE',ERR=820)
+820   RETURN
+      END

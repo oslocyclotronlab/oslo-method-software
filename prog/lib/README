@@ -1,0 +1,23 @@
+rewr.a is created by running 
+make all
+in the /Applications/prog/rewr directory.
+
+lev-162Dy is used for decay.f to
+give the low-energy yrast levels with
+Ex, I and Pi. Can be obtained from the file
+filtered.lec
+
+The directory masses is downloaded from
+http://www-nds.iaea.org/RIPL-2/
+where left at top you find the link:
+MASSES-(ftp)
+
+The rct7mas03_egidy file is sent
+Rositsa from Egidy in June 2005, 
+and contains pairing energies. To be
+used to calculate rho(Bn), robin.f
+
+The masses_cm2lab.txt contains
+accurate atomic masses and is used by
+Andreas to run inversed reaction program
+called cm2lab.f

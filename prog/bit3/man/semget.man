@@ -1,0 +1,132 @@
+
+
+
+ sssseeeemmmmggggeeeetttt((((2222))))                                                         sssseeeemmmmggggeeeetttt((((2222))))
+
+
+
+
+ NNNNAAAAMMMMEEEE
+      semget - get set of semaphores
+
+ SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+      ####iiiinnnncccclllluuuuddddeeee <<<<ssssyyyyssss////sssseeeemmmm....hhhh>>>>
+
+      iiiinnnntttt sssseeeemmmmggggeeeetttt((((kkkkeeeeyyyy____tttt kkkkeeeeyyyy,,,, iiiinnnntttt nnnnsssseeeemmmmssss,,,, iiiinnnntttt sssseeeemmmmffffllllgggg))));;;;
+
+ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+      sssseeeemmmmggggeeeetttt(((()))) returns the semaphore identifier associated with _k_e_y.
+
+      A semaphore identifier and associated data structure and set
+      containing _n_s_e_m_s semaphores are created for _k_e_y if one of the
+      following is true:
+
+           _k_e_y is equal to IIIIPPPPCCCC____PPPPRRRRIIIIVVVVAAAATTTTEEEE.  This call creates a new identifier,
+           subject to available resources.  The identifier is never returned
+           by another call to sssseeeemmmmggggeeeetttt(((()))) until it has been released by a call
+           to sssseeeemmmmccccttttllll(((()))).  The identifier should be used among the calling
+           process and its descendents; however, it is not a requirement.
+           The resource can be accessed by any process having the proper
+           permissions.
+
+           _k_e_y does not already have a semaphore identifier associated with
+           it, and (_s_e_m_f_l_g & IIIIPPPPCCCC____CCCCRRRREEEEAAAATTTT) is ``true''.
+
+      Specific behavior can be requested by ORing the following masks into
+      _s_e_m_f_l_g.
+
+           IIIIPPPPCCCC____CCCCRRRREEEEAAAATTTT: Create a semaphore identifier if one does not already
+           exist for _k_e_y.
+
+           IIIIPPPPCCCC____EEEEXXXXCCCCLLLL: If IIIIPPPPCCCC____CCCCRRRREEEEAAAATTTT is specified and _k_e_y already has a
+           semaphore identifier associated with it, return an error.
+
+      The low-order 9 bits of _s_e_m_f_l_g are the semaphore operation permissions
+      which are defined in _g_l_o_s_s_a_r_y(9).
+
+      Upon creation, the data structure associated with the new semaphore
+      identifier is initialized as follows:
+
+           In the operation-permission structure, sssseeeemmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd and
+           sssseeeemmmm____ppppeeeerrrrmmmm....uuuuiiiidddd are set equal to the effective-user-ID of the
+           calling process, while sssseeeemmmm____ppppeeeerrrrmmmm....ccccggggiiiidddd and sssseeeemmmm____ppppeeeerrrrmmmm....ggggiiiidddd are set to
+           the effective-group-ID of the calling process.
+
+           The low-order 9 bits of sssseeeemmmm____ppppeeeerrrrmmmm....mmmmooooddddeeee are set equal to the low-
+           order 9 bits of _s_e_m_f_l_g.
+
+           sssseeeemmmm____nnnnsssseeeemmmmssss is set equal to the value of _n_s_e_m_s.
+
+
+
+
+ Hewlett-Packard Company            - 1 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssseeeemmmmggggeeeetttt((((2222))))                                                         sssseeeemmmmggggeeeetttt((((2222))))
+
+
+
+
+           sssseeeemmmm____oooottttiiiimmmmeeee is set equal to 0 and sssseeeemmmm____ccccttttiiiimmmmeeee is set equal to the
+           current time.
+
+ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+      The following call to sssseeeemmmmggggeeeetttt(((()))) returns a semid associated with the key
+      returned by ffffttttooookkkk((((""""mmmmyyyyffffiiiilllleeee"""",,,, ''''AAAA''''))))....  If a semid associated with the key
+      does not exist, a new semid, set of 4 semaphores, and associated data
+      structure will be created.  If a semid for the key already exists, the
+      semid is simply returned.
+
+           iiiinnnntttt sssseeeemmmmiiiidddd;;;;
+                mmmmyyyysssseeeemmmmiiiidddd ==== sssseeeemmmmggggeeeetttt ((((ffffttttooookkkk((((""""mmmmyyyyffffiiiilllleeee"""",,,,''''AAAA'''')))),,,, 4444,,,, IIIIPPPPCCCC____CCCCRRRREEEEAAAATTTT |||| 0000666600000000))));;;;
+
+ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEE
+      Upon successful completion, a non-negative integer, namely a semaphore
+      identifier, is returned.  Otherwise, a value of -1 is returned and
+      eeeerrrrrrrrnnnnoooo is set to indicate the error.
+
+ EEEERRRRRRRROOOORRRRSSSS
+      sssseeeemmmmggggeeeetttt(((()))) fails if one or more of the following is true:
+
+           [EINVAL]       _n_s_e_m_s is either less than or equal to zero or
+                          greater than the system-imposed limit.
+
+           [EACCES]       A semaphore identifier exists for _k_e_y, but
+                          operation permission as specified by the low-order
+                          9 bits of _s_e_m_f_l_g would not be granted.
+
+           [EINVAL]       A semaphore identifier exists for _k_e_y, but the
+                          number of semaphores in the set associated with it
+                          is less than _n_s_e_m_s, and _n_s_e_m_s is not equal to
+                          zero.
+
+           [ENOENT]       A semaphore identifier does not exist for _k_e_y and
+                          (_s_e_m_f_l_g & IIIIPPPPCCCC____CCCCRRRREEEEAAAATTTT) is ``false''.
+
+           [ENOSPC]       A semaphore identifier is to be created, but the
+                          system-imposed limit on the maximum number of
+                          allowed semaphore identifiers system wide would be
+                          exceeded.
+
+           [EEXIST]       A semaphore identifier exists for _k_e_y but
+                          ((((((((_s_e_m_f_l_g&&&& IIIIPPPPCCCC____CCCCRRRREEEEAAAATTTT)))) &&&&&&&& ((((_s_e_m_f_l_g &&&& IIIIPPPPCCCC____EEEEXXXXCCCCLLLL)))))))) is
+                          ``true''.
+
+ SSSSEEEEEEEE AAAALLLLSSSSOOOO
+      ipcrm(1), ipcs(1), semctl(2), semop(2), stdipc(3C).
+
+ SSSSTTTTAAAANNNNDDDDAAAARRRRDDDDSSSS CCCCOOOONNNNFFFFOOOORRRRMMMMAAAANNNNCCCCEEEE
+      sssseeeemmmmggggeeeetttt(((()))): SVID2, XPG2, XPG3, XPG4
+
+
+
+
+ Hewlett-Packard Company            - 2 -     HP-UX Release 9.0: August 1992
+
+
+

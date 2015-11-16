@@ -1,0 +1,8 @@
+SYS_LIBRARIES = -lXm -lXt -lX11 
+
+AllTarget(app-scroll getusers monitor_sb simple_sb)
+
+NormalProgramTarget(app-scroll,app-scroll.o,,,)
+NormalProgramTarget(getusers,getusers.o,,,)
+NormalProgramTarget(monitor_sb,monitor_sb.o,,,)
+NormalProgramTarget(simple_sb,simple_sb.o,,,)

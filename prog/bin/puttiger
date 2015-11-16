@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Script to put file to Tiger
+# 21-11-2007 -- JW
+#
+
+if [ -z "$1" ]; then
+   echo "Usage: puttiger file_or_directory_name [destination]"
+   exit
+fi
+
+if [ -z "$2" ]; then
+   scp -p -r -P33 "$1" "$USER"@siri.uio.no:
+else
+   scp -p -r -P33 "$1" "$USER"@siri.uio.no:"$2"
+fi

@@ -1,0 +1,49 @@
+#!/bin/csh -f
+#
+#       Filenameme:       makefile
+#
+#       Purpose:        Install the Bit 3 SBus device driver, bts.
+#
+#       Copyright (c) 1990, 1991 by Bit 3 Computer Corporation.
+#       All rights reserved.
+#
+#       $Revision:   2.1  $
+#
+
+#DEBUG_FLAGS=-DDEBUG -g
+DEVICE=-DBTS_MODEL=466
+DEFNS=-Dsun $(DEVICE)
+#CFLAGS= -O2 -I.						# Solaris 1
+CFLAGS= -Xa -xO2 -I. -DSOL2 -dn -L/usr/ucblib -lucb		# Solaris 2
+#############################################################################
+# Which means:
+# -Xa     <->  ANSI compatible
+# -xO2    <->  Opt level 2 (default)
+# -I.     <->  Add cwd to include path
+# -D      <->  Associate name (SOL2) with token 1
+# -dn     <->  No dynamic links
+# -L      <->  Add dir (/usr/ucblib ) to ld path
+# -l      <->  Link with object library ucb
+#############################################################################
+
+
+readbox24: readbox24.c bit3_perror.o bt_devname.o
+	cc readbox24.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEBUG_FLAGS) -o readbox24
+
+readbox32: readbox32.c bit3_perror.o bt_devname.o
+	cc readbox32.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEBUG_FLAGS) -o readbox32
+
+readbox: readbox.c bit3_perror.o bt_devname.o
+	cc readbox.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEBUG_FLAGS) -o readbox
+
+
+
+
+
+
+
+
+
+
+
+

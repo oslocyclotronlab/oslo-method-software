@@ -1,0 +1,75 @@
+100 REM     BARRIER.BAS     SEPTEMBER 21, 1990       J. KANTELE
+
+110 COLOR 15, 1: CLS
+
+120 PRINT "*****************************************************************"
+
+130 PRINT " PROGRAM TO CALCULATE COULOMB AND INTERACTION-BARRIER HEIGHTS, AND"
+
+140 PRINT " INTERACTION RADII AND 'HALF-DENSITY' DISTANCES FOR HEAVY-ION"
+
+150 PRINT " COLLISIONS, (CORRESPONDING TO CONTACT AT 1/10 AND 1/2 DENSITIES,"
+
+160 PRINT " RESPECTIVELY). TWO VALUES FOR C.B. ARE GIVEN: THE 'PRACTICAL' ONE"
+
+170 PRINT " AND THE VALUE DUE TO BASS [Ba80]. DO NOT USE FOR Z < 2."
+
+180 PRINT "*****************************************************************"
+
+190 PRINT
+
+200 INPUT " PROJECTILE Z, A = ", Z1, A1
+
+210 PRINT
+
+220 INPUT " TARGET Z, A = ", Z2, A2
+
+230 PRINT
+
+240 CBP = Z1 * Z2 / (A1 ^ (1 / 3) + A2 ^ (1 / 3))
+
+250 R1 = 1.12 * A1 ^ (1 / 3) - .94 * A1 ^ (-1 / 3)
+
+260 R2 = 1.12 * A2 ^ (1 / 3) - .94 * A2 ^ (-1 / 3)
+
+270 RC = R1 + R2 + 3: RHD = R1 + R2
+
+280 CBB = 1.44 * Z1 * Z2 / RC
+
+290 RL = 1.36 * (A1 ^ (1 / 3) + A2 ^ (1 / 3)) + .5
+
+300 RH = 1.16 * (A1 ^ (1 / 3) + A2 ^ (1 / 3)) + 2.4
+
+310 IF A1 ^ (1 / 3) + A2 ^ (1 / 3) < 10 THEN RI = RL ELSE RI = RH
+
+320 IB = 1.44 * Z1 * Z2 / RI: COLOR 14
+
+330 PRINT USING " COULOMB BARIER ('PRACTICAL') = ####.# MeV "; CBP
+
+340 PRINT : COLOR 12
+
+350 PRINT USING " COULOMB BARIER (BASS) = ####.# MeV "; CBB
+
+360 PRINT : COLOR 11
+
+370 PRINT USING " INTERACTION BARRIER = ####.# MeV"; IB
+
+380 PRINT : COLOR 11
+
+390 PRINT USING " INTERACTION RADIUS = ##.## fm"; RI
+
+400 PRINT
+
+410 PRINT USING " 'HALF-DENSITY' DISTANCE (BASS) = ##.## fm"; RHD
+
+420 PRINT : COLOR 15
+
+430 PRINT "*****************************************************************"
+
+440 INPUT " DO YOU WANT TO CONTINUE? (1 = YES; 2 = QUIT) YOUR CHOICE = ", N
+
+450 ON N GOTO 180, 460
+
+460 END
+
+

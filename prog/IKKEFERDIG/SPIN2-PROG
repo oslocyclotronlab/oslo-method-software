@@ -1,0 +1,241 @@
+      PROGRAM SPIN2
+      EXTERNAL FUNC
+      DIMENSION XI(20),S(20),SIG(20),SHIFT(10),A(5),P(20),PSIG(20)
+      DIMENSION DIST(200,6),RESU(10,8),SIGMA(10)
+
+      WRITE(1,*)'       ******************************************'
+      WRITE(1,*)'       *                                        *'
+      WRITE(1,*)'       *    S I G M A ( r e a c t i o n )       *'
+      WRITE(1,*)'       *                                        *'
+      WRITE(1,*)'       *        PROGRAM TO CALCULATE THE        *'
+      WRITE(1,*)'       *       REACTION SPINDISTRIBUTION AS     *'
+      WRITE(1,*)'       *     FUNCTION OF EXCITATION-ENERGY.     *'
+      WRITE(1,*)'       *   DATA IS READ FROM FILE SPININ:DATA   *'
+      WRITE(1,*)'       *   THE DATA IS ARRANGED LIKE THIS WITH  *'
+      WRITE(1,*)'       *  SPIN, counts, uncert (9999=nonexist): *'
+      WRITE(1,*)'       *     0   9999   9999                    *'
+      WRITE(1,*)'       *     2   369      77                    *'
+      WRITE(1,*)'       *     4     .     .                      *'
+      WRITE(1,*)'       *     6     .     .                      *'
+      WRITE(1,*)'       *     0     0     0  (TO MARK NEXT DIST.)*'
+      WRITE(1,*)'       *     0   333     67                     *'
+      WRITE(1,*)'       *   9999  9999   9999 (TO MARK END)      *'
+      WRITE(1,*)'       *                                        *'
+      WRITE(1,*)'       *                                        *'
+      WRITE(1,*)'       *             26.1.1993/MG               *'
+      WRITE(1,*)'       ******************************************'
+
+      WRITE(1,7)
+  7   FORMAT(/'$Type RETURN')
+      CALL READI(1,I)
+
+C Gidder ikke programere lesing av energi, mass og shift,DE STAAR HER:
+      RESU(1,1)=4.7
+      RESU(2,1)=17.3
+      RESU(3,1)=23.5
+      RESU(4,1)=29.6
+      RESU(5,1)=37.7
+
+      SIGMA(1)=CUTOFF(162.,RESU(1,1))
+      SIGMA(2)=CUTOFF(160.,RESU(2,1))
+      SIGMA(3)=CUTOFF(160.,RESU(3,1))
+      SIGMA(4)=CUTOFF(160.,RESU(4,1))
+      SIGMA(5)=CUTOFF(158.,RESU(5,1))
+
+      SHIFT(1)=0.5
+      SHIFT(2)=1.5
+      SHIFT(3)=1.5
+      SHIFT(4)=1.5
+      SHIFT(5)=2.5
+
+
+C     READING PARAMETERS FROM DISK
+      idist=0
+      iresu=0
+
+      OPEN(23,FILE='SPININ:DATA',STATUS='OLD',ERR=508)
+      DO FOR j=1,10
+        A(2)=SIGMA(j)
+        ISTAT=0
+        DO FOR i=1,20
+          XI(i)=(2*i)-2
+          S(i)=0
+          SIG(i)=0
+          P(i)=0
+          PSIG(i)=0
+          READ(23,*)XI(i),S(i),SIG(i)
+          IF(XI(i)+S(i)+SIG(i).EQ.0)ISTAT=1
+          IF(XI(i).EQ.9999)GO TO 9999
+          IF(ISTAT.EQ.1)GO TO 2
+        ENDDO
+
+   2    NRANGE=i
+        XI(i)=(2*I)-2                  ! Else it will be 0 or 9999
+
+C Transforming S to P with DeltaI=SHIFT
+        DO FOR i=1,NRANGE
+          P(i)   =0
+          PSIG(i)=0
+          X0=XI(i)-SHIFT(j)
+          il=0
+          DO FOR ii=1,NRANGE
+            IF(X0.GT.XI(ii))il=ii
+          ENDDO
+
+          IF(il.GT.NRANGE-1) GO TO 3
+
+          IF(il.GT.0) THEN
+            P(i)   =S(il)+(S(il+1)-S(il))*(X0-XI(il))/2.
+            PSIG(i)=SIG(il)+(SIG(il+1)-SIG(il))*(X0-XI(il))/2.
+          ENDIF
+
+          IF(il.EQ.0) THEN
+            P(i)   =0+S(1)  *(X0+2)/2.
+            PSIG(i)=0+SIG(1)*(X0+2)/2.
+          ENDIF
+
+          IF(P(i)   .LT.0) P(i)   =0
+          IF(PSIG(i).LT.0) PSIG(i)=0
+
+  3       CONTINUE
+        ENDDO
+
+        WRITE(1,*)' '
+        WRITE(1,*)' Spin    S(i)   Ssig  S(i-sh) Ssig(i-sh)  Rho'
+        DO FOR i=1,NRANGE
+          YYY=FUNC(XI(i),A)
+          WRITE(1,104)XI(i),S(i),SIG(i),P(i),PSIG(i),YYY
+  104     FORMAT(F5.1,F9.2,F7.2,F9.2,F7.2,F8.2)
+        ENDDO
+
+C DIVIDING on Rho and normalizing
+        SUM_S=0
+        SUM_P=0
+        DO FOR i=1,NRANGE
+          YYY=FUNC(XI(i),A)
+          P(i)   =P(i)/YYY
+          PSIG(i)=PSIG(i)/YYY
+          SUM_P=SUM_P+P(i)
+          SUM_S=SUM_S+S(i)
+        ENDDO
+        DO FOR i=1,NRANGE
+          YYY=FUNC(XI(i),A)
+          idist=idist+1
+          P(i)   =(SUM_S/SUM_P)*   P(i)
+          PSIG(i)=(SUM_S/SUM_P)*PSIG(i)
+          DIST(idist,1)=XI(i)
+          DIST(idist,2)=S(i)
+          DIST(idist,3)=SIG(i)
+          DIST(idist,4)=P(i)
+          DIST(idist,5)=PSIG(i)
+          DIST(idist,6)=YYY
+        ENDDO
+
+C Calculating Iave og width
+        AVEIS=0
+        AVEIP=0
+        AVEIS2=0
+        AVEIP2=0
+
+        DO FOR i=1,NRANGE
+          AVEIS=AVEIS+XI(i)*S(i)
+          AVEIS2=AVEIS2+XI(i)*XI(i)*S(i)
+          AVEIP=AVEIP+XI(i)*P(i)
+          AVEIP2=AVEIP2+XI(i)*XI(i)*P(i)
+        ENDDO
+
+        AVEIS=AVEIS/SUM_S
+        AVEIS2=AVEIS2/SUM_S
+        WIDTHS=SQRT(AVEIS2-AVEIS*AVEIS)
+        AVEIP=AVEIP/SUM_S
+        AVEIP2=AVEIP2/SUM_S
+        WIDTHP=SQRT(AVEIP2-AVEIP*AVEIP)
+
+        iresu=iresu+1
+        RESU(iresu,2)=A(2)
+        RESU(iresu,3)=AVEIS
+        RESU(iresu,4)=WIDTHS
+        RESU(iresu,5)=AVEIP
+        RESU(iresu,6)=WIDTHP
+        RESU(iresu,7)=SUM_S
+        RESU(iresu,8)=SHIFT(j)
+
+      ENDDO
+
+ 9999 CONTINUE
+
+C Listing results:
+      OPEN(22,FILE='TEST')
+ 9    FORMAT(/,1X,'    Spin    S(i)   Ssig      P(i)   Psig     Rho')
+      DO FOR i=1,idist
+        IF(DIST(i,1).EQ.0)WRITE(22,9)
+        WRITE(22,11)(DIST(i,k),k=1,6)
+      ENDDO
+ 11   FORMAT(1X,6F8.2)
+
+      WRITE(22,10)
+ 10   FORMAT(/,1X,'     Ex   cutoff  aveI_S    wI_S    aveI_P  wI_P',
+     +'     Sum   Shift')
+      DO FOR i=1,iresu
+        WRITE(22,12)(RESU(i,k),k=1,8)
+      ENDDO
+ 12   FORMAT(1X,8F8.2)
+
+      GO TO 7777
+ 508  WRITE(1,*) ' ERROR IN READING FILE SPININ:DATA'
+ 7777 CONTINUE
+      WRITE(1,*)'*** Results written in file TEST:SYMB***'
+      CLOSE(22)
+      CLOSE(23)
+      END
+
+      FUNCTION FUNC(X,A)
+      REAL A(5),II
+      SUM=0
+      FUNC=(2.0*X+1.)*EXP(-(X*(X+1.))/(2.*A(2)*A(2)))
+      DO FOR i=0,9
+        II=2.*i
+        SUM=SUM+(2.0*II+1.)*EXP(-(II*(II+1.))/(2.*A(2)*A(2)))
+      ENDDO
+      FUNC=1000.*FUNC/SUM
+      RETURN          
+      END
+
+      FUNCTION CUTOFF(MASS,Exci)
+      REAL MASS
+C See page 347 from Review of A. Richter, calculates cutoff-param
+      aa=MASS/8.
+      U=Exci-2.
+      Temp=(1./(2.*aa))*(1.+sqrt(1.+4.*aa*U))
+      RigMom=0.0137*((162.)**(5./3))
+      CUTOFF=sqrt(RigMom*Temp)
+      RETURN
+      END
+
+       SUBROUTINE READI(IDEV,INTEG)
+       CHARACTER X*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)INTEG
+       RETURN
+       END
+
+       SUBROUTINE READF(IDEV,REELL)
+       CHARACTER X*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)REELL
+       RETURN
+       END
+
+       SUBROUTINE READA(IDEV,KAR)
+       CHARACTER X*50
+       CHARACTER KAR*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)KAR
+       RETURN
+       END

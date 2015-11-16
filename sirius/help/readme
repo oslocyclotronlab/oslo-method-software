@@ -1,0 +1,70 @@
+Oslo February 25th, 2008
+Install instructions for offline on Mac OS X 10.5 or higher
+Executable files and scripts should have chmod 755
+Text files should have chmod 644  
+E-mail: magne.guttormsen@fys.uio.no
+
+1	Copy the /sirius folder to /Applications/sirius
+
+2	Copy the X11 file Offline to app-defaults directory:
+	sudo cp Sirius /usr/X11R6/lib/X11/app-defaults/Sirius
+	in order to obtain the appropriate X-environment (GUI fonts, colors etc)
+
+3	You need Open Motif:
+	openmotif3 ver.2.2.2-5 x11 Official Implementation of OSF/Motif (2.2 exp)
+	The window manager can be downloaded free from Fink
+
+4	You need to allocate shared memory:
+	4.1	Open terminal
+	4.2	Look what you have of shared memory:
+			sysctl -a | grep shm
+			kern.exec: unknown type returned
+			kern.sysv.shmall: 1024
+			kern.sysv.shmseg: 8
+			kern.sysv.shmmni: 32
+			kern.sysv.shmmin: 1
+			kern.sysv.shmmax: 4194304
+			security.mac.sysvshm_enforce: 1
+			security.mac.posixshm_enforce: 1
+
+	4.3	Change default values for shared memory:
+			You have only allocated 4 MB = 4194304 bytes of shared memory.
+			In order to increase this, we create a new system file under
+			the /etc directory. You need sudo to do this:
+			sudo cp sysctl.conf /etc/sysctl.conf
+         		
+	4.4	Restart the computer (you may need to restart 2 times)
+	4.5	Test that you got 16 MB shared memory:
+			sysctl -a | grep shm
+			kern.exec: unknown type returned
+			kern.sysv.shmall: 4096
+			kern.sysv.shmseg: 50
+			kern.sysv.shmmni: 64
+			kern.sysv.shmmin: 1
+			kern.sysv.shmmax: 16777216
+			security.mac.sysvshm_enforce: 1
+			security.mac.posixshm_enforce: 1
+
+			Note that: shmmax = 4096 * shmall (needed on MacOSX) 
+
+5       You need to increase the maximum allowed value of your stack size
+	5.1	Type the allowed limit (default was 8 MB, now 64 MB), write in terminal:
+			launchctl limit stack 67108864 67108864
+			(a script executes the command: ulimit -s 65500 65500
+			to set the stack size when you start sirius)
+	5.2	Restart the computer
+
+6       Byte swapping between Intel and PowerPC CPUs:
+        If you have an Intel CPU, you should swap the event data bytes by
+        ((x&0xff000000)>>24)+((x&0x00ff0000)>>8)+((x&0x0000ff00)<<8)+((x&0x000000ff)<<24)
+        This is done by removing the commenting of 4 statements at the end of read_disc.c
+
+7	To recompile and build offline:
+	7.1	Go to /Applications/sirius/src
+	7.2	Type: sh REMAKE.ALL	
+
+8	To start offline, do the following:
+	8.1	Open an xterm window
+	8.2	Use cd to enter the directory where you want to srore the eventfiles, called sirius_0, sirius_1, sirius_2...
+	8.3	Type: sirius
+

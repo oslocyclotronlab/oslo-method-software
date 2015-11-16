@@ -1,0 +1,10 @@
+SYS_LIBRARIES = -lXm -lXt -lX11 
+
+AllTarget(iconPixmap resize_shell set_minimum wm_del_proto wm_delete wm_protocol)
+
+NormalProgramTarget(iconPixmap,iconPixmap.o,,,)
+NormalProgramTarget(resize_shell,resize_shell.o,,,)
+NormalProgramTarget(set_minimum,set_minimum.o,,,)
+NormalProgramTarget(wm_del_proto,wm_del_proto.o,,,)
+NormalProgramTarget(wm_delete,wm_delete.o,,,)
+NormalProgramTarget(wm_protocol,wm_protocol.o,,,)

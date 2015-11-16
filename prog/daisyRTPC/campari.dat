@@ -1,0 +1,196 @@
+     0     4   ADC threshold
+     1     4   ADC threshold
+     2     4   ADC threshold
+     3     3   ADC threshold
+     4   255   ADC 1, uld
+     5   255   ADC 1, uld
+     6   255   ADC 1, uld
+     7   255   ADC 1, uld
+     8   255   ADC 1, uld
+     9   255   ADC 1, uld
+    10   255   ADC 1, uld
+    11   255   ADC 1, uld
+    12     5   ADC 1, lld
+    13     5   ADC 1, lld
+    14     5   ADC 1, lld
+    15     5   ADC 1, lld
+    16     5   ADC 1, lld
+    17     5   ADC 1, lld
+    18     5   ADC 1, lld
+    19     5   ADC 1, lld
+    20   255   ADC 2, uld
+    21   255   ADC 2, uld
+    22   255   ADC 2, uld
+    23   255   ADC 2, uld
+    24   255   ADC 2, uld
+    25   255   ADC 2, uld
+    26   255   ADC 2, uld
+    27   255   ADC 2, uld
+    28     5   ADC 2, lld
+    29     5   ADC 2, lld
+    30     5   ADC 2, lld
+    31     5   ADC 2, lld
+    32     5   ADC 2, lld
+    33     5   ADC 2, lld
+    34     5   ADC 2, lld
+    35     5   ADC 2, lld
+    36   255   ADC 3, uld
+    37   255   ADC 3, uld
+    38   255   ADC 3, uld
+    39   255   ADC 3, uld
+    40   255   ADC 3, uld
+    41   255   ADC 3, uld
+    42   255   ADC 3, uld
+    43   255   ADC 3, uld
+    44     5   ADC 3, lld
+    45     5   ADC 3, lld
+    46     5   ADC 3, lld
+    47     5   ADC 3, lld
+    48     5   ADC 3, lld
+    49     5   ADC 3, lld
+    50     5   ADC 3, lld
+    51     5   ADC 3, lld
+    52   255   ADC 4, uld
+    53   255   ADC 4, uld
+    54   255   ADC 4, uld
+    55   255   ADC 4, uld
+    56   255   ADC 4, uld
+    57   255   ADC 4, uld
+    58   255   ADC 4, uld
+    59   255   ADC 4, uld
+    60     5   ADC 4, lld
+    61     5   ADC 4, lld
+    62     5   ADC 4, lld
+    63     5   ADC 4, lld
+    64     5   ADC 4, lld
+    65     5   ADC 4, lld
+    66     5   ADC 4, lld
+    67     5   ADC 4, lld
+    68   128   ADC offset
+    69   128   ADC offset
+    70   128   ADC offset
+    71   128   ADC offset
+    72   128   ADC offset
+    73   128   ADC offset
+    74   128   ADC offset
+    75   128   ADC offset
+    76   128   ADC offset
+    77   128   ADC offset
+    78   128   ADC offset
+    79   128   ADC offset
+    80   128   ADC offset
+    81   128   ADC offset
+    82   128   ADC offset
+    83   128   ADC offset
+    84   128   ADC offset
+    85   128   ADC offset
+    86   128   ADC offset
+    87   128   ADC offset
+    88   128   ADC offset
+    89   128   ADC offset
+    90   128   ADC offset
+    91   128   ADC offset
+    92   128   ADC offset
+    93   128   ADC offset
+    94   128   ADC offset
+    95   128   ADC offset
+    96   128   ADC offset
+    97   128   ADC offset
+    98   128   ADC offset
+    99   128   ADC offset
+   100   255   TDC 1, uld
+   101   255   TDC 1, uld
+   102   255   TDC 1, uld
+   103   255   TDC 1, uld
+   104   255   TDC 1, uld
+   105   255   TDC 1, uld
+   106   255   TDC 1, uld
+   107   255   TDC 1, uld
+   108     5   TDC 1, lld
+   109     5   TDC 1, lld
+   110     5   TDC 1, lld
+   111     5   TDC 1, lld
+   112     5   TDC 1, lld
+   113     5   TDC 1, lld
+   114     5   TDC 1, lld
+   115     5   TDC 1, lld
+   116   255   TDC 2, uld
+   117   255   TDC 2, uld
+   118   255   TDC 2, uld
+   119   255   TDC 2, uld
+   120   255   TDC 2, uld
+   121   255   TDC 2, uld
+   122   255   TDC 2, uld
+   123   255   TDC 2, uld
+   124     5   TDC 2, lld
+   125     5   TDC 2, lld
+   126     5   TDC 2, lld
+   127     5   TDC 2, lld
+   128     5   TDC 2, lld
+   129     5   TDC 2, lld
+   130     5   TDC 2, lld
+   131     5   TDC 2, lld
+   132   255   TDC 3, uld
+   133   255   TDC 3, uld
+   134   255   TDC 3, uld
+   135   255   TDC 3, uld
+   136   255   TDC 3, uld
+   137   255   TDC 3, uld
+   138   255   TDC 3, uld
+   139   255   TDC 3, uld
+   140     5   TDC 3, lld
+   141     5   TDC 3, lld
+   142     5   TDC 3, lld
+   143     5   TDC 3, lld
+   144     5   TDC 3, lld
+   145     5   TDC 3, lld
+   146     5   TDC 3, lld
+   147     5   TDC 3, lld
+   148   255   TDC 4, uld
+   149   255   TDC 4, uld
+   150   255   TDC 4, uld
+   151   255   TDC 4, uld
+   152   255   TDC 4, uld
+   153   255   TDC 4, uld
+   154   255   TDC 4, uld
+   155   255   TDC 4, uld
+   156     5   TDC 4, lld
+   157     5   TDC 4, lld
+   158     5   TDC 4, lld
+   159     5   TDC 4, lld
+   160     5   TDC 4, lld
+   161     5   TDC 4, lld
+   162     5   TDC 4, lld
+   163     5   TDC 4, lld
+   164   128   TDC offset
+   165   128   TDC offset
+   166   128   TDC offset
+   167   128   TDC offset
+   168   128   TDC offset
+   169   128   TDC offset
+   170   128   TDC offset
+   171   128   TDC offset
+   172   128   TDC offset
+   173   128   TDC offset
+   174   128   TDC offset
+   175   128   TDC offset
+   176   128   TDC offset
+   177   128   TDC offset
+   178   128   TDC offset
+   179   128   TDC offset
+   180   128   TDC offset
+   181   128   TDC offset
+   182   128   TDC offset
+   183   128   TDC offset
+   184   128   TDC offset
+   185   128   TDC offset
+   186   128   TDC offset
+   187   128   TDC offset
+   188   128   TDC offset
+   189   128   TDC offset
+   190   128   TDC offset
+   191   128   TDC offset
+   192   128   TDC offset
+   193   128   TDC offset
+   194   128   TDC offset
+   195   128   TDC offset

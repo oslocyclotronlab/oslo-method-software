@@ -1,0 +1,7 @@
+PROGRAMS=alpha_list list_callback scrolled_list search_list simple_list
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

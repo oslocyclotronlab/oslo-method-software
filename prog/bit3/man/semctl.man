@@ -1,0 +1,198 @@
+
+
+
+ sssseeeemmmmccccttttllll((((2222))))                                                         sssseeeemmmmccccttttllll((((2222))))
+
+
+
+
+ NNNNAAAAMMMMEEEE
+      semctl - semaphore control operations
+
+ SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+      ####iiiinnnncccclllluuuuddddeeee <<<<ssssyyyyssss////sssseeeemmmm....hhhh>>>>
+
+      iiiinnnntttt sssseeeemmmmccccttttllll((((iiiinnnntttt sssseeeemmmmiiiidddd,,,,
+      iiiinnnntttt sssseeeemmmmnnnnuuuummmm,,,,
+      iiiinnnntttt ccccmmmmdddd,,,, ............
+      ////**** aaaarrrrgggg ****////
+      ))));;;;
+
+ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+      sssseeeemmmmccccttttllll(((()))) provides a variety of semaphore control operations as
+      specified by _c_m_d.
+
+      The following _c_m_ds are executed with respect to the semaphore
+      specified by _s_e_m_i_d and _s_e_m_n_u_m:
+
+           GGGGEEEETTTTVVVVAAAALLLL         Return the value of semval (see _s_e_m_a_p_h_o_r_e
+                          _i_d_e_n_t_i_f_i_e_r in _g_l_o_s_s_a_r_y(9)).  Requires Read
+                          permission.
+
+           SSSSEEEETTTTVVVVAAAALLLL         Set the value of semval to _a_r_g, where _a_r_g is the
+                          fourth argument of sssseeeemmmmccccttttllll(((()))) taken as an iiiinnnntttt.  When
+                          this _c_m_d is successfully executed, the semadj
+                          value corresponding to the specified semaphore in
+                          all processes is cleared.  Requires Alter
+                          permission.
+
+           GGGGEEEETTTTPPPPIIIIDDDD         Return the value of sempid.  Requires Read
+                          permission.
+
+           GGGGEEEETTTTNNNNCCCCNNNNTTTT        Return the value of semncnt.  Requires Read
+                          permission.
+
+           GGGGEEEETTTTZZZZCCCCNNNNTTTT        Return the value of semzcnt.  Requires Read
+                          permission.
+
+      The following _c_m_ds return and set, respectively, every semval in the
+      set of semaphores.
+
+           GGGGEEEETTTTAAAALLLLLLLL         Place semvals into array pointed to by _a_r_g, where
+                          _a_r_g is the fourth argument of sssseeeemmmmccccttttllll(((()))) taken as a
+                          pointer to uuuunnnnssssiiiiggggnnnneeeedddd sssshhhhoooorrrrtttt iiiinnnntttt.  Requires Read
+                          permission.
+
+           SSSSEEEETTTTAAAALLLLLLLL         Set semvals according to the array pointed to by
+                          _a_r_g, where _a_r_g is the fourth argument of sssseeeemmmmccccttttllll(((())))
+                          taken as a pointer to uuuunnnnssssiiiiggggnnnneeeedddd sssshhhhoooorrrrtttt iiiinnnntttt.  When
+                          this _c_m_d is successfully executed, the semadj
+
+
+
+ Hewlett-Packard Company            - 1 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssseeeemmmmccccttttllll((((2222))))                                                         sssseeeemmmmccccttttllll((((2222))))
+
+
+
+
+                          values corresponding to each specified semaphore
+                          in all processes are cleared.  Requires Alter
+                          permission.
+
+      The following _c_m_ds are also available:
+
+           IIIIPPPPCCCC____SSSSTTTTAAAATTTT       Place the current value of each member of the data
+                          structure associated with _s_e_m_i_d into the structure
+                          pointed to by _a_r_g, where _a_r_g is the fourth
+                          argument of sssseeeemmmmccccttttllll(((()))) taken as a pointer to ssssttttrrrruuuucccctttt
+                          sssseeeemmmmiiiidddd____ddddssss.  The contents of this structure are
+                          defined in _g_l_o_s_s_a_r_y(9).  Requires Read permission.
+
+           IIIIPPPPCCCC____SSSSEEEETTTT        Set the value of the following members of the data
+                          structure associated with _s_e_m_i_d to the
+                          corresponding value found in the structure pointed
+                          to by _a_r_g, where _a_r_g is the fourth argument of
+                          sssseeeemmmmccccttttllll(((()))) taken as a pointer to ssssttttrrrruuuucccctttt sssseeeemmmmiiiidddd____ddddssss:
+
+                                    sssseeeemmmm____ppppeeeerrrrmmmm....uuuuiiiidddd
+                                    sssseeeemmmm____ppppeeeerrrrmmmm....ggggiiiidddd
+                                    sssseeeemmmm____ppppeeeerrrrmmmm....mmmmooooddddeeee  ////**** oooonnnnllllyyyy lllloooowwww 9999 bbbbiiiittttssss ****////
+
+                          This _c_m_d can only be executed by a process that
+                          has an effective user ID equal to either that of
+                          super-user or to the value of either sssseeeemmmm____ppppeeeerrrrmmmm....uuuuiiiidddd
+                          or sssseeeemmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd in the data structure associated
+                          with _s_e_m_i_d.
+
+           IIIIPPPPCCCC____RRRRMMMMIIIIDDDD       Remove the semaphore identifier specified by _s_e_m_i_d
+                          from the system and destroy the set of semaphores
+                          and data structure associated with it.  This _c_m_d
+                          can only be executed by a process that has an
+                          effective user ID equal to either that of super-
+                          user or to the value of either sssseeeemmmm____ppppeeeerrrrmmmm....uuuuiiiidddd or
+                          sssseeeemmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd in the data structure associated
+                          with _s_e_m_i_d.
+
+ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+      The following call to sssseeeemmmmccccttttllll(((()))) initializes the set of 4 semaphores to
+      the values 0, 1, 0, and 1 respectively.  This example assumes the
+      process has a valid semid representing a set of 4 semaphores as shown
+      in the _s_e_m_g_e_t(2) manual entry.  For an example of performing "P" and
+      "V" operations on the semaphores below, refer to _s_e_m_o_p(2).
+
+           uuuusssshhhhoooorrrrtttt sssseeeemmmmaaaarrrrrrrraaaayyyy[[[[4444]]]];;;;
+
+           sssseeeemmmmaaaarrrrrrrraaaayyyy[[[[0000]]]] ==== 0000;;;;
+           sssseeeemmmmaaaarrrrrrrraaaayyyy[[[[1111]]]] ==== 1111;;;;
+           sssseeeemmmmaaaarrrrrrrraaaayyyy[[[[2222]]]] ==== 0000;;;;
+           sssseeeemmmmaaaarrrrrrrraaaayyyy[[[[3333]]]] ==== 1111;;;;
+
+
+
+ Hewlett-Packard Company            - 2 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssseeeemmmmccccttttllll((((2222))))                                                         sssseeeemmmmccccttttllll((((2222))))
+
+
+
+
+           sssseeeemmmmccccttttllll ((((mmmmyyyysssseeeemmmmiiiidddd,,,, 0000,,,, SSSSEEEETTTTAAAALLLLLLLL,,,, sssseeeemmmmaaaarrrrrrrraaaayyyy))));;;;
+
+ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEE
+      Upon successful completion, the value returned depends on _c_m_d as
+      follows:
+
+           GGGGEEEETTTTVVVVAAAALLLL         The value of semval.
+           GGGGEEEETTTTNNNNCCCCNNNNTTTT        The value of semncnt.
+           GGGGEEEETTTTZZZZCCCCNNNNTTTT        The value of semzcnt.
+           GGGGEEEETTTTPPPPIIIIDDDD         The value of sempid.
+
+      All others return a value of 0.
+
+      Otherwise, a value of -1 is returned and eeeerrrrrrrrnnnnoooo is set to indicate the
+      error.
+
+ EEEERRRRRRRROOOORRRRSSSS
+      sssseeeemmmmccccttttllll(((()))) fails if any of the following conditions are encountered:
+
+           [EACCES]       Operation permission is denied to the calling
+                          process (see _s_e_m_a_p_h_o_r_e _o_p_e_r_a_t_i_o_n _p_e_r_m_i_s_s_i_o_n_s in
+                          _g_l_o_s_s_a_r_y(9).
+
+           [EFAULT]       _c_m_d is equal to GGGGEEEETTTTVVVVAAAALLLL, SSSSEEEETTTTVVVVAAAALLLL, GGGGEEEETTTTAAAALLLLLLLL, SSSSEEEETTTTAAAALLLLLLLL,
+                          IIIIPPPPCCCC____SSSSTTTTAAAATTTT, or IIIIPPPPCCCC____SSSSEEEETTTT, and _a_r_g.
+
+           [EINVAL]       _s_e_m_i_d is not a valid semaphore identifier.
+
+           [EINVAL]       _s_e_m_n_u_m is less than zero or greater than or equal
+                          sssseeeemmmm____nnnnsssseeeemmmmssss.
+
+           [EINVAL]       _c_m_d is not a valid command.
+
+           [EPERM]        _c_m_d is equal to IIIIPPPPCCCC____RRRRMMMMIIIIDDDD or IIIIPPPPCCCC____SSSSEEEETTTT and the
+                          effective user ID of the calling process is not
+                          equal to that of super-user and it is not equal to
+                          the value of either sssseeeemmmm____ppppeeeerrrrmmmm....uuuuiiiidddd or sssseeeemmmm____ppppeeeerrrrmmmm....ccccuuuuiiiidddd
+                          in the data structure associated with _s_e_m_i_d.
+
+           [ERANGE]       _c_m_d is SSSSEEEETTTTVVVVAAAALLLL or SSSSEEEETTTTAAAALLLLLLLL and the value to which
+                          semval is to be set is greater than the system
+                          imposed maximum.
+
+ SSSSEEEEEEEE AAAALLLLSSSSOOOO
+      ipcrm(1), ipcs(1), semget(2), semop(2), stdipc(3C).
+
+ SSSSTTTTAAAANNNNDDDDAAAARRRRDDDDSSSS CCCCOOOONNNNFFFFOOOORRRRMMMMAAAANNNNCCCCEEEE
+      sssseeeemmmmccccttttllll(((()))): SVID2, XPG2, XPG3, XPG4
+
+
+
+
+
+
+ Hewlett-Packard Company            - 3 -     HP-UX Release 9.0: August 1992
+
+
+

@@ -1,0 +1,207 @@
+100 REM    LIONSTOP.BAS          MARCH 19, 1990         J. KANTELE
+
+110 COLOR 14, 4: CLS
+
+120 PRINT "*****************************************************************"
+
+130 PRINT
+
+140 PRINT " PROGRAM TO CALCULATE RANGES AND STOPPING POWERS OF H AND HE"
+
+150 PRINT " IONS (ABOUT .3 TO 300 MeV/u) IN SOLID ELEMENTS WITH Z > 5."
+
+160 PRINT
+
+170 PRINT " THE CALCULATIONS ARE BASED ON FITS ON PROTON DATA POINTS FOR"
+
+180 PRINT " Z = 6, 13, 26, AND 82, FROM: J. F. JANNI, ADNDT 27, (1982) 341."
+
+190 PRINT
+
+200 PRINT " THE ACCURACY IS GENERALLY 5 PER CENT (AT LEAST FOR PROTONS),"
+
+210 PRINT " EXCEPT FOR VALUES INVOLVING LARGE INTERPOLATION STEPS."
+
+220 PRINT
+
+230 PRINT "*****************************************************************"
+
+240 DIM T(10, 11)
+
+250 FOR K = 1 TO 10
+
+260     FOR L = 1 TO 11
+
+270         READ T(K, L)
+
+280     NEXT L
+
+290 NEXT K
+
+300 DATA .1, .3, .7, 1, 3, 7, 10, 30, 70, 100, 300
+
+310 DATA 1, 4.4, 14, 24, 160, 680, 1300, 9000, 4E+4, 7.5E+4, 5.2E+5
+
+320 DATA 6, .49, 1.6, 2.8, 16.7, 72, 136, 979, 4514, 8538, 5.7E+4
+
+330 DATA 13, .79, 2.4, 3.9, 21.9, 91, 168, 1170, 5270, 9900, 6.5E+4
+
+340 DATA 26, 1.09, 3.1, 5.1, 28, 111, 203, 1360, 6010, 1.12E+4, 7.26E+4
+
+350 DATA 82, 2.2, 6.3, 10.3, 52, 192, 339, 2080, 8780, 1.6E+4, 1E+5
+
+360 DATA 6, 505, 288, 229, 106, 55, 41, 16.9, 8.6, 6.6, 3.2
+
+370 DATA 13, 311, 213, 172, 83, 45, 34, 14.4, 7.5, 5.7, 2.8
+
+380 DATA 26, 257, 159, 131, 66.8, 37, 28.7, 12.5, 6.6, 5.08, 2.51
+
+390 DATA 82, 109, 76, 64, 37, 21, 17.7, 8.4, 4.6, 3.6, 1.8
+
+400 PRINT
+
+410 INPUT " PROJECTILE # (1 = p, 2 = d, 3 = t, 4 = 3-He, 5 = 4-He) = ", N
+
+420 PRINT
+
+430 IF N > 5 THEN 440 ELSE 460
+
+440 PRINT " PROJECTILE NUMBER MUST BE 1, 2, 3, 4, or 5 !": GOTO 400
+
+450 PRINT
+
+460 INPUT " PROJECTILE ENERGY (MeV) = ", G
+
+470 PRINT
+
+480 IF N = 1 THEN 490 ELSE 500
+
+490 P = G: GOTO 570
+
+500 IF N = 2 THEN 510 ELSE 520
+
+510 P = .5 * G: GOTO 570
+
+520 IF N = 3 THEN 530 ELSE 540
+
+530 P = .333 * G: GOTO 570
+
+540 IF N = 4 THEN 550 ELSE 560
+
+550 P = .28 * G: GOTO 570
+
+560 P = .25 * G: REM P IS THE ENERGY PER NUCLEON (MeV/u)
+
+570 IF P < .3 THEN 590 ELSE 580
+
+580 IF P > 300 THEN 590 ELSE 610
+
+590 PRINT " THE ENERGY RANGE IS .299 MeV < E/A < 300 MeV !": GOTO 450
+
+600 PRINT
+
+610 INPUT " ATOMIC NUMBER OF ABSORBER, Z = ", Z
+
+620 PRINT
+
+630 IF Z < 6 THEN 640 ELSE 650
+
+640 PRINT " YOU MUST HAVE Z > 5 !": GOTO 600
+
+650 PRINT
+
+660 FOR J = 1 TO 10
+
+670 IF T(1, J + 1) - P >= 0 THEN 690 ELSE 680
+
+680 NEXT J
+
+690 FOR I = 2 TO 6
+
+700 GOSUB 1110
+
+710 NEXT I
+
+720 IF Z > 82 THEN 770
+
+730 FOR M = 2 TO 5
+
+740 IF T(M + 1, 1) - Z >= 0 THEN 760
+
+750 NEXT M
+
+760 LET R = Y(M + 1) + (Y(M) - Y(M + 1)) * ((T(M + 1, 1) - Z) / (T(M + 1, 1) - T(M, 1))): GOTO 780
+
+770 LET R = Y(6) + (Y(6) - Y(5)) * (Z - 82) / (82 - 26): GOTO 780
+
+780 LET Q = 1 + (N - 1) * (N - 4) * (N - 5) / 6 + (N - 1) * (N - 2) * (N - 4) * (N - 5) / 3
+
+790 LET R1 = Q * R
+
+800 LET R2 = (Y(4) + (Y(5) - Y(4)) / 13) * 4.31 * Q
+
+810 LET R3 = (Y(5) + .107 * (Y(6) - Y(5))) * 1.88 * Q
+
+820 LET R4 = Y(2) * Q
+
+830 FOR I = 7 TO 10
+
+840 GOSUB 1110
+
+850 NEXT I
+
+860 IF Z > 82 THEN 910
+
+870 FOR U = 6 TO 9
+
+880 IF T(U + 1, 1) - Z >= 0 THEN 900
+
+890 NEXT U
+
+900 S = Y(U + 1) + (Y(U) - Y(U + 1)) * ((T(U + 1, 1) - Z) / (T(U + 1, 1) - T(U, 1))) ^ 2: GOTO 920
+
+910 S = Y(10) + (Y(10) - Y(9)) * ((Z - 82) / (82 - 26)) / 2: GOTO 920
+
+920 IF N < 4 THEN V = 1
+
+930 IF N = 4 THEN V = 3.6
+
+940 IF N = 5 THEN V = 4
+
+950 S1 = V * S
+
+960 COLOR 15
+
+970 PRINT USING " RANGE IN ELEMENT Z = ## IS = ##.##^^^^ mg/cm^2"; Z; R1
+
+980 PRINT
+
+990 PRINT USING " STOPPING POWER IN Z = ## IS dE/dx = ##.##^^^^ keV/mg/cm^2"; Z; S1
+
+1000 PRINT : COLOR 14
+
+1010 PRINT USING " RANGE IN SILICON = ##.##^^^^ micrometers"; R2
+
+1020 PRINT
+
+1030 PRINT USING " RANGE IN GERMANIUM = ##.##^^^^ micrometers"; R3
+
+1040 PRINT
+
+1050 PRINT USING " RANGE IN NE PLASTIC = ##.##^^^^ micrometers"; R4
+
+1060 PRINT
+
+1070 COLOR 11: PRINT " TO QUIT, JUST HIT CTRL-C ": COLOR 14
+
+1080 PRINT "****************************************************************"
+
+1090 GOTO 400
+
+1100 END
+
+1110 LET Y(I) = EXP(LOG(T(I, J)) + (LOG(P) - LOG(T(1, J))) / (LOG(T(1, J + 1)) - LOG(T(1, J))) * (LOG(T(I, J + 1)) - LOG(T(I, J))))
+
+1120 RETURN
+
+

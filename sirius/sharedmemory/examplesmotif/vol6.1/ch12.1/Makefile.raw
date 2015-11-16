@@ -1,0 +1,7 @@
+PROGRAMS=radio_box simple_radio toggle toggle_box toggle_pix
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

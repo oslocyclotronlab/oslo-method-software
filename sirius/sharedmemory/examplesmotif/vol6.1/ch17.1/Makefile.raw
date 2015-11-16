@@ -1,0 +1,7 @@
+PROGRAMS=iconPixmap resize_shell set_minimum wm_del_proto wm_delete wm_protocol
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

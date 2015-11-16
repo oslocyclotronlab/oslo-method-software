@@ -1,0 +1,13 @@
+C --  Define spectra 
+      integer esp(0:2047,0:63)			
+      integer desp(0:2047,0:63)
+      integer edesp(0:2047,0:63)	
+      integer thicksp(0:2047,0:63)
+      integer gesp(0:4095,0:5)
+      integer tgesp(0:511,0:5)
+      integer nasp(0:2047,0:31)
+      integer tnasp(0:511,0:31)
+      integer alfna(0:2047,0:511)
+      integer alfge(0:2047,0:511)
+      integer mat(0:2047,0:63)
+      integer singles(0:4095,0:9)			

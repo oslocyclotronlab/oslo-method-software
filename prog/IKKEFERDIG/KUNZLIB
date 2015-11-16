@@ -1,0 +1,1024 @@
+C
+C   FYSKTT*KUNZLIB.LEGAUS
+C   FYSKTT*KUNZLIB.VCC
+C   FYSKTT*KUNZLIB.PHASEF
+C   FYSKTT*KUNZLIB.YXFCT
+C   FYSKTT*KUNZLIB.RACAH
+C   FYSKTT*KUNZLIB.DELR
+C   FYSKTT*KUNZLIB.WINEJ
+C   FYSKTT*KUNZLIB.COU
+C   FYSKTT*KUNZLIB.BIND
+C   FYSKTT*KUNZLIB.CUDATE
+C   FYSKTT*KUNZLIB.LGNDR
+C   FYSKTT*KUNZLIB.DWPLOT
+C   FYSKTT*KUNZLIB.POLFCT
+C   FYSKTT*KUNZLIB.GAUSSR
+C   FYSKTT*KUNZLIB.SECOND
+C
+C FYSKTT*KUNZLIB(1).LEGAUS(0)
+C
+CLIBE08
+      SUBROUTINE LEGAUS(LL,X,W)                                         LEGAU000
+      IMPLICIT REAL*8(A-H,O-Z) 
+      DIMENSION X(100),W(100)                                           LEGAU001
+      Z3=-1.6/FLOAT(LL+1)                                               LEGAU002
+      Z2=3.0*Z3                                                         LEGAU003
+      Z1=5.0*Z3                                                         LEGAU004
+      NL=(LL+1)/2                                                       LEGAU005
+      DO 200 L=1,NL                                                     LEGAU006
+      ZOLD=0.0                                                          LEGAU007
+      Z=Z1+3.0*(Z3-Z2)                                                  LEGAU008
+      DO 50 J=1,10                                                      LEGAU009
+      P1=0.0                                                            LEGAU010
+      P2=1.0                                                            LEGAU011
+      DO 30 I=1,LL                                                      LEGAU012
+      P3=(FLOAT(I+I-1)*Z*P2-FLOAT(I-1)*P1)/FLOAT(I)                     LEGAU013
+      P1=P2                                                             LEGAU014
+      P2=P3                                                             LEGAU015
+   30 CONTINUE                                                          LEGAU016
+      DP=FLOAT(LL)*(P1-Z*P2)/(1.0-Z*Z)                                  LEGAU017
+      Z=Z-P2/DP                                                         LEGAU018
+      IF(ABS(Z-ZOLD)/Z.LT.1.0D-10) GO TO 51                             LEGAU019
+      ZOLD=Z                                                            LEGAU020
+   50 CONTINUE                                                          LEGAU021
+      WRITE(6,9100)L                                                    LEGAU022
+ 9100 FORMAT(28H0NO CONVERGENCE FOR ZERO NO.,I4)                        LEGAU023
+   51 CONTINUE                                                          LEGAU024
+      X(L)=Z                                                            LEGAU025
+      W(L)=2.0/((1.0-Z*Z)*DP*DP)                                        LEGAU026
+      Z1=Z2                                                             LEGAU027
+      Z2=Z3                                                             LEGAU028
+      Z3=Z                                                              LEGAU029
+  200 CONTINUE                                                          LEGAU030
+      RETURN                                                            LEGAU031
+      END                                                               LEGAU032
+C
+C FYSKTT*KUNZLIB(1).VCC(0)
+C
+      FUNCTION VCC(JX1,JX2,JX3,MX1,MX2)                                 VCC  000
+C     THE NEXT 3 CARDS CONVERT DWUCK TO AN IBM 360                      VCC  001
+      IMPLICIT REAL*8(A-H,O-Z)                                          VCC  002
+C     SQRT(XXX)=DSQRT(XXX)                                              VCC  003
+C     FLOAT(III)=DFLOAT(III)                                            VCC  004
+      DIMENSION FACT(51)
+      EQUIVALENCE (FACT(1),F(2))                                        VCC  024
+      COMMON/FACTRL/F(52)  
+      DATA F   / 1.0000000000D+00, 1.0000000000D+00, 2.0000000000D+00   VCC  006
+     1         , 6.0000000000D+00, 2.4000000000D+01, 1.2000000000D+02   VCC  007
+     2         , 7.2000000000D+02, 5.0400000000D+03, 4.0320000000D+04   VCC  008
+     3         , 3.6288000000D+05, 3.6288000000D+06, 3.9916800000D+07   VCC  009
+     4         , 4.7900160000D+08, 6.2270208000D+09, 8.7178291200D+10   VCC  010
+     5         , 1.3076743680D+12, 2.0922789888D+13, 3.5568742810D+14   VCC  011
+     6         , 6.4023737057D+15, 1.2164510041D+17, 2.4329020082D+18   VCC  012
+     7         , 5.1090942172D+19, 1.1240007278D+21, 2.5852016739D+22   VCC  013
+     8         , 6.2044840173D+23, 1.5511210043D+25, 4.0329146113D+26   VCC  014
+     9         , 1.0888869450D+28, 3.0488834461D+29, 8.8417619937D+30   VCC  015
+     $         , 2.6525285981D+32, 8.2228386542D+33, 2.6313083693D+35   VCC  016
+     $         , 8.6833176188D+36, 2.9523279904D+38, 1.0333147966D+40   VCC  017
+     $         , 3.7199332679D+41, 1.3763753091D+43, 5.2302261747D+44   VCC  018
+     $         , 2.0397882081D+46, 8.1591528325D+47, 3.3452526613D+49   VCC  019
+     $         , 1.4050061178D+51, 6.0415263063D+52, 2.6582715748D+54   VCC  020
+     $         , 1.1962222087D+56, 5.5026221598D+57, 2.5862324151D+59   VCC  021
+     $         , 1.2413915593D+61, 6.0828186403D+62, 3.0414093202D+64   VCC  022
+     $         , 1.5511187533D+66/                                      VCC  023
+      VCC=0.0                                                           VCC  025
+      J1=JX1                                                            VCC  026
+      J2=JX2                                                            VCC  027
+      J3=JX3                                                            VCC  028
+      M1=MX1                                                            VCC  029
+      M2=MX2                                                            VCC  030
+      IF(J1.LT.J2) GO TO 20                                             VCC  031
+      IF(J3.LT.J2) GO TO 30                                             VCC  032
+      ICNTR=0                                                           VCC  033
+      GO TO 40                                                          VCC  034
+   20 IF(J3.LT.J1) GO TO 30                                             VCC  035
+      ICNTR=-1                                                          VCC  036
+      IT=J1                                                             VCC  037
+      J1=J2                                                             VCC  038
+      J2=IT                                                             VCC  039
+      IT=M1                                                             VCC  040
+      M1=M2                                                             VCC  041
+      M2=IT                                                             VCC  042
+      GO TO 40                                                          VCC  043
+   30 ICNTR=1                                                           VCC  044
+      IT=J2                                                             VCC  045
+      J2=J3                                                             VCC  046
+      J3=IT                                                             VCC  047
+      M2=-M1-M2                                                         VCC  048
+   40 CONTINUE                                                          VCC  049
+      JZ1=(J1+J2-J3)/2                                                  VCC  050
+      IF(JZ1.LT.0) GO TO 150                                            VCC  051
+      JZ2=(J1+J3-J2)/2                                                  VCC  052
+      IF(JZ2.LT.0) GO TO 150                                            VCC  053
+      JZ3=(J2+J3-J1)/2                                                  VCC  054
+      IF(JZ3.LT.0) GO TO 150                                            VCC  055
+      IF(J1-IABS(M1).LT.0) GO TO 150                                    VCC  056
+      IF(J2-IABS(M2).LT.0) GO TO 150                                    VCC  057
+      IF(J3-IABS(M1+M2).LT.0) GO TO 150                                 VCC  058
+      JT1=(J1-J3+M2)/2                                                  VCC  059
+      JT2=(J2-J3-M1)/2                                                  VCC  060
+      NUMIN=MAX0 (JT1,JT2,0)                                            VCC  061
+      JT3=(J1-M1)/2                                                     VCC  062
+      JT4=(J2+M2)/2                                                     VCC  063
+      NUMAX=MIN0 (JT3,JT4,JZ1)                                          VCC  064
+      JT5=(J2-M2)/2                                                     VCC  065
+      IF(NUMAX.LT.NUMIN) GO TO 150                                      VCC  066
+      J4=J1/2                                                           VCC  067
+      J5=J3/2                                                           VCC  068
+      PHAS=PHASEF(NUMIN)                                                VCC  069
+      DO 100 NU=NUMIN,NUMAX                                             VCC  070
+      VCC=VCC+PHAS      *(YXFCT(JT3-NU,J4)*YXFCT(NU-JT2,J5))            VCC  071
+     1/(FACT(JT4-NU)*FACT(NU-JT1)*FACT(JZ1-NU)*FACT(NU))                VCC  072
+      PHAS=-PHAS                                                        VCC  073
+  100 CONTINUE                                                          VCC  074
+      FCTOR=YXFCT(J4,(J1+M1)/2)*YXFCT(J4,JT3)*YXFCT((J1+J2+J3)/2+1,JZ2)*VCC  075
+     1YXFCT(J5,(J3+M1+M2)/2)*YXFCT(J5,(J3-M1-M2)/2)*FACT(JZ1)*FACT(JZ3)*VCC  076
+     2FACT(JT4)*FACT(JT5)*FLOAT(J3+1)                                   VCC  077
+      VCC=SQRT(FCTOR)*VCC                                               VCC  078
+      IF(ICNTR)120,150,110                                              VCC  079
+  110 VCC=VCC*SQRT(FLOAT(J2+1)/FLOAT(J3+1))*PHASEF(JT3)                 VCC  080
+      GO TO 150                                                         VCC  081
+  120 VCC=VCC*PHASEF(JZ1)                                               VCC  082
+  150 RETURN                                                            VCC  083
+      END                                                               VCC  084
+C
+C FYSKTT*KUNZLIB(1).PHASEF(0)
+C
+      FUNCTION PHASEF(N)                                                PHASE000
+C     THE NEXT 1 CARDS CONVERT DWUCK TO AN IBM 360                      PHASE001
+      IMPLICIT REAL*8(A-H,O-Z)                                          PHASE002
+      PHASEF=FLOAT(1-2*IABS(N-2*(N/2)))                                 PHASE003
+      RETURN                                                            PHASE004
+      END                                                               PHASE005
+C
+C FYSKTT*KUNZLIB(1).YXFCT(0)
+C
+      FUNCTION YXFCT(M,N)                                               YXFCT000
+C     THE NEXT 1 CARDS CONVERT DWUCK TO AN IBM 360                      YXFCT001
+      IMPLICIT REAL*8(A-H,O-Z)                                          YXFCT002
+C     COMPUTES NFACT/MFACT                                              YXFCT003
+      YXFCT=1.0                                                         YXFCT004
+      NUMAX=M-N                                                         YXFCT005
+      IF(NUMAX)30,100,20                                                YXFCT006
+   20 ICTRL=0                                                           YXFCT007
+      FCTOR=N                                                           YXFCT008
+      GO TO 40                                                          YXFCT009
+   30 ICTRL=1                                                           YXFCT010
+      NUMAX=-NUMAX                                                      YXFCT011
+      FCTOR=M                                                           YXFCT012
+   40 CONTINUE                                                          YXFCT013
+      DO 50 NU=1,NUMAX                                                  YXFCT014
+      FCTOR=FCTOR+1.0                                                   YXFCT015
+      YXFCT=YXFCT*FCTOR                                                 YXFCT016
+   50 CONTINUE                                                          YXFCT017
+      IF(ICTRL.EQ.0) YXFCT=1.0/YXFCT                                    YXFCT018
+  100 RETURN                                                            YXFCT019
+      END                                                               YXFCT020
+C
+C FYSKTT*KUNZLIB(1).RACAH(0)
+C
+      FUNCTION RACAH(J1,J2,J3,J4,J5,J6)                                 RACAH000
+C     THE NEXT 2 CARDS CONVERT DWUCK TO AN IBM 360                      RACAH001
+      IMPLICIT REAL*8(A-H,O-Z)                                          RACAH002
+C     SQRT(XXX)=DSQRT(XXX)                                              RACAH003
+      DIMENSION FACT(51)
+      COMMON/FACTRL/F(52)  
+      EQUIVALENCE (FACT(1),F(2))                                        RACAH023
+      RACAH=0.0                                                         RACAH024
+      Z1=DELR(J1,J2,J5)                                                 RACAH025
+      IF(Z1.EQ.0.0) GO TO 90                                            RACAH026
+      Z1=DELR(J3,J4,J5)*Z1                                              RACAH027
+      IF(Z1.EQ.0.0) GO TO 90                                            RACAH028
+      Z2=DELR(J1,J3,J6)                                                 RACAH029
+      IF(Z2.EQ.0.0) GO TO 90                                            RACAH030
+      Z2=DELR(J2,J4,J6)*Z2                                              RACAH031
+      IF(Z2.EQ.0.0) GO TO 90                                            RACAH032
+      Z1=SQRT(Z1/Z2)*Z2                                                 RACAH033
+      JT1=(J1+J2+J5)/2                                                  RACAH034
+      JT2=(J3+J4+J5)/2                                                  RACAH035
+      JT3=(J1+J3+J6)/2                                                  RACAH036
+      JT4=(J2+J4+J6)/2                                                  RACAH037
+      JZ1=(J1+J2+J3+J4)/2                                               RACAH038
+      JZ2=(J1+J4+J5+J6)/2                                               RACAH039
+      JZ3=(J2+J3+J5+J6)/2                                               RACAH040
+      NUMIN=MAX0 (JT1,JT2,JT3,JT4)                                      RACAH041
+      NUMAX=MIN0 (JZ1,JZ2,JZ3)                                          RACAH042
+      IF(NUMAX.LT.NUMIN) GO TO 90                                       RACAH043
+      PHASE=PHASEF(NUMIN+JZ1)*Z1                                        RACAH044
+      DO 80 NU=NUMIN,NUMAX                                              RACAH045
+      JY1=NU-JT1                                                        RACAH046
+      JY2=NU-JT2                                                        RACAH047
+      JY3=NU-JT3                                                        RACAH048
+      JY4=JZ1-NU                                                        RACAH049
+      JY5=JZ2-NU                                                        RACAH050
+      JY6=JZ3-NU                                                        RACAH051
+      FCTOR=FACT(JY1)*FACT(JY2)*FACT(JY3)*YXFCT(NU+1,NU-JT4)            RACAH052
+     1*FACT(JY4)*FACT(JY5)*FACT(JY6)                                    RACAH053
+      RACAH=RACAH+PHASE/FCTOR                                           RACAH054
+      PHASE=-PHASE                                                      RACAH055
+   80 CONTINUE                                                          RACAH056
+   90 RETURN                                                            RACAH057
+      END                                                               RACAH058
+C
+C FYSKTT*KUNZLIB(1).DELR(0)
+C
+      FUNCTION DELR(J1,J2,J3)                                           DELR 000
+C     THE NEXT 1 CARDS CONVERT DWUCK TO AN IBM 360                      DELR 001
+      IMPLICIT REAL*8(A-H,O-Z)                                          DELR 002
+      DIMENSION FACT(51)
+      COMMON/FACTRL/F(52)  
+      EQUIVALENCE (FACT(1),F(2))                                        DELR 022
+      JZ1=(J1+J2-J3)/2                                                  DELR 023
+      IF(JZ1.LT.0) GO TO 130                                            DELR 024
+      JZ2=(J1-J2+J3)/2                                                  DELR 025
+      IF(JZ2.LT.0) GO TO 130                                            DELR 026
+      JZ3=(J2+J3-J1)/2                                                  DELR 027
+      IF(JZ3.LT.0) GO TO 130                                            DELR 028
+      JZ4=(J1+J2+J3)/2+1                                                DELR 029
+      IF(JZ3.LT.JZ2) GO TO 80                                           DELR 030
+      IF(JZ3.LT.JZ1) GO TO 70                                           DELR 031
+      DELR=YXFCT(JZ4,JZ3)*FACT(JZ1)*FACT(JZ2)                           DELR 032
+      RETURN                                                            DELR 033
+   70 DELR=YXFCT(JZ4,JZ1)*FACT(JZ2)*FACT(JZ3)                           DELR 034
+      RETURN                                                            DELR 035
+   80 IF(JZ2.LT.JZ1) GO TO 70                                           DELR 036
+      DELR=YXFCT(JZ4,JZ2)*FACT(JZ1)*FACT(JZ3)                           DELR 037
+      RETURN                                                            DELR 038
+  130 DELR=0.0                                                          DELR 039
+      RETURN                                                            DELR 040
+      END                                                               DELR 041
+C
+C FYSKTT*KUNZLIB(1).WINEJ(0)
+C
+      FUNCTION WINEJ(J1,J2,J3,J4,J5,J6,J7,J8,J9)                        WINEJ000
+C     THE NEXT 1 CARDS CONVERT DWUCK TO AN IBM 360                      WINEJ001
+      IMPLICIT REAL*8(A-H,O-Z)                                          WINEJ002
+      WINEJ=0.0                                                         WINEJ003
+      MUMIN=MAX0(IABS(J1-J9),IABS(J2-J6),IABS(J4-J8))                   WINEJ004
+      MUMAX=MIN0(J1+J9,J2+J6,J4+J8)                                     WINEJ005
+      IF(MUMAX.LT.MUMIN) GO TO 40                                       WINEJ006
+       DO 20 MU=MUMIN,MUMAX,2                                           WINEJ007
+      PROD=RACAH(J1,J4,J9,J8,J7,MU)*RACAH(J2,J5,MU,J4,J8,J6)*           WINEJ008
+     1     RACAH(J9,MU,J3,J2,J1,J6)*FLOAT(MU+1)                         WINEJ009
+      WINEJ=WINEJ+PROD                                                  WINEJ010
+   20 CONTINUE                                                          WINEJ011
+      WINEJ=WINEJ*PHASEF((J1+J3+J5+J8)/2+J2+J4+J9)                      WINEJ012
+   40 RETURN                                                            WINEJ013
+      END                                                               WINEJ014
+CLIBE02
+C
+C FYSKTT*KUNZLIB(1).COU(0)
+C
+CLIBE02
+      SUBROUTINE COU(R,RP,E,L,H,F,FP,G,GP,S)                            COU  000
+      IMPLICIT REAL*8(A-H,O-Z)                                          COU  002
+      DIMENSION F(51),FP(51),G(51),GP(51),S(51)                         COU  010
+C                                                                       COU  011
+C     ALOG(XXX)=DLOG(XXX)  
+C  
+      TE=2.*E                                                           COU  012
+      TF=E**2                                                           COU  013
+      LL=L                                                              COU  014
+      IF(LL-50)20,35,35                                                 COU  015
+   20 ELP=50.                                                           COU  016
+      J=50                                                              COU  017
+      GO TO 45                                                          COU  018
+   35 ELP=LL                                                            COU  019
+      J=LL                                                              COU  020
+   45 A=ATAN (E/ELP)                                                    COU  021
+      B=SQRT (TF+ELP**2)                                                COU  022
+      Y=A*(ELP-0.5)+E*(ALOG(B)-1.)-SIN (A)/(12.*B)                      COU  023
+     1  +SIN (3.*A)/(360.*B**3)-SIN (5.*A)/(1260.*B**5)                 COU  024
+     2  +SIN (7.*A)/(1680.*B**7)-SIN (9.*A)/(1188.*B**9)                COU  025
+      K=J-1                                                             COU  026
+      IF(J-LL)65,65,70                                                  COU  027
+   65 S(J)=Y                                                            COU  028
+   70 DO 100 I=1,K                                                      COU  029
+      ELP=ELP-1.                                                        COU  030
+      J=J-1                                                             COU  031
+      Y=Y-ATAN (E/ELP)                                                  COU  032
+      IF(J-LL)95,95,100                                                 COU  033
+   95 S(J)=Y                                                            COU  034
+  100 CONTINUE                                                          COU  035
+      DEL1=R-TE                                                         COU  036
+      RMAX=.41666667*(TF+4.*E+3.)                                       COU  037
+      IF(RMAX.LT.10.0) RMAX=10.0                                        COU  038
+      DEL=R-RMAX                                                        COU  039
+      IF(E-5.)280,130,130                                               COU  040
+  130 IF(ABS (DEL1)-ABS (DEL))140,140,280                               COU  041
+  140 DEL=DEL1                                                          COU  042
+      IF(DEL)147,145,147                                                COU  043
+  145 I=2                                                               COU  044
+      GO TO 150                                                         COU  045
+  147 I=1                                                               COU  046
+  150 X=TE                                                              COU  047
+      T1=TF                                                             COU  048
+      T2=T1**2                                                          COU  049
+      T3=E** .666666667                                                 COU  050
+      T4=T3**2                                                          COU  051
+      T5=T4**2                                                          COU  052
+      T6=T3*T5                                                          COU  053
+      T7=T4*T6                                                          COU  054
+      T8=T3*T7                                                          COU  055
+      T9=E** .166666667                                                 COU  056
+      Y=1.22340402*T9*(1.+.495957017E-1/T4-.888888889E-2/T1+.245519918  COU  057
+     1E-2/T6-.910895806E-3/T2+.845362E-3/T8)                            COU  058
+      Z=-.707881773/T9*(1.-.172826039/T3+.317460317E-3/T1-.358121485    COU  059
+     1E-2/T5+.311782468E-3/T2-.907396643E-3/T7)                         COU  060
+      GO TO 665                                                         COU  061
+  280 IF(E)285,290,285                                                  COU  062
+  285 IF(DEL)310,290,290                                                COU  063
+  290 X=R                                                               COU  064
+      I=2                                                               COU  065
+      GO TO 320                                                         COU  066
+  310 X=RMAX                                                            COU  067
+      I=1                                                               COU  068
+  320 T1=TF                                                             COU  069
+      T2=2.*X                                                           COU  070
+      T3=X-E*ALOG(T2)+S(1)                                              COU  071
+      T4=E/T2                                                           COU  072
+      SS=1.                                                             COU  073
+      TS=0.                                                             COU  074
+      SL=0.                                                             COU  075
+      TL=1.-E/X                                                         COU  076
+      SSS=1.                                                            COU  077
+      STS=0.                                                            COU  078
+      SSL=0.                                                            COU  079
+      STL=TL                                                            COU  080
+      EN=0.                                                             COU  081
+      DO 620 K=1,25                                                     COU  082
+      T5=EN+1.                                                          COU  083
+      T6=T5+EN                                                          COU  084
+      T7=EN*T5                                                          COU  085
+      T8=T6*T4/T5                                                       COU  086
+      T9=(T1-T7)/(T2*T5)                                                COU  087
+      T5=T8*SS-T9*TS                                                    COU  088
+      TS=T8*TS+T9*SS                                                    COU  089
+      SS=T5                                                             COU  090
+      IF(ABS (SS/SSS)-1.0E-10)630,630,540                               COU  091
+  540 T5=T8*SL-T9*TL-SS/X                                               COU  092
+      TL=T8*TL+T9*SL-TS/X                                               COU  093
+      SL=T5                                                             COU  094
+      SSS=SSS+SS                                                        COU  095
+      STS=STS+TS                                                        COU  096
+      SSL=SSL+SL                                                        COU  097
+      STL=STL+TL                                                        COU  098
+      EN=EN+1.                                                          COU  099
+  620 CONTINUE                                                          COU  100
+  630 T8=SIN (T3)                                                       COU  101
+      T9=COS (T3)                                                       COU  102
+      Y=SSS*T9-STS*T8                                                   COU  103
+      Z=SSL*T9-STL*T8                                                   COU  104
+  665 GO TO (670,810),I                                                 COU  105
+  670 M=1                                                               COU  106
+  671 N=ABS (DEL/H)+1.0                                                 COU  107
+      DX=DEL/FLOAT(N)                                                   COU  108
+      T1=DX/2.                                                          COU  109
+      T2=DX/8.                                                          COU  110
+      T3=TE                                                             COU  111
+      DO 805 I=1,N                                                      COU  112
+      T4=DX*(T3/X-1.)*Y                                                 COU  113
+      X=X+T1                                                            COU  114
+      T5=DX*(T3/X-1.)*(Y+T1*Z+T2*T4)                                    COU  115
+      X=X+T1                                                            COU  116
+      T6=DX*(T3/X-1.)*(Y+DX*Z+T1*T5)                                    COU  117
+      Y=Y+DX*(Z+(T4+2.*T5)/6.)                                          COU  118
+      Z=Z+(T4+4.*T5+T6)/6.                                              COU  119
+  805 CONTINUE                                                          COU  120
+      GO TO (810,828),M                                                 COU  121
+  810 G(1)=Y                                                            COU  122
+      M=2                                                               COU  123
+      DEL=RP-R                                                          COU  124
+      W=Z                                                               COU  125
+      GO TO 671                                                         COU  126
+  828 GP(1)=Y                                                           COU  127
+      T1=TF                                                             COU  128
+      T8=SQRT (1.+T1)                                                   COU  129
+      G(2)=((1./R+E)*G(1)-W)/T8                                         COU  130
+      GP(2)=((1./RP+E)*Y-Z)/T8                                          COU  131
+      T2=1.                                                             COU  132
+      T3=2.                                                             COU  133
+      DO 910 I=3,LL                                                     COU  134
+      T4=T2+T3                                                          COU  135
+      T5=T2*T3                                                          COU  136
+      T6=T3*SQRT (T2**2+T1)                                             COU  137
+      T7=T2*SQRT (T3**2+T1)                                             COU  138
+      G (I)=(T4*(E+T5/R )*G (I-1)-T6*G (I-2))/T7                        COU  139
+      GP(I)=(T4*(E+T5/RP)*GP(I-1)-T6*GP(I-2))/T7                        COU  140
+      T2=T2+1.                                                          COU  141
+      T3=T3+1.                                                          COU  142
+  910 CONTINUE                                                          COU  143
+      I=L+11                                                            COU  144
+      N=2.*R+11.                                                        COU  145
+      IF(I-N)960,960,950                                                COU  146
+  950 N=I                                                               COU  147
+  960 Y=1.0E-20                                                         COU  148
+      YP=Y                                                              COU  149
+      X=Y                                                               COU  150
+      XP=X                                                              COU  151
+      Z=0.                                                              COU  152
+      ZP=Z                                                              COU  153
+      T2=N                                                              COU  154
+ 1000 T3=T2+1.                                                          COU  155
+      T4=T2+T3                                                          COU  156
+      T5=T2*T3                                                          COU  157
+      T6=T2*SQRT (T3**2+T1)                                             COU  158
+      T7=T3*SQRT (T2**2+T1)                                             COU  159
+      Y =(T4*(E+T5/R )*Y -T6*Z )/T7                                     COU  160
+      YP=(T4*(E+T5/RP)*YP-T6*ZP)/T7                                     COU  161
+      IF(N-LL)1060,1060,1080                                            COU  162
+ 1060 F(N)=Y                                                            COU  163
+      FP(N)=YP                                                          COU  164
+      GO TO 1120                                                        COU  165
+ 1080 IF(1.-ABS (Y))1090,1090,1120                                      COU  166
+ 1090 CONTINUE                                                          COU  167
+      Y =Y *1.0E-20                                                     COU  168
+      YP=YP*1.0E-20                                                     COU  169
+      X =X *1.0E-20                                                     COU  170
+      XP=XP*1.0E-20                                                     COU  171
+ 1120 N=N-1                                                             COU  172
+      Z=X                                                               COU  173
+      ZP=XP                                                             COU  174
+      X=Y                                                               COU  175
+      XP=YP                                                             COU  176
+      T2=T2-1.                                                          COU  177
+      IF(N)1150,1150,1000                                               COU  178
+ 1150 Y=F(1)*G(2)-F(2)*G(1)                                             COU  179
+      YP=FP(1)*GP(2)-FP(2)*GP(1)                                        COU  180
+      Z=1./(Y*T8)                                                       COU  181
+      ZP=1./(YP*T8)                                                     COU  182
+      DO 1180 I=1,LL                                                    COU  183
+      FP(I)=FP(I)*ZP                                                    COU  184
+ 1180 F(I)=F(I)*Z                                                       COU  185
+      RETURN                                                            COU  186
+       END                                                              COU  187
+C
+C FYSKTT*KUNZLIB(1).BIND(0)
+C
+CLIBE03
+      SUBROUTINE BIND(U,F,DR,RM,FNODE,FL,K,FK,ETA,V,E,FK2,ISW,IERR,D)   BIND   0
+      IMPLICIT REAL*8(A-H,O-Z)                                          BIND   1
+      DIMENSION U(800),F(400),T(8),D(4)                                 BIND   2
+      DATA ICMAX/16/                                                    BIND   3
+      DATA FLAMX,DETX/1.0D-04,1.0D-03/                                  BIND   4
+C  
+C     ALOG(XXX)=DLOG(XXX)  
+C  
+      KT=K                                                              BIND   5
+      ICNT=ICMAX                                                        BIND   6
+      FLP=FL*(FL+1.0)                                                   BIND   7
+      DR2=DR**2/12.0                                                    BIND   8
+      LL=FL+1.0                                                         BIND   9
+      ATER=0.0                                                          BIND  10
+      IEND=1                                                            BIND  11
+      IF(ISW.EQ.2) IEND=2                                               BIND  12
+C                                                                       BIND  13
+C     CALCULATE OUTER BOUNDARY CONDITION                                BIND  14
+C                                                                       BIND  15
+   10 CONTINUE                                                          BIND  16
+      R=DR*FLOAT(K+1)                                                   BIND  17
+      IF(FK2.LT.0.0) GO TO 30                                           BIND  18
+C     POSITIVE ENERGY BOUNDARY CONDITION                                BIND  19
+      M=MAX0(LL,3)                                                      BIND  20
+      T(1)=FK*R                                                         BIND  21
+      T(2)=T(1)-FK*DR                                                   BIND  22
+      CALL COU(T(1),T(2),ETA,M ,DR,F( 1),F(21),F(41),F(61),F(81))       BIND  23
+      D(4)=F(LL+20)                                                     BIND  24
+      D(3)=F(LL+60)                                                     BIND  25
+      DX=.01                                                            BIND  26
+      T(3)=T(2)-DX/2.0                                                  BIND  27
+      T(4)=T(2)+DX/2.0                                                  BIND  28
+      CALL COU(T(3),T(4),ETA ,M,DR,F( 1),F(21),F(41),F(61),F(81))       BIND  29
+      GP=(F(LL+60)-F(LL+40))/DX                                         BIND  30
+      SURF=GP*D(3)+T(2)*((FLP/T(2)**2+2.0*ETA/T(2)-1.0)*D(3)**2-GP**2)  BIND  31
+      SURF=SURF/FK/2.0                                                  BIND  32
+      T(2)=T(1)+FK*DR                                                   BIND  33
+      CALL COU(T(1),T(2),ETA,M ,DR,F( 1),F(21),F(41),F(61),F(81))       BIND  34
+      T(8)=F(LL+60)                                                     BIND  35
+      T(7)=F(LL+40)                                                     BIND  36
+      T(6)=F(LL+20)                                                     BIND  37
+      T(5)=F(LL   )                                                     BIND  38
+      GP=D(3)                                                           BIND  39
+      GO TO 40                                                          BIND  40
+   30 CONTINUE                                                          BIND  41
+C     NEGATIVE ENERGY BOUNDARY CONDITION                                BIND  42
+      T(8)=1.0D-15                                                      BIND  43
+      T(7)=T(8)*EXP(FK*DR+ETA*ALOG(1.0+DR/R))                           BIND  44
+      GP=T(7)**2/T(8)                                                   BIND  45
+   40 CONTINUE                                                          BIND  46
+      DO 110 I=1,IEND                                                   BIND  47
+C                                                                       BIND  48
+C     INTEGRATE FROM INFINITY TO TURNING POINT                          BIND  49
+C                                                                       BIND  50
+      R=DR*FLOAT(K+1)                                                   BIND  51
+      G5=U(2*K  )-FLP/R**2                                              BIND  52
+      IFLAG=0                                                           BIND  53
+      IF(G5.LT.0.0) IFLAG=1                                             BIND  54
+      Q6=1.0+DR2*(U(2*K  )-FLP/(R+DR)**2)                               BIND  55
+      Q5=1.0+DR2*G5                                                     BIND  56
+      II=9-2*I                                                          BIND  57
+      F6=T(II+1)                                                        BIND  58
+      F5=T(II  )                                                        BIND  59
+      W2=0.0                                                            BIND  60
+      FNORM2=-0.5*GP**2                                                 BIND  61
+      DO 100 M=1,KT                                                     BIND  62
+      MM=K-M+1                                                          BIND  63
+      MK=MM+MM-1                                                        BIND  64
+      R=R-DR                                                            BIND  65
+      G4=U(MK+1)+V*U(MK  )-FLP/R**2                                     BIND  66
+      Q4=1.0+DR2*G4                                                     BIND  67
+      F4=((12.0-10.0*Q5)*F5-Q6*F6)/Q4                                   BIND  68
+      Q6=Q5                                                             BIND  69
+      Q5=Q4                                                             BIND  70
+      F6=F5                                                             BIND  71
+      F5=F4                                                             BIND  72
+      G6=G5                                                             BIND  73
+      G5=G4                                                             BIND  74
+      F(MM)=F4                                                          BIND  75
+      IF(G6*G5.LT.0.0) IFLAG=IFLAG+1                                    BIND  76
+      IF(IFLAG.GE.2) GO TO 104                                          BIND  77
+      FNORM2=FNORM2+F6**2                                               BIND  78
+      W2=W2+U(MK+2)*F6**2                                               BIND  79
+  100 CONTINUE                                                          BIND  80
+      KT=K-INT(RM/DR)                                                   BIND  81
+      MM=K-KT+1                                                         BIND  82
+      F5=F(MM  )                                                        BIND  83
+      F6=F(MM+1)                                                        BIND  84
+  104 T(II-3)=F6                                                        BIND  85
+      T(II-4)=F5                                                        BIND  86
+  110 CONTINUE                                                          BIND  87
+C                                                                       BIND  88
+C     INTEGRATE FROM ORIGIN TO TURNING POINT                            BIND  89
+C                                                                       BIND  90
+      KM=MM+1                                                           BIND  91
+      FNCT=0.0                                                          BIND  92
+      KS=FL/3.3+2.0                                                     BIND  93
+      W1=0.0                                                            BIND  94
+      FNORM1=0.0                                                        BIND  95
+      F2=0.0                                                            BIND  96
+      Q2=0.0                                                            BIND  97
+      R =0.0                                                            BIND  98
+      DO 200 M=1,KM                                                     BIND  99
+      MK=M+M-1                                                          BIND 100
+      R=R+DR                                                            BIND 101
+      Q3=1.0+DR2*(U(MK+1)+V*U(MK  )-FLP/R**2         )                  BIND 102
+      IF(M.GT.KS) GO TO 150                                             BIND 103
+      F3=R**LL                                                          BIND 104
+      GO TO 151                                                         BIND 105
+  150 CONTINUE                                                          BIND 106
+      F3=((12.0-10.0*Q2)*F2-Q1*F1)/Q3                                   BIND 107
+  151 CONTINUE                                                          BIND 108
+      Q1=Q2                                                             BIND 109
+      Q2=Q3                                                             BIND 110
+      F1=F2                                                             BIND 111
+      F2=F3                                                             BIND 112
+      IF(ICNT.EQ.0) F(M)=F3                                             BIND 113
+      FNORM1=FNORM1+F2**2                                               BIND 114
+      W1=W1+U(MK)*F2**2                                                 BIND 115
+      IF(F1*F2.LT.0.0) FNCT=FNCT+1.0                                    BIND 116
+  200 CONTINUE                                                          BIND 117
+C                                                                       BIND 118
+      DET=(F1*F6-F5*F2)/(F2*F6*DR)                                      BIND 119
+      FN=FNODE-FNCT                                                     BIND 120
+      FNORM1=FNORM1/F2**2                                               BIND 121
+      FNORM2=FNORM2/F6**2                                               BIND 122
+      FNORM=FNORM1+FNORM2                                               BIND 123
+      ATER=ATER+1.0                                                     BIND 124
+      IF(ICNT.EQ.0) GO TO 500                                           BIND 125
+      IF(ISW.EQ.2) GO TO 650                                            BIND 126
+      ICNT=ICNT-1                                                       BIND 127
+      IF(ICNT.NE.0) GO TO 270                                           BIND 128
+      WRITE(6,9001)ICMAX                                                BIND 129
+      IERR=1                                                            BIND 130
+  270 CONTINUE                                                          BIND 131
+      IF(ISW.EQ.1) GO TO 451                                            BIND 132
+C                                                                       BIND 133
+C     CHOOSE NEXT GUESS ON WELL DEPTH                                   BIND 134
+C                                                                       BIND 135
+      IF(FN.EQ.0.0) GO TO 280                                           BIND 136
+      V=V*(1.0+FN/(FNCT+1.0))                                           BIND 137
+      GO TO 495                                                         BIND 138
+  280 FLAM=1.0-DET/(V*DR*(W1/F2**2+W2/F6**2))                           BIND 139
+      IF(FLAM.GT.1.2) FLAM=1.2                                          BIND 140
+      IF(FLAM.LT.0.8) FLAM=0.8                                          BIND 141
+      V=V*FLAM                                                          BIND 142
+      GO TO 490                                                         BIND 143
+C                                                                       BIND 144
+C     CHOOSE NEXT GUESS ON BINDING ENERGY                               BIND 145
+C                                                                       BIND 146
+  451 CONTINUE                                                          BIND 147
+      IF(FN.EQ.0.0) GO TO 480                                           BIND 148
+      FLAM=1.0+ABS(E)*3.0*FN/(E*FK*R)                                   BIND 149
+      GO TO 482                                                         BIND 150
+  480 CONTINUE                                                          BIND 151
+      FLAM=1.0-DET/(DR*FK2*FNORM1)                                      BIND 152
+  482 CONTINUE                                                          BIND 153
+      IF(FLAM.GT.1.2) FLAM=1.2                                          BIND 154
+      IF(FLAM.LT.0.8) FLAM=0.8                                          BIND 155
+      TEMP=SQRT(FLAM)                                                   BIND 156
+      FK=FK*TEMP                                                        BIND 157
+      ETA=ETA/TEMP                                                      BIND 158
+      TEMP=FK2*FLAM-FK2                                                 BIND 159
+      FK2=FK2+TEMP                                                      BIND 160
+      E=E*FLAM                                                          BIND 161
+      DO 485 M=1,K                                                      BIND 162
+      MK=M+M-1                                                          BIND 163
+      U(MK+1)=U(MK+1)+TEMP                                              BIND 164
+  485 CONTINUE                                                          BIND 165
+  490 CONTINUE                                                          BIND 166
+      IF(ABS(DET     ).GT.DETX ) GO TO 495                              BIND 167
+      IF(ABS(FLAM-1.0).GT.FLAMX) GO TO 495                              BIND 168
+      ICNT=0                                                            BIND 169
+  495 IF(ISW.EQ.0) GO TO 40                                             BIND 170
+      GO TO 10                                                          BIND 171
+  500 CONTINUE                                                          BIND 172
+      RM=(FLOAT(KM)-0.5)*DR                                             BIND 173
+C                                                                       BIND 174
+C     NORMALIZE FUNCTION EXCEPT FOR POSITIVE ENERGY                     BIND 175
+C                                                                       BIND 176
+      IF(FK2.GT.0.0) GO TO 700                                          BIND 177
+      FNORM=SQRT(FNORM*DR)                                              BIND 178
+  505 CONTINUE                                                          BIND 179
+      TEMP=1.0/(F2*FNORM)                                               BIND 180
+      R=0.0                                                             BIND 181
+      DO 510 M=1,KM                                                     BIND 182
+      R=R+DR                                                            BIND 183
+      F(M)=F(M)*TEMP/R                                                  BIND 184
+  510 CONTINUE                                                          BIND 185
+      KM=KM+1                                                           BIND 186
+      TEMP=1.0/(F6*FNORM)                                               BIND 187
+      DO 520 M=KM,K                                                     BIND 188
+      R=R+DR                                                            BIND 189
+      F(M)=F(M)*TEMP/R                                                  BIND 190
+  520 CONTINUE                                                          BIND 191
+      WRITE(6,9500)V,DET,FNCT,RM,E,ATER                                 BIND 192
+      RETURN                                                            BIND 193
+  650 CONTINUE                                                          BIND 194
+C                                                                       BIND 195
+C     FIND B.C. FOR E > 0  AND NO SEARCH (ISW = 2)                      BIND 196
+C                                                                       BIND 197
+      DET=T(1)*T(4)-T(2)*T(3)                                           BIND 198
+      A1=(F1*T(4)-F2*T(3))/DET                                          BIND 199
+      B1=(F2*T(1)-F1*T(2))/DET                                          BIND 200
+      DET=1.0/SQRT(A1**2+B1**2)                                         BIND 201
+      A1=A1*DET                                                         BIND 202
+      B1=B1*DET                                                         BIND 203
+      WRITE(6,9501)A1,B1                                                BIND 204
+      R=0.0                                                             BIND 205
+      T(8)    =A1*T(6)+B1*T(8)                                          BIND 206
+      T(7)    =A1*T(5)+B1*T(7)                                          BIND 207
+      ICNT=0                                                            BIND 208
+      IEND=1                                                            BIND 209
+      GO TO 40                                                          BIND 210
+  700 CONTINUE                                                          BIND 211
+      FNORM=FK/F6                                                       BIND 212
+      IF(ISW.EQ.2) GO TO 750                                            BIND 213
+      D(1)=0.0                                                          BIND 214
+      D(2)=1.0                                                          BIND 215
+      VOL=(FNORM1+FNORM2)*DR*F6**2                                      BIND 216
+      WIDTH=2.0*E/(FK*(VOL+SURF))                                       BIND 217
+      WRITE(6,9502)WIDTH                                                BIND 218
+      IF(WIDTH.LT.0.0) GO TO 745                                        BIND 219
+      FNORM=FNORM/SQRT(WIDTH*FK2*FK/(2.0*E))                            BIND 220
+      GO TO 505                                                         BIND 221
+  745 IERR=1                                                            BIND 222
+      WRITE(6,9002)                                                     BIND 223
+      GO TO 505                                                         BIND 224
+  750 CONTINUE                                                          BIND 225
+      D(1)=B1*A1                                                        BIND 226
+      D(2)=B1*B1                                                        BIND 227
+      GO TO 505                                                         BIND 228
+ 9001 FORMAT(28H0BOUND STATE SEARCH FAILS IN,I3,12H ITERATIONS  )       BIND 229
+ 9002 FORMAT(20H0WIDTH IS NEGATIVE  )                                   BIND 230
+ 9500 FORMAT(21X,6HV    =,F9.4,3X,6HDET  =,F9.4,3X,6HNODES=,F9.4,3X,    BIND 231
+     1 6HRM   =,F9.4,3X,6HE    =,F9.4,3X,6HITER.=,F9.4)                 BIND 232
+ 9501 FORMAT(21X,6HCOSD =,F9.4,9H   SIND =,F9.4)                        BIND 233
+ 9502 FORMAT(24H0SINGLE PARTICLE WIDTH = ,E10.3,5H  MEV )               BIND 234
+      END                                                               BIND 235
+C
+C FYSKTT*KUNZLIB(1).CUDATE(1)
+C
+      SUBROUTINE CUDATE(IDAT)                                           CUDAT000
+      IMPLICIT REAL*8(A-H,O-Z)                                          CHUCK003
+C     DIMENSION IDAT(6),IB(2),ITEMP(6)                                  CUDAT001
+C                                                                       CUDAT002
+C     SPECIAL UNIVAC SUBROUTINE FOR TIME AND DATE  
+C                                                                       CUDAT004
+C     CALL FDATE(IB(1),IB(2))  
+C                                                                       CUDAT007
+C     IB(1)= MODAYR      WORD CONTAINS 6 FIELDATA CHARACTERS
+C     IB(2)= HRMISE      WORD CONTAINS 6 FIELDATA CHARACTERS
+C                                                                       CUDAT010
+C     I1=0                                                              CUDAT011
+C     DO 100 I=1,2                                                      CUDAT012
+C     DO 50 J=1,6                                                       CUDAT016
+C                                                                       CUDAT017
+C     UNPACK EACH CHAR OF 6 BITS                                        CUDAT018
+C                                                                       CUDAT019
+C     ITEMP(J)=IB(I)-64*(IB(I)/64)                                      CUDAT020
+C     IF(IB(I).LT.0) ITEMP(J)=63+ITEMP(J)                               CUDAT021
+C                                                                       CUDAT022
+C     ZERO IN FIELDATA = 48
+C                                                                       CUDAT024
+C     ITEMP(J)=ITEMP(J)-48                                              CUDAT025
+C     IB(I)=IB(I)/64                                                    CUDAT026
+C  50 CONTINUE                                                          CUDAT027
+C                                                                       CUDAT028
+C     DATE IS STORED IN FIRST 3 WORDS , TIME IN SECOND 3 WORDS OF IDAT  CUDAT029
+C                                                                       CUDAT030
+C     IDAT(I1+1)=10*ITEMP(6)+ITEMP(5)                                   CUDAT031
+C     IDAT(I1+2)=10*ITEMP(4)+ITEMP(3)                                   CUDAT032
+C     IDAT(I1+3)=10*ITEMP(2)+ITEMP(1)                                   CUDAT033
+C     I1=I1+3                                                           CUDAT034
+C 100 CONTINUE                                                          CUDAT035
+      RETURN                                                            CUDAT036
+      END                                                               CUDAT037
+C
+C FYSKTT*KUNZLIB(1).LGNDR(0)
+C
+CLIBE04
+      SUBROUTINE LGNDR(PLM,MPLUS,LPLUS,THET)                            LGNDR000
+      IMPLICIT REAL*8(A-H,O-Z)                                          LGNDR002
+      DIMENSION PLM(459)                                                LGNDR005
+      THETA=THET /57.295779                                             LGNDR006
+      Y=COS(THETA)                                                      LGNDR007
+      Z=SIN(THETA)                                                      LGNDR008
+      IX=0                                                              LGNDR009
+      DO 100 M=1,MPLUS                                                  LGNDR010
+      LX=M-1                                                            LGNDR011
+      L2=0                                                              LGNDR012
+      P3=1.0                                                            LGNDR013
+      FL1=LX                                                            LGNDR014
+      IF(LX.EQ.0) GO TO 41                                              LGNDR015
+      DO 40 LT=1,LX                                                     LGNDR016
+      FL1=FL1+1.0                                                       LGNDR017
+      P3=P3*FL1*Z/2.0                                                   LGNDR018
+   40 CONTINUE                                                          LGNDR019
+   41 P2=0.0                                                            LGNDR020
+      FL2=FL1+1.0                                                       LGNDR021
+      FL3=1.0                                                           LGNDR022
+      DO 90 LT=1,LPLUS                                                  LGNDR023
+      IX1=IX+LT                                                         LGNDR024
+      IF(L2-LX)50,70,60                                                 LGNDR025
+   50 PLM(IX1)=0.0                                                      LGNDR026
+      GO TO 75                                                          LGNDR027
+   60 P3=(FL2*Y*P2-FL1*P1)/FL3                                          LGNDR028
+      FL1=FL1+1.0                                                       LGNDR029
+      FL2=FL2+2.0                                                       LGNDR030
+      FL3=FL3+1.0                                                       LGNDR031
+   70 PLM(IX1)=P3                                                       LGNDR032
+      P1=P2                                                             LGNDR033
+      P2=P3                                                             LGNDR034
+   75 L2=L2+1                                                           LGNDR035
+   90 CONTINUE                                                          LGNDR036
+      IX=IX+LPLUS                                                       LGNDR037
+  100 CONTINUE                                                          LGNDR038
+      RETURN                                                            LGNDR039
+      END                                                               LGNDR040
+C
+C FYSKTT*KUNZLIB(1).DWPLOT(0)
+C
+CLIBE06
+      SUBROUTINE DWPLOT(NTH,NLOG,SIGPLT,DTHETA,THETA1)                  DWPLO000
+      IMPLICIT REAL*8(A-H,O-Z)                                          DWPLO002
+      DIMENSION SIGPLT(60),XDATA(4),DSTORE(25),SDATA(4)                 DWPLO004
+      DATA XDATA/4H*   ,4H *  ,4H  * ,4H   */                           DWPLO005
+      DATA SDATA/4H*+++,4H+*++,4H++*+,4H+++*/                           DWPLO006
+      DATA SCALE/4H++++/                                                DWPLO007
+      DATA BLANK/4H    /
+C     ALOG(XXX)=DLOG(XXX)  
+C  
+      IF(NTH .EQ.0) GO TO 2000                                          DWPLO008
+      IF(NLOG.EQ.0) GO TO 2000                                          DWPLO009
+      MAXN=0                                                            DWPLO010
+      DO 30 I=1,NTH                                                     DWPLO011
+      IF(SIGPLT(I).LE.0.0) SIGPLT(I)=1.0D-20                            DWPL6012
+      SIGPLT(I)=ALOG10(SIGPLT(I))+100.0                                 DWPLO013
+      NDELT=SIGPLT(I)                                                   DWPLO014
+      MAXN=MAX0(MAXN,NDELT+1)                                           DWPLO015
+   30 CONTINUE                                                          DWPLO016
+      MAXN=MAXN-NLOG                                                    DWPLO017
+      FMAX=MAXN                                                         DWPLO018
+      NDELT=100/NLOG                                                    DWPLO019
+      FDELT=NDELT                                                       DWPLO020
+      IWRITE=1                                                          DWPLO021
+      GO TO 1000                                                        DWPLO022
+   50 CONTINUE                                                          DWPLO023
+      DO 70 J=1,25                                                      DWPLO026
+      DSTORE(J)=BLANK                                                   DWPLO027
+   70 CONTINUE                                                          DWPLO028
+      THETA=THETA1                                                      DWPLO024
+      DO 100 I=1,NTH                                                    DWPLO025
+      INDX=(SIGPLT(I)-FMAX)*FDELT+0.5                                   DWPLO029
+      ICNT=(INDX-1)/4                                                   DWPLO030
+      IF(ICNT.LT.0) GO TO 95                                            DWPLO031
+      INDX=INDX-4*ICNT                                                  DWPLO032
+      IF(INDX.GT.0) DSTORE(ICNT+1)=XDATA(INDX)                          DWPLO033
+   95 WRITE(6,9001)THETA,DSTORE                                         DWPLO034
+      IF(INDX.GT.0) DSTORE(ICNT+1)=BLANK
+      THETA=THETA+DTHETA                                                DWPLO035
+  100 CONTINUE                                                          DWPLO036
+      IWRITE=2                                                          DWPLO037
+ 1000 CONTINUE                                                          DWPLO038
+      DO 1050 J=1,25                                                    DWPLO039
+      DSTORE(J)=SCALE                                                   DWPLO040
+ 1050 CONTINUE                                                          DWPLO041
+      DO 1060 I=1,NLOG                                                  DWPLO042
+      INDX=I*NDELT                                                      DWPLO043
+      ICNT=(INDX-1)/4                                                   DWPLO044
+      INDX=INDX-4*ICNT                                                  DWPLO045
+      DSTORE(ICNT+1)=SDATA(INDX)                                        DWPLO046
+ 1060 CONTINUE                                                          DWPLO047
+      WRITE(6,9000)DSTORE                                               DWPLO048
+      GO TO (50,2000),IWRITE                                            DWPLO049
+ 2000 RETURN                                                            DWPLO050
+ 9000 FORMAT(12H    THETA  *,25A4,1H+)                                  DWPLO051
+ 9001 FORMAT(1H ,F8.2 ,3H  +,25A4,1H+)                                  DWPLO052
+      END  
+C
+C FYSKTT*KUNZLIB(1).POLFCT(0)
+C
+CLIBE07
+      SUBROUTINE POLFCT(POL,SUMR,SUMI,JSX,JRX)                          POLFC000
+      IMPLICIT REAL*8(A-H,O-Z)                                          POLFC002
+      DIMENSION SUMR(5,5),SUMI(5,5),B(2,2),C(3,3),D(3,3,3),TSUM(8)      POLFC003
+     1,POL(8)                                                           POLFC004
+C                                                                       POLFC005
+C     DATA FOR SIGMA-Y                                                  POLFC006
+C                                                                       POLFC007
+C     SPIN-1/2                                                          POLFC008
+C     DATA B/0.0,-1.0,1.0,0.0/                                          POLFC009
+      DATA B/0.0D0,-1.0D0,1.0D0,0.0D0/                                  POLFC009
+C                                                                       POLFC010
+C     SPIN-1                                                            POLFC011
+C     DATA C/0.0,-.707106781,0.0,.707106781,0.0,-.707106781             POLFC012
+C    1      ,0.0,.707106781,0.0/                                        POLFC013
+      DATA C/0.0D0,-.707106781D0,0.0D0,.707106781D0,0.0D0,-.707106781D0 POLFC012
+     1      ,0.0D0,.707106781D0,0.0D0/                                  POLFC013
+C                                                                       POLFC014
+C                                                                       POLFC014
+C     DATA FOR TENSOR SIGMA X SIGMA                                     POLFC015
+C     DATA D/0.0,0.0,1.732050807,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.22474487POLFC016
+C    11,0.0,0.0,0.0,1.224744871,0.0,0.0,0.0,.707106781,0.0,0.0,0.0,-1.41POLFC017
+C    24213561,0.0,0.0,0.0,.707106781/                                   POLFC018
+      DATA D/0.0D0,0.0D0,1.732050807D0,0.0D0,0.0D0,0.0D0,0.0D0 
+     1     ,0.0D0,0.0D0,0.0D0,-1.224744871D0,0.0D0,0.0D0,0.0D0 
+     2     ,1.224744871D0,0.0D0,0.0D0,0.0D0,.707106781D0,0.0D0 
+     3     ,0.0D0,0.0D0,-1.4124213561D0,0.0D0,0.0D0,0.0D0  
+     4     ,.707106781D0/  
+      DO 2 I=1,8                                                        POLFC019
+      POL(I)=0.0                                                        POLFC020
+    2 CONTINUE                                                          POLFC021
+      JS=JSX                                                            POLFC022
+      JR=JRX                                                            POLFC023
+      LDEL=0                                                            POLFC024
+      M=1                                                               POLFC025
+      GO TO 6                                                           POLFC026
+    5 JS=JRX                                                            POLFC027
+      JR=JSX                                                            POLFC028
+      LDEL=4                                                            POLFC029
+      M=2                                                               POLFC030
+    6 CONTINUE                                                          POLFC031
+      DO 100 I=1,JR                                                     POLFC032
+      DO 90 J=1,JS                                                      POLFC033
+      DO 7 K=1,8                                                        POLFC034
+      TSUM(K)=0.0                                                       POLFC035
+    7 CONTINUE                                                          POLFC036
+      DO 80 K=1,JS                                                      POLFC037
+      IF(JS.GT.3) GO TO 80                                              POLFC038
+      GO TO (10,20,30),JS                                               POLFC039
+   10 TEMP=1.0                                                          POLFC040
+      GO TO 50                                                          POLFC041
+   20 TEMP=B(K,J)                                                       POLFC042
+      GO TO 50                                                          POLFC043
+   30 TEMP=C(K,J)                                                       POLFC044
+   50 CONTINUE                                                          POLFC045
+      GO TO (61,62),M                                                   POLFC046
+   61 T1=SUMR(K,I)                                                      POLFC047
+      T2=SUMI(K,I)                                                      POLFC048
+      GO TO 70                                                          POLFC049
+   62 T1=SUMR(I,K)                                                      POLFC050
+      T2=SUMI(I,K)                                                      POLFC051
+   70 CONTINUE                                                          POLFC052
+      TSUM(1)=TSUM(1)-T2*TEMP                                           POLFC053
+      TSUM(2)=TSUM(2)+T1*TEMP                                           POLFC054
+      IF(JS-3)80,71,80                                                  POLFC055
+   71 CONTINUE                                                          POLFC056
+      DO 75 L=1,3                                                       POLFC057
+      LL=L+L+1                                                          POLFC058
+      TEMP=D(K,J,L)                                                     POLFC059
+      TSUM(LL  )=TSUM(LL  )+T1*TEMP                                     POLFC060
+      TSUM(LL+1)=TSUM(LL+1)+T2*TEMP                                     POLFC061
+   75 CONTINUE                                                          POLFC062
+   80 CONTINUE                                                          POLFC063
+      GO TO (81,82),M                                                   POLFC064
+   81 T1=SUMR(J,I)                                                      POLFC065
+      T2=SUMI(J,I)                                                      POLFC066
+      GO TO 83                                                          POLFC067
+   82 T1=SUMR(I,J)                                                      POLFC068
+      T2=SUMI(I,J)                                                      POLFC069
+   83 CONTINUE                                                          POLFC070
+      DO 85 L=1,4                                                       POLFC071
+      LL=L+L-1                                                          POLFC072
+      K=L+LDEL                                                          POLFC073
+      POL(K)=POL(K)+TSUM(LL  )*T1+TSUM(LL+1)*T2                         POLFC074
+   85 CONTINUE                                                          POLFC075
+   90 CONTINUE                                                          POLFC076
+  100 CONTINUE                                                          POLFC077
+      GO TO (5,105),M                                                   POLFC078
+  105 POL(7)=-POL(7)                                                    POLFC079
+      POL(5)=-POL(5)                                                    POLFC080
+      RETURN                                                            POLFC081
+      END                                                               POLFC082
+C
+C FYSKTT*KUNZLIB(1).GAUSSR(0)
+C
+      SUBROUTINE GAUSSR(NMAX,INDEX,ALFA,AG,WG,IERR,CUTOFF) 
+      IMPLICIT REAL*8(A-H,O-Z) 
+      DIMENSION AG(100),WG(100)
+C  
+C     ALOG(XXX)=DLOG(XXX)  
+C  
+C     DATA PI,SQRPI/3.14159265,1.77245385/ 
+      DATA PI,SQRPI/3.14159265D0,1.77245385D0/ 
+      INDEX=NMAX
+      FI=NMAX  
+      FKI=4.0*(FI+(ALFA+1.0)*0.5)  
+      FLN=ALOG(FI) 
+C  
+      K=ALFA
+      JJ=(ALFA-FLOAT(K))*2.0
+      DY=0.0
+      IF(JJ.NE.0) GO TO 19 
+C     HERE FOR GAUSS-LAGUERRE  
+      FNORM=1.0
+      IF(K.EQ.0) GO TO 11  
+      DO 10 J=1,K  
+      FNORM=FNORM*(ALFA+FI+1.0-FLOAT(J))
+   10 CONTINUE 
+   11 CONTINUE 
+      GO TO 25 
+C   HERE FOR GAUSS-HERMITE 
+   19 CONTINUE 
+      FNORM=SQRPI/2.0  
+      DO 20 J=1,NMAX
+      FNORM=FNORM*(1.0+ALFA/FLOAT(J))  
+   20 CONTINUE 
+      K=ALFA+1.0
+      IF(K.EQ.0) GO TO 25  
+      DO 22 J=1,K  
+      FNORM=FNORM*(FLOAT(J)-0.5)
+   22 CONTINUE 
+   25 CONTINUE 
+      Y=0.0
+      Z1=0.0
+      Z2=0.0
+C  
+      DO 80 J=1,NMAX
+      FJ=J 
+      FKJ=4.0*(FJ+(ALFA+1.0)*0.5)  
+      Z=((FJ+0.5*ALFA-0.25)*PI)**2/FKI 
+      Z=Z*(1.0+Z*(1.0+PI*ALOG(FJ)*FLN/(8.0*(FI+FLN-FJ)))/(3.0*FKI))
+      DELZ=Z-Z1
+      Z1=Z 
+      Z=Y+DELZ 
+      Z3=Z 
+      DO 74 M=1,20 
+      A1=0.0
+      A2=1.0
+      DO 70 K=1,NMAX
+      FK=K 
+      A3=((2.0*FK+ALFA-1.0-Z)*A2-(FK+ALFA-1.0)*A1)/FK  
+      A1=A2
+      A2=A3
+      B2=(FK*A2-(FK+ALFA)*A1)/Z
+   70 CONTINUE 
+      Y=Z-A2/B2
+      IF(ABS((Z-Y)/Z).LT.3.D-14) GO TO 75  
+      Z=Y  
+   74 CONTINUE 
+      IERR=J
+   75 CONTINUE 
+      DZ=Z-Z2  
+      Z2=Z 
+      DZ=((FNORM/Z)/B2)/B2 
+      IF(DZ.LT.CUTOFF.AND.DZ.LT.DY) GO TO 100  
+      DY=DZ
+      INDEX=J  
+      AG(J)=Y  
+      WG(J)=DZ 
+      IF(JJ.NE.0) AG(J)=SQRT(Y)
+   80 CONTINUE 
+  100 CONTINUE 
+      RETURN
+      END  
+C
+C FYSKTT*KUNZLIB(1).SECOND(0)
+C
+      SUBROUTINE SECOND(X) 
+      IMPLICIT REAL*8 (A-H,O-Z)
+C     CALL FSUPS(ITIME)
+      ITIME=0  
+      X=0.001*FLOAT(ITIME) 
+      RETURN
+      END  

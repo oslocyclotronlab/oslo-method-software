@@ -1,0 +1,86 @@
+100 REM   FERMIOLD.BAS         AUGUST 29, 1992          J. KANTELE
+
+110 COLOR 14: CLS
+
+120 PRINT "****************************************************************"
+
+130 PRINT
+
+140 PRINT " PROGRAM TO CALCULATE THE 'TRADITIONAL' FERMI FUNCTIONS FOR "
+
+150 PRINT " BETA (-) AND BETA (+) DECAY. NO CORRECTIONS FOR FINITE NUCLEAR "
+
+160 PRINT " SIZE OR SCREENING BY ORBITAL ELECTRONS ARE MADE. "
+
+170 PRINT
+
+180 PRINT "****************************************************************"
+
+190 PRINT
+
+200 INPUT " ATOMIC NUMBER OF DAUGHTER NUCLEUS, Z = ", Z
+
+210 FOR I = 1 TO 6
+
+220 READ Z(I), C(I)
+
+230 DATA 9,1.047,11,1.036,18,1.065,20,.952,23,1.035,34,1.033
+
+240 IF Z = Z(I) THEN C = C(I): GOTO 270
+
+250 NEXT I
+
+260 C = 1
+
+270 A = C * EXP(1.4594 + .21579 * LOG(Z) + .24867 * LOG(Z) ^ 2 - .02225 * LOG(Z) ^ 3)
+
+280 PRINT
+
+290 INPUT " KINETIC ENERGY OF NEGATRON OR POSITRON (keV), E = ", E
+
+300 PRINT
+
+310 K = E / 511
+
+320 R = 1.2 * .002596 * A ^ (1 / 3)
+
+330 A1 = 1 / 137.036
+
+340 W = K + 1
+
+350 P = SQR(W ^ 2 - 1)
+
+360 G1 = SQR(1 - (A1 * Z) ^ 2)
+
+370 G2 = EXP(.692961 + 2.5156E-05 * Z - 4.96794E-05 * Z ^ 2 - 2.94266E-09 * Z ^ 3)
+
+380 X = G1: Y = A1 * Z * W / P
+
+390 G3 = EXP((.5 + X) * LOG((1 + X) ^ 2 + Y ^ 2) - 2 * Y * ATN(Y / (1 + X)) - 2 * (1 + X) + LOG(2 * 3.1416) + (1 + X) / (6 * ((1 + X) ^ 2 + Y ^ 2)) - LOG(X ^ 2 + Y ^ 2))
+
+400 FOR S = 1 TO 2
+
+410 IF S = 1 THEN S1 = 1 ELSE S1 = -1
+
+420 F(S) = 2 * (1 + G1) * (2 * P * R) ^ (2 * (G1 - 1)) * EXP(S1 * 3.141592 * A1 * Z * W / P) / G2 ^ 2 * G3
+
+430 NEXT S
+
+440 PRINT USING " TRADITIONAL FERMI FUNCTION F(-) = ##.###^^^^"; F(1)
+
+450 PRINT
+
+460 PRINT USING " TRADITIONAL FERMI FUNCTION F(+) = ##.###^^^^"; F(2)
+
+470 PRINT
+
+480 COLOR 12: PRINT " TO QUIT, JUST TYPE CTRL-C": COLOR 14
+
+490 RESTORE
+
+500 GOTO 170
+
+510 END
+
+
+

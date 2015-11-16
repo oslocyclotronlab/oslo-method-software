@@ -1,0 +1,61 @@
+macro fitexp
+
+vector/delete *
+graphics/set *
+graphics/option *
+picture/igset *
+graphics/option zfl
+graphics/option nbox
+graphics/misc/next
+graphics/set BWID 4
+graphics/set LWID 4
+graphics/set CSHI 0.01
+graphics/set PASS 7
+graphics/set vsiz 0.4
+graphics/set xmgl 3
+graphics/set xval 0.55
+
+vector/create gdrerr(105) R 105*0
+vector/create gdrstrength(3,105) 
+vector/read gdrstrength 'GDR_rsf_Sn117.dat'
+
+vector/create xerr(100) R 100*0
+
+vector/create strength(4,69)
+vector/read strength 'strength.nrm.web'
+
+vector/create fitted(7,400)
+vector/read fitted 'fitted.paw'
+
+set vsiz 0.4
+set xlab 1.9
+set xval 0.45119
+set yval 0.45
+graphics/option logy
+graphics/hplot/null 0.0 18 1E-9 1E-6 
+graphics/hplot/errors gdrstrength(1,1:105) gdrstrength(2,1:105) gdrerr(1:105) gdrstrength(3,1:105) 105 22 0.2 
+
+
+graphics/hplot/errors strength(2,1:60) strength(3,1:60) xerr(1:60) strength(4,1:60) 60 20 0.2
+graphics/primitives/graph 119 fitted(1,1:119) fitted(2,1:119) C
+picture/igset ltyp 12
+graphics/primitives/graph 119 fitted(1,1:119) fitted(3,1:119) C
+*graphics/primitives/graph 119 fitted(1,1:119) fitted(4,1:119) C
+graphics/primitives/graph 119 fitted(1,1:119) fitted(5,1:119) C
+graphics/primitives/graph 119 fitted(1,1:119) fitted(6,1:119) C
+graphics/primitives/graph 119 fitted(1,1:119) fitted(7,1:119) C
+
+picture/igset ltyp 1
+
+graphics/primitives/text 2.5 0.00000035 '^117!Sn' 0.7 0 C
+graphics/primitives/text 5.0 0.0000000080 'E1' 0.5 0 C
+graphics/primitives/text 7.8 0.0000000045 'M1' 0.5 0 C
+graphics/primitives/text 10.5 0.0000000016 'E2' 0.5 0 C
+*graphics/primitives/text 1.31 0.000000012 'soft pole' 0.5 0 C
+graphics/primitives/text -1.0 0.000000040 'Radiative strength function (MeV^-3!)' 0.5 90 C
+graphics/primitives/text 4.5  0.00000000049 'Gamma-ray energy E?[g]! (MeV)'  0.5 0 C
+
+picture/print 'fitexp.eps'
+picture/print 'fitexp.ps'
+return
+

@@ -1,0 +1,8 @@
+#!/bin/tcsh
+cd /user/schiller/osloware/mama/update/libs/graph
+make -f Makefile all
+cd /user/schiller/osloware/mama/update/libs/upfiles
+make -f Makefile all
+cd /user/schiller/osloware/mama/update
+make -f Makefile all
+exit 0

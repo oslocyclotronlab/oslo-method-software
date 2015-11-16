@@ -1,0 +1,75 @@
+Directory: masses/
+File:      mass-frdm95.readme (October 5, 2000)
+***********************************************
+
+
+			   mass-frdm95.dat
+
+   Compilations of ground state properties based on the FRDM model
+	     (provided by S. Goriely on October 5, 2000)
+***************************************************************
+
+	     FRDM PREDICTION OF GROUND-STATES PROPERTIES
+
+			 P. Moller, J. R. Nix
+		 Los Alamos National Laboratory (USA)
+		     W. D. Myers, W. J. Swiatecki
+		  Lawrence Berkeley Laboratory (USA)
+
+
+Content
+-------
+Predictions of the ground state properties obtained within the Finite
+Range Droplet Model (FRDM) [1]. The atomic mass excesses and nuclear
+ground-state deformations are tabulated for 8979 nuclei ranging from
+O-16 to A=339. Calculations are based on the finite-range droplet
+macroscopic model and the folded-Yukawa single-particle microscopic
+model.  Relative to the 1981 FRDM mass table [2] the current results
+are obtained with an improved macroscopic model, an improved pairing
+model with a new form for the effective-interaction pairing gap, and
+minimization of the ground-state energy with respect to additional
+shape degrees of freedom. The values of only nine constants are
+determined directly from a least-squares adjustment to the
+ground-state masses of 1654 nuclei ranging from O-16 to [Z=106, A=263]
+and to 28 fission-barrier heights. The error of the mass model is
+0.669 MeV for the entire region of nuclei considered, but is only
+0.448 MeV for the region N greater than or equal to 65. The table
+includes the experimental masses when available, the calculated
+masses, the microscopic correction and deformation parameters.  The
+microscopic correction Emic corresponds to the difference between the
+total binding energy and the spherical macroscopic (droplet) energy.
+
+
+Format
+------
+Each record of the file contains:
+
+   Z    : charge number
+   A    : mass number
+   El   : element symbol
+   fl   : flag corresponding to 0 if no experimental data available
+                                1 for a mass excess recommended by 
+                                  Audi&Wapstra (1995)
+                                2 for a measured mass from 
+                                  Audi&Wapstra (1995)
+   Mexp : experimental or recommended atomic mass excess in MeV of 
+          Audi&Wapstra (1995)
+   Mth  : calculated FRDM atomic mass excess in MeV 
+   Emic : calculated FRDM microscopic energy in MeV 
+   beta2: calculated quadrupole deformation of the nuclear ground-state
+   beta3: calculated octupole deformation of the nuclear ground-state
+   beta4: calculated hexadecapole deformation of the nuclear ground-state
+   beta6: calculated hexacontatetrapole deformation of the nuclear 
+          ground-state
+
+The corresponding FORTRAN format is (2i4,1x,a2,1x,i1,3f10.3,4f8.3)
+
+
+References
+----------
+[1] P. Moller, J. R. Nix, W. D. Myers, W. J. Swiatecki (1995) At. Data 
+    and Nucl.Data Tables 59, 185.
+[2] P. Moller, J. R. Nix (1981) At. Data and Nucl. Data Tables 26, 165.
+[3] G. Audi and A. H. Wapstra (1995) Nucl. Phys. A595, 409.
+
+

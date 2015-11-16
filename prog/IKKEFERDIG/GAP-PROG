@@ -1,0 +1,193 @@
+        PROGRAM GAPLIG
+        DIMENSION U(100)
+        COMMON /X1/ EPS(100)
+        COMMON /X2/ SPAR(100),V(100)
+        OPEN (20,FILE='GAPUT:DATA')
+        TOL=1.0E-06
+    1   PRINT 1001
+ 1001   FORMAT (//,'   KVASIPARTIKKEL TRANSFORMASJON.',
+     1  1X,'BESTEMMELSE AV LAMDA OG DELTA',//)
+        PRINT 1002
+ 1002   FORMAT (//,5X,'N=1.     LES INN ALLE DATA',/,
+     1  5X,'N=2.     FORANDRING AV PARTIKKELTALL',/,
+     2  5X,'N=0.     STOPP')
+        PRINT 1003
+ 1003   FORMAT (/,'$   N= ' )
+        READ(1,*)NN
+        IF(NN.EQ.0) GO TO 150
+C
+C       INNLESNINGSPROSEDURE.
+C
+        OPEN (23,FILE='GAPIN:DATA')
+        READ (23,*)NL
+        IF(NL.EQ.0) GO TO 5
+        READ (23,*)(SPAR(I),I=1,NL),N,NTYPE
+    5   CLOSE (23)
+        IF (NN.EQ.2) GO TO 10
+        PRINT 1004,NL
+ 1004   FORMAT ('$     NUMBER OF ORBITS:',8X,'OLD=',I6,
+     1  5X,'NEW=')
+        READ(1,*)NL
+        PRINT 1005
+ 1005   FORMAT (5X,'ORBIT NO',20X,'ENERGY',/)
+        DO 7 I=1,NL
+        PRINT 1006,I,SPAR(I)
+ 1006   FORMAT ('$        ',I3,5X,'OLD=',F7.3,2X,'NEW=')
+        READ(1,*)SPAR(I)
+   7    CONTINUE
+  10    PRINT 1007,N
+ 1007   FORMAT ('$     ANTALL PAR PARTIKLER:',5X,'OLD=',
+     1  I3,5X,'NEW=')
+        READ(1,*)N
+        PRINT 1008,NTYPE
+ 1008   FORMAT ('$     TILPASNINGSMETODE:',5X,'OLD=',I3,5X,
+     1  'NEW=')
+        READ(1,*)NTYPE
+        OPEN(21,FILE='GAPINN:DATA')
+        WRITE (21,*)NL
+        WRITE (21,*)(SPAR(I),I=1,NL),N,NTYPE
+        CLOSE (21)
+C
+C       START BEREGNING.
+C
+        DO 20 I=1,NL
+        V(I)=1.0
+        IF(I.GT.N) V(I)=0.0
+   20   EPS(I)=SPAR(I)
+        IF(NTYPE.EQ.1) CALL KVASI(NL)
+   23   X=EPS(N+1)+EPS(N-1)-2.0*EPS(N)
+        IF(X.LT.0.0) GO TO 25
+        DDX=0.1*(EPS(N+1)-EPS(N))
+         GO TO 30
+   25   DDX=0.1*(EPS(N-1)-EPS(N))
+   30   FLAM=EPS(N)
+        D=ABS(0.5*DDX)
+        CALL GAP(NL,N,FLAM,D)
+        PRINT 2002,FLAM,D
+ 2002   FORMAT (5X,'LAMDA=',F10.6,5X,'DELTA=',F10.6)
+        WRITE (20,2002)FLAM,D
+        A=NL-F(2,NL,FLAM,D)-2*N
+        PRINT 1981,A
+        WRITE (20,1981)A
+        IF(ABS(A).LT.TOL) GO TO 52
+   40   DO 45 I=1,10
+        FLAM=FLAM+DDX
+        TEST=F(1,NL,FLAM,0.0)
+        IF(TEST.GT.2) GO TO 501
+        FLAM=FLAM-DDX
+        DDX=0.1*DDX
+        PRINT 1971,DDX
+        WRITE(20,1971)DDX
+        GO TO 40
+  501   CONTINUE
+        CALL GAP(NL,N,FLAM,D)
+        PRINT 2002,FLAM,D
+        WRITE(20,2002)FLAM,D
+        A=NL-F(2,NL,FLAM,D)-2*N
+        PRINT 1981,A,DDX 
+ 1981   FORMAT (5X,'TALLIGNING,A=',F10.6,3X,'DDX=',F10.6)
+        WRITE(20,1981)A,DDX
+        IF(ABS(A).LT.TOL) GO TO 52
+        IF(A*DDX.GT.0.0) GO TO 50
+   45   CONTINUE
+        STOP 'INGEN KONVERGENS I LOOP 45'
+   50   DDX=-0.1*DDX
+        PRINT 1971,DDX
+ 1971   FORMAT (5X,'SKIFTE AV STEPLENGDE,DDX=',F10.6)
+        WRITE (20,1971)DDX
+        IF(ABS(DDX).LT.TOL) GO TO 52
+        GO TO 40
+   52   D1=0.0
+        DO 53 I=1,NL
+        X=EPS(I)-FLAM
+        X=0.5*(1.0-X/SQRT(X*X+D*D))
+        V(I)=SQRT(X)
+        U(I)=SQRT(1.0-X)
+   53   D1=D1+U(I)*V(I)
+        IF(NTYPE.EQ.0) GO TO 55
+        IF(ABS(FLAMT-FLAM).LT.TOL.AND.ABS(DT-D).LT.TOL) GO TO 55
+        FLAMT=FLAM
+        DT=D
+        CALL KVASI(NL)
+        GO TO 23
+   55   CONTINUE
+        ENERGY=-D*D
+        DO 58 I=1,NL
+        X=V(I)*V(I)
+        ENERGY=ENERGY+2.0*SPAR(I)*X-X*X
+   58   CONTINUE
+C
+C       UTSKRIFT
+C
+        PRINT 1001
+        WRITE(20,1001)
+        PRINT 2011,NTYPE
+ 2011   FORMAT (8X,'BEREGNINGSMETODE:NTYPE=',I3)
+        WRITE (20,2011)NTYPE
+        PRINT 2012,N
+ 2012   FORMAT (9X,'ANTALL PAR PARTIKLER =',I3)
+        WRITE (20,2012)N
+        PRINT 2003,FLAM,D,D1
+ 2003   FORMAT (25X,'LAMDA=',F7.3,/,25X,'DELTA=',F7.3,
+     1  /,22X,'SUM(U*V)=',F7.3)
+        WRITE (20,2003)FLAM,D,D1
+        PRINT 2009,ENERGY
+ 2009   FORMAT (24X,'ENERGY=',F10.4)
+        WRITE (20,2009)ENERGY
+        PRINT 2004
+ 2004   FORMAT (/,5X,'ORBIT NO',5X,'ENERGY',5X,'U(K)',5X,'V(K)')
+        WRITE (20,2004)
+        DO 60 I=1,NL
+        PRINT 2005,I,SPAR(I),U(I),V(I)
+        WRITE (20,2005)I,SPAR(I),U(I),V(I)
+ 2005   FORMAT (8X,I3,8X,F6.3,4X,F5.3,4X,F5.3)
+   60   CONTINUE
+        GO TO 1
+  150   CONTINUE
+        END
+        SUBROUTINE GAP(NL,N,D1,D2)
+        TOL=1.0E-06
+        A=2.0-F(1,NL,D1,D2)
+        B1=NL-F(2,NL,N,D1,D2)-2*N
+        PRINT 201,D1,D2,A,B1
+  201   FORMAT (2X,'GAPL:LAMDA=',F7.3,2X,'DELTA=',F7.3,
+     1  2X,'A=',F8.4,2X,'B=',F8.4)
+        WRITE (20,201)D1,D2,A,B1
+        IF(ABS(A).LT.TOL) RETURN
+        ITELL=0
+        DEL=0.1
+   10   B=-0.5*NL*DEL*SIGN(1.0,A)
+        DD2=D2+B
+        DF=(F(1,NL,D1,DD2)-F(1,NL,D1,D2))/B
+        D2=AMAX1(0.0,D2+A/DF)
+        A1=2-F(1,NL,D1,D2)
+        B1=NL-F(2,NL,N,D1,D2)-2*N
+        PRINT 201,D1,D2,A1,B1
+        WRITE (20,201)D1,D2,A1,B1
+        IF(ABS(A1).LT.TOL) GO TO 20
+        IF(A*A1.LT.0) DEL=DEL/10
+        A=A1
+        ITELL=ITELL+1
+        IF(ITELL.GT.50) STOP 'INGEN KONVERGERING I GAP.'
+        GO TO 10
+   20   RETURN
+        END
+        FUNCTION F(N,NL,D1,D2)
+        COMMON /X1/ EPS(100)
+        Z=0.0
+        DO 10 I=1,NL
+        Z1=1.0
+        IF(N.EQ.2) Z1=EPS(I)-D1
+        Z=Z+Z1/SQRT((EPS(I)-D1)**2+D2*D2)
+   10   CONTINUE
+        F=Z
+        RETURN
+        END
+        SUBROUTINE KVASI(NL)
+        COMMON /X1/ EPS(100)
+        COMMON /X2/ SPAR(100),V(100)
+        DO 10 I=1,NL
+        EPS(I)=SPAR(I)-V(I)*V(I)
+   10   CONTINUE
+        RETURN
+        END

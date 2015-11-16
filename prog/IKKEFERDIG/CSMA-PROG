@@ -1,0 +1,1122 @@
+        PROGRAM  C S M A S Y M
+C
+C       CRANKED SHELL MODEL CODE USING AXIALLY  A S Y M M E T R I C  
+C       NUCLEAR SHAPE.  S. Frauendorf and F. R. May,
+C
+C       ORIGIN: UNIVAC VERSION OF NBI MODIFIED FOR VAX OF NBI BY J. Kownacki
+
+C       ADOPTED TO VAX OF JUELICH BY R. M. Lieder, 18.2.83
+
+C            Modified for use on N-570/CX at the University of Oslo
+C                        by M.Guttormsen,2.des.1986
+C       ****************************************************************
+C
+C       PROGRAM CALCULATES QUASIPARTICLE LEVELS
+C       POTENTIAL NILSSON 3-AXIAL EPS2,EPS4,GAM
+C       LAGRANGE MULTIPLIER OMEGA*JX
+C       PAIRING MONOPOL DEL
+C       BASIS SPHERICAL QUANTIZATION ALONG X-AXIS
+C
+        DIMENSION HIHI(128),SISI(128)
+        COMMON/PTR/FCT(57)
+        COMMON/CMN2/CEPS1,CEPS2,CEPS3,CEPS4,CEPS5,CEPS6
+        COMMON/GM/GM(150)
+        COMMON/SPF/HN(3,28,28),RM(3,28)
+        COMMON/DIA/HILF(56),EV(56)
+        DIMENSION H(56,56),S(56,56)
+        COMMON/QP/EQ(128),AM(128)
+        COMMON/EN/NUM,EN(64),IAQN(64)
+        COMMON/IC/IC(56)
+        DIMENSION QM0(3,28,28),QM2(3,28,28),RS(3,28,28),
+     1  HEM(3,28,28),EP(128),EM(128),IQ(64)
+        DIMENSION S0(3,28,28),E0(3,28),RM0(3,28,28)
+        COMMON/GAM/GAM
+        LOGICAL IJ,IJ1,SI,SII
+C
+C       ****************************************************************
+C
+        CHARACTER ANSW*1,NUCLEUS*5,PNAME*7
+C
+        NOUT=2
+        NPLT=3
+        PNAME='CSMASYM'
+        OPEN (NOUT,FILE='CSMUT:DATA')
+        OPEN (NPLT,FILE='CSM:PLT')
+C
+C       ****************************************************************
+C
+900     CALL EXPLAIN(1,PNAME)
+        READ(1,1000) NUCLEUS
+1000    FORMAT(A)
+        CALL EXPLAIN(2,PNAME)
+        READ(1,*)EPS2,EPS4,GAM,A,IP,NL,NU
+        WRITE(NOUT,100)
+ 100    FORMAT('1','   *** QUASIPARTICLE LEVELS IN THE ROTATING FRAME',
+     1  ' FOR AN AXIALLY  A S Y M M E T R I C  NUCLEAR SHAPE ***'///)
+        WRITE (NOUT,1005) NUCLEUS
+        WRITE (NPLT,1005) NUCLEUS
+1005    FORMAT(' ',A,///)
+        IF(A.LE.0.0) GO TO 400
+        IF(A.GT.0.0) GO TO 77
+400     CALL EXPLAIN(3,PNAME)
+        READ(1,*)AA,SO
+        A=ABS(A)
+  77    CONTINUE
+        WRITE(NPLT,91) A,IP,NL,NU
+ 91     FORMAT(' A=',F10.1,'IP,NL,NU=',3I10)
+        IF(IP.LT.0) WRITE(NPLT,93)
+        IF(IP.GT.0) WRITE(NPLT,92)
+ 92     FORMAT(' NEUTRON TRAJECTORIES')
+ 93     FORMAT(' PROTON  TRAJECTORIES')
+1010    CALL EXPLAIN(4,PNAME)
+        READ(1,*)DEL,RLAM,OMFIRST,OMLAST,STO
+        IF(OMLAST.LE.OMFIRST.OR.STO.EQ.0.) GO TO 1010
+        IOL=1.+OMFIRST/STO
+        IOU=1.+OMLAST/STO
+        IJ1=IABS(IP).EQ.3
+        IJ=IJ1.OR.IABS(IP).EQ.2
+        IF(IP.GT.0) WRITE(NOUT,101)
+        IF(IP.LT.0) WRITE(NOUT,102)
+ 101    FORMAT(
+     1  '   SINGLE PARTICLE LEVELS AT OMEGA=0  NEUTRONS'//)
+ 102    FORMAT(
+     1  '   SINGLE PARTICLE LEVELS AT OMEGA=0  PROTONS'//)
+        CEPS1=0
+        CEPS2=EPS2
+        CEPS3=0.
+        CEPS4=EPS4
+        CEPS5=0.
+        CEPS6=0.
+        GM(52)=1.0
+        GM(51)=1.77245385
+        DO 34 I=1,28
+        GM(2*I+52)=I*GM(2*I+50)
+  34    GM(2*I+51)=(I-.5)*GM(2*I+49)
+        GM(49)=-2.*GM(51)
+        DO 35 I=1,20
+        IR=-2*I+49
+        IIR=IR+2
+  35    GM(IR)=GM(IIR)/(-I-.5)
+        FCT(1)=.0
+        DO 111 I=1,56
+        AII=FLOAT(I)
+ 111    FCT(I+1)=FCT(I)+ALOG(AII)
+        IF(A.LE.0.0) GO TO 401
+        IF(IP.GT.0) AA=.624-1.234E-3*A
+        IF(IP.LT.0) AA=.493+6.49E-4*A
+        IF(IP.GT.0) SO=.0641-2.6E-6*A
+        IF(IP.LT.0) SO=.0766-7.79E-5*A
+ 401    XE2=EPS2/3.*2.
+        XE4=EPS4
+        CALL OME2(10,HOM,1.0E-4)
+        SO=SO*1/HOM
+        WRITE(NOUT,103) CEPS2,CEPS4,AA,SO,A,HOM,GAM
+        WRITE(NPLT,103) CEPS2,CEPS4,AA,SO,A,HOM,GAM
+ 103    FORMAT('  EPS2=',
+     1  F6.3,'      EPS4=',F6.3,'       MUE=',F7.4,
+     2  '       KAP=',F7.4,'      A=',F4.0,'       SET HOM/HOMO='
+     3  ,F10.8,'      GAM=',F8.3,//)
+        GAR=GAM*.0174532925
+        F20=EPS2/3.*(COS(GAR)+1.732050808*SIN(GAR))
+        F22=EPS2/4.242640687*(SIN(GAR)-1.732050808*COS(GAR))
+        GAP=GAR+1.047197551
+        F40=(5.*COS(GAP)**2+1.)/6.
+        F42=-.4564354646*SIN(2.*GAP)
+        F44=.697216688*SIN(GAP)**2
+        ANIL=SQRT((1.-2./3.*EPS2*COS(GAR-2.0943))/
+     1  (1.-2./3.*EPS2*COS(GAR)))
+        ANIL=.5*(ANIL+1./ANIL)
+C
+C       POTENTIAL MATRIX
+C
+        DO 10 N=NL,NU
+        NAJO=N
+        NF=N-NL+1
+        I2=((N+1)*(N+2))/2
+        JM=2*N+1
+        J=JM
+        M=J
+        SI=((J-1)/4)*4.NE.J-1
+        IF(SI) M=J-2
+        DO 11 I=1,I2
+        RJ=J*.5
+        L=(J+(-1)**N*(-1)**((J+1)/2))/2
+        JJ=JM
+        MM=JJ
+        SII=((JJ-1)/4)*4.NE.JJ-1
+        IF(SII) MM=MM-2
+        DO 12 II=1,I2
+        HN(NF,I,II)=0.
+        QM0(NF,I,II)=0.
+        QM2(NF,I,II)=0.
+        HEM(NF,I,II)=0.
+        RS(NF,I,II)=0.
+        RJJ=JJ*.5
+        LL=(JJ+(-1)**N*(-1)**((JJ+1)/2))/2
+C
+C       SPIN ME
+C
+  360   IF(L.NE.LL.OR.MM.NE.M) GO TO 361
+        LD=L*2
+        RS(NF,I,II)=
+     1  (CLEBI(LD,1,J,M-1,1,M)*CLEBI(LD,1,JJ,MM-1,1,MM)
+     2  -CLEBI(LD,1,J,M+1,-1,M)*CLEBI(LD,1,JJ,MM+1,-1,MM))*.5
+ 361    CONTINUE
+C
+C       QUADRUPOLE ME
+C
+        IF(M.NE.MM.AND.M.NE.MM+4.AND.M.NE.MM-4.AND.M.NE.MM+8.
+     1  AND.M.NE.MM-8)GO TO 39
+        CALL MRHOT(NAJO,L,0,NAJO,LL,0,2,AR)
+        AR=AR*SQRT((RJJ+.5)/(RJ+.5))
+        F2=F22
+        IF(M.EQ.MM) F2=F20
+        EI=AR*CLEBI(JJ,4,J,-1,0,-1)*CLEBI(JJ,4,J,MM,M-MM,M)
+        IF(M-MM) 363,364,363
+ 364    QM0(NF,I,II)=EI
+        GO TO 365
+ 363    QM2(NF,I,II)=EI
+ 365    HN(NF,I,II)=EI*F2
+C
+C       HEXADECUPOLE ME
+C***************
+        F4=F44
+        IF(M.EQ.MM-4.OR.M.EQ.MM+4)F4=F42
+        IF(M.EQ.MM) F4=F40
+        EI=AR*CLEBI(JJ,8,J,-1,0,-1)*CLEBI(JJ,8,J,MM,M-MM,M)*F4
+        HEM(NF,I,II)=EI
+        HN(NF,I,II)=HN(NF,I,II)+EI*EPS4
+   39   CONTINUE
+        MM=MM-4
+        IF(MM+JJ) 14,12,12
+   14   JJ=JJ-2
+        SII=.NOT.SII
+        MM=JJ
+        IF(SII) MM=MM-2
+   12   CONTINUE
+C
+C       DIAGONAL ME
+C
+        RM(NF,I)=M*.5*ANIL
+          B=.5*(J+(-1)**N*(-1)**((J+1)/2))
+        HN(NF,I,I)=HN(NF,I,I)+N+1.5-SO*(RJ*(RJ+1.)-.75+(AA-1.)*
+     1  B*(B+1.)-AA*N*(N+3.)*.5)
+        M=M-4
+        IF(M+J) 13,11,11
+   13   J=J-2
+        SI=.NOT.SI
+        M=J
+        IF(SI) M=M-2
+   11   CONTINUE
+   10   CONTINUE
+C
+C       SP-LEVELS AT OMEGA=0
+C
+        EPSD=.0000000001
+        ENUM=.0
+        IRGL=1
+        DO 40 N=NL,NU
+        NF=N-NL+1
+        I2=((N+1)*(N+2))/2
+        DO 41 I=1,I2
+        ENUM=ENUM+HN(NF,I,I)
+        DO 41 II=1,I2
+   41   H(I,II)=HN(NF,I,II)
+        NR=0
+         CALL F02ABF(H,56,I2,EV,S,56,HILF,NR)
+        DO 42 I=1,I2
+        EN(IRGL)=EV(I)
+        IAQN(IRGL)=N
+  42    IRGL=IRGL+1
+  40    CONTINUE
+        NUM=IRGL-1
+        CALL ORDER2(EN,IAQN,NUM)
+        WRITE(NOUT,106)
+ 106    FORMAT(
+     1  '   LEVEL NUMBER   ENERGY    N'/)
+        WRITE(NOUT,107) ((I,EN(I),IAQN(I)),I=1,NUM)
+ 107    FORMAT((3X,5(I2,F7.3,I7,6X)))
+        ESUM=.0
+        DO 222 K=1,NUM
+ 222    ESUM=ESUM+EN(K)
+        ESUM=2.*ESUM
+        WRITE(NOUT,223) ESUM
+ 223    FORMAT(//,3X,'ESUM=',F7.3)
+C
+C       DETERMINATION OF LAMBDA
+C
+        RRN=0.
+        IF(RLAM.GT.0.) GO TO 33
+        RLAM=ABS(RLAM)
+        CALL EXPLAIN(5,PNAME)
+        READ(1,*)RRN
+  33    RNUS=0.
+        RNUM=0.
+        DO 311 I=1,NUM
+        EQP=SQRT(DEL**2+(EN(I)-RLAM)**2)
+        XX=.5*(1.-(EN(I)-RLAM)/EQP)
+        EQ(I)=EQP
+        RNUM=RNUM+XX
+        RNUS=RNUS+1./EQP**3
+ 311    CONTINUE
+        XX=RNUM*2.
+        YY=RNUS*DEL**2
+        IF(RRN.NE.0.) RLAM=RLAM+(RRN-XX)/YY
+        IF(RRN.NE.0.AND.ABS(RRN-XX).GT..001) GO TO 33
+        DO 7  I=1,NUM
+  7     IF(EN(I).LT.RLAM) EQ(I)=-EQ(I)
+        WRITE(2,109)
+ 109    FORMAT(///'   QUASIPARTICLE LEVELS AT OMEGA=0'//)
+        WRITE(2,106)
+        WRITE(2,107) ((I,EQ(I),IAQN(I)),I=1,NUM)
+C
+C       PAIRING
+C
+        I=IOU-IOL+1
+        WRITE(3,200) I
+        DO 19 IOM=IOL,IOU
+        OMEGA=STO*(IOM-1.)
+        IRGL=1
+        RNUM=0.
+        RJX=0.
+        REN=0.
+        RDE=0.
+        DO 16 N=NL,NU
+        NF=N-NL+1
+        I22=(N+1)*(N+2)
+        IF(IJ.AND.N.EQ.NU) I22=2*(N+1)
+        I2=I22/2
+        DO 30 I=1,I2
+        IM=I+I2
+        DO 31 II=1,I2
+        IIM=II+I2
+        H(I,II)=HN(NF,I,II)
+        H(IM,IIM)=-H(I,II)
+        H(IM,II)=0.
+        H(I,IIM)=0.
+   31   CONTINUE
+        H(I,I)=H(I,I)-RLAM-RM(NF,I)*OMEGA
+        H(IM,IM)=H(IM,IM)+RLAM-RM(NF,I)*OMEGA
+        H(I,IM)=DEL
+        H(IM,I)=DEL
+   30   CONTINUE
+        NR=0
+         CALL F02ABF(H,56,I22,EV,S,56,HILF,NR)
+        DO 17 I=1,I22
+        EQ(IRGL)=EV(I)
+        HILF(I)=EV(I)
+        PHS=1.
+        IF(EV(I).GT.0.) PHS=-1.
+        XX=0.
+        DO 18 K=1,I2
+        KM=K+I2
+        YY=S(K,I)**2
+        ZZ=S(KM,I)**2
+        RNUM=RNUM+(YY-ZZ)*PHS
+        XX=XX+(YY+ZZ)*RM(NF,K)
+        IF(PHS.LT.0.) RDE=RDE+(S(K,I)*S(KM,I))*PHS
+        DO 18 L=1,I2
+        LM=L+I2
+        REN=REN+PHS*HN(NF,K,L)*(S(K,I)*S(L,I)-S(KM,I)*S(LM,I))
+  18    CONTINUE
+        RJX=RJX+XX*PHS
+        AM(IRGL)=FLOAT(N*100) +XX
+        IF(XX.LT.0.) AM(IRGL)=FLOAT(-N*100)+XX
+        IRGL=IRGL+1
+  17    CONTINUE
+   43   CONTINUE
+   16   CONTINUE
+        IRGL=IRGL-1
+        RNUM=RNUM/2.+NUM
+        RJX=RJX*.5
+        REN=REN*.5+ENUM
+         CALL ORDER1(EQ,AM,IRGL)
+C
+C       OUTPUT
+C
+ 105    FORMAT((3X,5(I3,F7.3, F8.3,4X)))
+        WRITE(2,104)OMEGA,DEL,RLAM,REN,RNUM,RDE,RJX
+ 104    FORMAT(/////,'   QUASIPARTICLE LEVELS WITH SIGNAT.+1/2',//,
+     1  '   OMEGA=',F6.3,'   DELTA=',F6.3,'   LAMBDA=',F6.3,
+     1  //,'   TOTAL VALUES:  SP-ENERGY=',F7.3,'    PARTICLE NO='
+     1  ,F7.3,'   PAIR STRENGTH=',F7.3,'  JX=',F7.3,//,
+     1  '   LEVEL NUMBER  QUASIPART. ENER.    SHELL NUMB*100+',
+     1  'ANGULAR MOMENTUM',/)
+ 99     FORMAT(10E10.5)
+        WRITE(2,105) ((I,EQ(I),AM(I)),I=1,IRGL)
+        L=1
+        K=1
+        DO 20 I=1,IRGL
+        N=(ABS(AM(I))+50.)/100
+        IF((N/2)*2.NE.N) GO TO 21
+        HIHI(L)=EQ(I)
+        L=L+1
+        GO TO 20
+  21    SISI(K)=EQ(I)
+        K=K+1
+  20    CONTINUE
+        L=L-1
+        K=K-1
+         WRITE(3,201) OMEGA
+  23    WRITE(3,200) L
+        WRITE(3,202) (HIHI(I),I=1,L)
+        WRITE(3,200) K
+        WRITE(3,202) (SISI(I),I=1,K)
+  19    CONTINUE
+        WRITE(3,205) DEL,RLAM,IOL,IOU,STO
+205     FORMAT(2F10.5,2I10,F10.5)
+ 200    FORMAT(1X,I10)
+ 201    FORMAT(1X,F10.5)
+ 202    FORMAT(1X,10F12.3)
+1020    PRINT 1030
+1030    FORMAT('$ CONTINUE WITH NEW DATA SET? (Y/N) : ')
+        READ(1,1000)ANSW
+        IF(ANSW.EQ.'Y'.OR.ANSW.EQ.'N') WRITE (NPLT,1035) ANSW
+1035    FORMAT(' ',A)
+        IF(ANSW.EQ.'Y') GO TO 900
+        IF(ANSW.EQ.'N') GO TO 1040
+        GO TO 1020
+1040    WRITE(NOUT,1050)
+1050    FORMAT('1','PROG.  C S M A S Y M  FINISHED'/'1')
+        CLOSE (NOUT,STATUS='PRINT')
+        CLOSE (NPLT)
+        STOP '*** C S M A S Y M  FINISHED ***'
+        END
+
+
+        SUBROUTINE EXPLAIN(KENN,PNAME)
+C
+C       PROGRAM EXPLAINS INPUT FOR CSMSYM AND CSMASYM
+C
+        CHARACTER PNAME*7
+C
+        GO TO (10,100,200,300,400,500),KENN
+C
+C       ***************************************************************
+C
+ 10     PRINT 20
+ 20     FORMAT('1','CRANKED SHELL MODEL CALCULATION'/)
+        IF(PNAME.EQ.'CSMSYM') PRINT 30
+ 30     FORMAT(' USING AXIALLY  S Y M M E T R I C  NUCLEAR SHAPE'///)
+        IF(PNAME.EQ.'CSMASYM') PRINT 40
+ 40     FORMAT(' USING AXIALLY  A S Y M M E T R I C  NUCLEAR SHAPE'///)
+        PRINT 50
+ 50     FORMAT('0ENTER :'//' NUCLEUS'/)
+        RETURN
+C
+C       ****************************************************************
+C
+ 100    PRINT 110
+ 110    FORMAT('0ENTER :',//,
+     1  ' EPSILON2=QUADRUPOLE DEFORMATION',/,
+     2  ' EPSILON4=HEXADECAPOLE DEFORMATION')
+        IF(PNAME.EQ.'CSMASYM') PRINT 120
+ 120    FORMAT(' GAMMA   =GAMMA DEFORMATION [LUND CONVENTION]')
+        PRINT 130
+ 130    FORMAT(' A    =MASS NUMBER [USUALLY P O S I T I V E ,',/,
+     1  '          IF NEGATIVE, MU AND KAPPA CAN BE ENTERED]',/,
+     2  ' I    =-1 FOR PROTONS, +1 FOR NEUTRONS',/,
+     3  ' NL   =LOWEST OSCILLATOR SHELL INCLUDED',/,
+     4  ' NU   =HIGHEST OSCILLATOR SHELL INCLUDED [(NU-NL).LE.2]',/)
+        RETURN
+C
+C       *******************************************************************
+C
+ 200    PRINT 210
+ 210    FORMAT('0ENTER :',//,
+     1  ' MU   =PARAMETER OF MODIFIED HARMONIC OSCILLATOR',/,
+     2  ' KAPPA=PARAMETER OF MODIFIED HARMONIC OSCILLATOR',/)
+        RETURN
+C
+C       ******************************************************************
+C
+ 300    PRINT 310
+ 310    FORMAT('0ENTER :',//,
+     1  ' DELTA   =PAIRING GAP IN UNITS OF HBAR*OMEGA=41/(A**1/3)',/,
+     2  ' LAMBDA  =CHEMICAL POTENTIAL [USUALLY N E G A T I V E ,',/,
+     3  ' IF SO ENTER EDUCATED GUESS, LAMBDA WILL BE ADJUSTED',/,
+     4  ' ACCORDING TO NUMBER OF PARTICLES IN ACTIVE SHELL]',/,
+     5  ' OMFIRST =FIRST OMEGA VALUE IN UNITS OF HBAR*OMEGA',/,
+     6  ' OMLAST  =LAST OMEGA VALUE IN UNITS OF HBAR*OMEGA',/,
+     7  ' OMSTEP  =STEP WIDTH OF OMEGA',/)
+        RETURN
+C
+C       *****************************************************************
+C
+ 400    PRINT 410
+ 410    FORMAT('0ENTER :',//,
+     1  ' NP    =NUMBER OF PARTICLES IN ACTIVE SHELLS',/,
+     2  '        FOR PROTONS:  NP=Z-1/3*NL*(NL+1)*(NL+2)',/,
+     3  '        FOR NEUTRONS: NP=A-Z-1/3*NL*(NL+1)*(NL+2)',/)
+        RETURN
+C
+C       *******************************************************************
+C
+ 500    RETURN
+        END
+
+
+        FUNCTION CLEBI(I1,I2,I3,N1,N2,N3)
+C       ---------------------------------
+        COMMON /PTR/ FCT(57)
+        INTEGER Z,ZMIN,ZMAX
+        J1=I1
+        J2=I2
+        J =I3
+        N=57
+        M1=N1
+        M2=N2
+        M=-N3
+        CC=0.0
+        JSUM=J1+J2+J
+        JM1=J1-IABS(M1)
+        JM2=J2-IABS(M2)
+        JM3=J -IABS(M )
+        IF((MOD(JSUM,2).NE.0).OR.(MOD(JM1,2).NE.0).OR.
+     1  (MOD(JM2,2).NE.0).OR.(MOD(JM3,2).NE.0).OR.(JM1.LT.0).OR.
+     2  (JM2.LT.0).OR.(JM3.LT.0)) GO TO 1
+        IF((M1+M2+M.NE.0).OR.(J.GT.J1+J2).OR.(J.LT.IABS(J1-J2))
+     1   ) GO TO 1
+        ZMIN=0
+        IF(J-J2+M1.LT.0) ZMIN=-J+J2-M1
+        IF(J-J1-M2+ZMIN.LT.0) ZMIN=-J+J1+M2
+        ZMAX=J1+J2-J
+        IF(J2+M2-ZMAX.LT.0) ZMAX=J2+M2
+        IF(J1-M1-ZMAX.LT.0) ZMAX=J1-M1
+        JA=(J1+M1)/2+1
+        JB=JA-M1
+        JC=(J2+M2)/2+1
+        JD=JC-M2
+        JE=(J +M )/2+1
+        JF=JE-M
+        JG=(J1+J2-J)/2+1
+        JH=JA+JB-JG
+        JI=JC+JD-JG
+        JJ=JE+JF+JG-1
+        IF(JJ.GT.N) GO TO 5
+        IA=ZMIN/2
+        IB=JG-IA+1
+        IC=JB-IA+1
+        ID=JC-IA+1
+        IE=JA-JG+IA
+        IF=JD-JG+IA
+        FASE=1.0
+        IF(MOD(IA,2).EQ.0) FASE=-FASE
+        Z =ZMIN
+        ARII=FLOAT(J+1)
+        ARI=(FCT(JA)+FCT(JB)+FCT(JC)+FCT(JE)+FCT(JF)+FCT(JG)
+     1  +FCT(JD)+FCT(JH)+FCT(JI)-FCT(JJ)+ALOG(ARII))/2.0
+   2    IA=IA+1
+        IB=IB-1
+        IC=IC-1
+        ID=ID-1
+        IE=IE+1
+        IF=IF+1
+        FASE=-FASE
+        ARP=-FCT(IA)-FCT(IB)-FCT(IC)-FCT(ID)-FCT(IE)-FCT(IF)
+        ARS=ARI+ARP
+        IF(ARS.GT.80.0) GO TO 5
+        IF(ARS.LT.-80.0) GO TO 10
+        CC=CC+FASE*EXP(ARS)
+  10    CONTINUE
+        Z=Z+2
+        IF(Z.LE.ZMAX) GO TO 2
+   1    CLEBI=CC
+        RETURN
+   3    WRITE(2,4)
+   4    FORMAT(26H0 ERROR IN ARGUMENT OF VCC)
+        GO TO 7
+   5    WRITE(2,6)
+        STOP
+   6    FORMAT(29H0 ERROR - FACTORIALS EXCEEDED)
+   7    WRITE(2,8)I1,I2,I3,N1,N2,N3
+   8    FORMAT(10I10)
+        RETURN
+        END
+
+
+        SUBROUTINE MRHOT(NNP,LLP,LAMP,NN,LL,LAM,T,ME)
+C       ---------------------------------------------
+        COMMON /LU/ LU
+        REAL ME
+   1    FORMAT(12I6)
+        INTEGER T,TA,E,C,D,SLUT
+        COMMON /GM/ GM(150)
+ 300    FORMAT(7H DANGER)
+ 301    FORMAT(31H TERMINATION SOMETHING IS WRONG)
+ 302    FORMAT(33H IS NOT THIS A WONDERFUL COMPILER)
+        LU =2
+        NANP=NNP
+        LALP=LLP
+        LAAMP=LAMP
+        NAN=NN
+        LAL=LL
+        LAAM=LAM
+        TA=T
+        IF(LAAM-LAAMP)231,201,201
+ 201    CONTINUE
+        NP=(NANP-LALP)/2+1
+        N=(NAN-LAL)/2+1
+        IF(NP-N)202,203,203
+ 202    NPNP=NP
+        NP=N
+        N=NPNP
+        L=LALP
+        LALP=LAL
+        LAL=L
+ 203    CONTINUE
+        C=(LAL-LALP-TA)/2
+        D=(LALP-LAL-TA)/2
+        E=D+NP-N-1
+        IF(2*C.EQ.(LAL-LALP-TA)) GO TO 401
+        ME=0.0
+        DO 3 K=1,N
+        K1=2*(N-K+1)+50
+        K2=LAL-LALP-TA+2*(K-1)+50
+        K3=LALP-LAL-TA+2*(K+NP-N-1)+50
+        K4=2*(NP-N+K)+50
+        K5=2*(N-K+1)+LAL+LALP+1+TA+50
+        K6=LAL-LALP-TA+50
+        K7=LALP-LAL+50-TA
+   3    ME=ME+GM(2*N+50)*GM(2*NP+50)/GM(K1)*GM(K2)/GM(2*K+50)*
+     1  GM(K3)/GM(K4)*GM(K5)/GM(K6)/GM(K7)
+        K1=2*N+2*LAL+51
+        K2=2*NP+2*LALP+51
+        ME=ME/SQRT(GM(2*N+50)*GM(K1)*GM(2*NP+50)*GM(K2))*
+     1  (-1)**(NP-N)
+        GO TO 230
+ 401    CONTINUE
+        IF(C.LE.0.AND.D.LE.0) GO TO 204
+        GO TO 208
+ 204    CONTINUE
+        IF(E.GT.-1) GO TO 206
+        GO TO 209
+ 206    SLUT=0
+        GO TO 220
+ 209    CONTINUE
+        IF(C.LE.E+1) GO TO 207
+        GO TO 221
+ 207    SLUT=-E
+        GO TO 220
+ 221    SLUT=1-C
+        GO TO 210
+ 208    CONTINUE
+        IF(C.LE.0.AND.D.GT.0) GO TO 211
+        GO TO 212
+ 211    SLUT=1-C
+        GO TO 213
+ 212    CONTINUE
+        IF(C.GT.0.AND.D.LE.0) GO TO 214
+        GO TO 215
+ 214    CONTINUE
+        IF(E.GT.-1) GO TO 216
+        GO TO 217
+ 216    SLUT=0
+        GO TO 218
+ 217    SLUT=-E
+ 218    CONTINUE
+        GO TO 219
+ 215    CONTINUE
+        WRITE(LU,300)
+        WRITE(LU,301)
+        WRITE(LU,302)
+        STOP
+ 219    CONTINUE
+ 210    CONTINUE
+ 220    CONTINUE
+ 213    CONTINUE
+        IF(SLUT.EQ.0) GO TO 231
+        IF(SLUT.LT.0) GO TO 222
+        GO TO 223
+ 222    WRITE(LU,300)
+        WRITE(LU,301)
+        WRITE(LU,302)
+        STOP
+ 223    ME=0.0
+        IF(SLUT.GT.N) SLUT=N
+        DO 234 K=1,SLUT
+        KK1=2*(N-K+1)+50
+        KK2=2*(N-K+1)+LAL+LALP+1+TA+50
+        KK3=2*(NP-N+K)+50
+        KK4=2-2*C+50
+        KK5=2*(2-K-C)+50
+        KK6=2*(C+K-1)+50
+        KK7=2*C+50
+        IF(C.LE.0) GO TO 224
+        GO TO 225
+ 224    GLI=(-1)**(K+1)*GM(KK4)/GM(KK5)
+        GO TO 226
+ 225    GLI=GM(KK6)/GM(KK7)
+ 226    CONTINUE
+        KK8=2-2*D+50
+        KK9=2*(2-D-K-NP+N)+50
+        KK10=2*(D+K+NP-N-1)+50
+        KK11=2*D+50
+        IF(D.LE.0) GO TO 227
+        GO TO 228
+ 227    GLA=GM(KK8)/GM(KK9)*(-1)**(1+K+NP-N)
+        GO TO 229
+ 228    GLA=GM(KK10)/GM(KK11)
+ 229    CONTINUE
+        ME=ME+GM(2*N+50)/GM(2*K+50)*GM(2*NP+50)/GM(KK1)*GM(KK2)/
+     1  GM(KK3)*GLI*GLA
+ 234    CONTINUE
+        KK12=2*(N+LAL)+51
+        KK13=2*(NP+LALP)+51
+        ME=ME*(-1)**(N-NP)/SQRT(GM(2*N+50)*GM(2*NP+50)*GM(KK12)*
+     1  GM(KK13))
+        GO TO 230
+ 231    ME=0.0
+ 230    CONTINUE
+        RETURN
+        END
+
+
+        SUBROUTINE SIMPS (A,B,NI,F,NY,I,IFLAG,ISW)
+C       ------------------------------------------
+C       A=UNDRE GRANS
+C       B=OVRE GRANS
+C       NI= (ANTAL INTERVALL)/4 /OM ISW=0/
+C       F=FUNKTIONEN
+C       NY=NPGGRANNHETEN
+C       I=VARDET PA INTEGRALEN
+C       IF(ISW.EQ.0),RETURNS,IFLAG=(1 IF TOLERANCE NOT MET,0 IF MET)
+C       IF(ISW.NE.0),ITERATES UNTIL TOLERANCE MET,IFLAG IGNORED,
+        REAL NY,I
+        INTEGER P
+        REAL H,S1,S2,S3,I1,I2
+        N=NI
+        H=(B-A)/4.0/FLOAT(N)
+        I2=F(B)-F(A)
+        I1=I2
+        S3=0.0
+        S2=S3
+        S1=S2
+        N4=4*N
+        DO 442 P=4,N4,4
+        S1=S1+F(A+H*(P-2))
+        S2=S2+F(A+H*(P-4))
+ 442    CONTINUE
+ 441    CONTINUE
+        DO 443 P=2,N4,2
+        S3=S3+F(A+H*(P-1))
+ 443    CONTINUE
+        I1=(I1+4.0*S1+2.0*S2)*H/1.5
+        I2=(I2+4.0*S3+2.0*S1+2.0*S2)*H/3.0
+        N=N*2
+        N4=4*N
+        H=H/2.0
+        IF(ABS(I1-I2).LE.NY) GO TO 444
+        I2=F(B)-F(A)
+        I1=I2
+        S2=S1+S2
+        S1=S3
+        S3=0.0
+        IFLAG=1
+        IF(ISW.EQ.0) RETURN
+        GO TO 441
+ 444    I=(16.0*I2-I1)/15.0
+        IFLAG=0
+        RETURN
+        END
+
+
+        FUNCTION F1(XI)
+C       ---------------
+        COMMON /CMN2/ EPS1,EPS2,EPS3,EPS4,EPS5,EPS6
+        X=XI
+   2    AMN=(((((28.875*EPS6*X+15.75*EPS5)*X+(EPS4*8.75-39.375
+     1  *EPS6))*X+(5.0*EPS3-17.5*EPS5))*X+(13.125*EPS6-7.5*EPS4-
+     1  EPS2))*X+(EPS1*2.0-3.0*EPS3+3.75*EPS5))*X+1.0+EPS2/3.0
+     1  +0.75*EPS4-0.625*EPS6
+        F1=AMN**(-1.5)
+        RETURN
+        END
+
+        SUBROUTINE OME2(NNN,OMOM,NYI)
+        REAL NYI,NY
+        INTEGER T
+        REAL I
+        EXTERNAL F1
+        COMMON/CMN2/ EPS1,EPS2,EPS3,EPS4,EPS5,EPS6
+        COMMON/GAM/GAM
+        DATA PI/3.1415926536/
+        NY=NYI
+        T=NNN
+        GO TO 332
+ 331    T=2*T
+        IF(T.LE.3000) GO TO 332
+   1    FORMAT(1X,' INTEGRATION INTERVAL IN OME DIVIDED INTO',
+     1  'MORE THAN 3000 PARTS')
+        WRITE(2,1)
+        STOP
+ 332    CALL SIMPS(-1.0,1.0,T,F1,NY,I,IFLAG,0)
+        IF(IFLAG.NE.0) GO TO 331
+        GAR=GAM*PI/180.0
+        IF(GAM.LE.120..AND.GAM.GT.60.) GO TO 11
+        OMOM1=(0.5*I/(1.0+EPS2/3.0)/SQRT(1.0-2.0*EPS2/3.0))**(1.0/3.0)
+        OMOM2=(0.5*I/(1.0-EPS2/3.0)/SQRT(1.0+2.0*EPS2/3.0))**(1.0/3.0)
+        AOMOM=0.5*(OMOM1-OMOM2)
+        OMOM=OMOM1+AOMOM*(COS(3.*GAR)-1.)
+        GO TO 12
+  11    OMOM1=(0.5*I/(1.0-EPS2/3.0)/SQRT(1.0+2.0*EPS2/3.0))**(1.0/3.0)
+        OMOM2=(0.5*I/(1.0+EPS2/3.0)/SQRT(1.0-2.0*EPS2/3.0))**(1.0/3.0)
+        AOMOM=0.5*(OMOM2-OMOM1)
+        OMOM=OMOM1+AOMOM*(COS(3.*GAR)+1.)
+  12    CONTINUE
+        RETURN
+        END
+
+        SUBROUTINE ORDER1(E,A,IDIM)
+C       ---------------------------
+        DIMENSION E(IDIM),A(IDIM)
+        DO 1 M=1,IDIM
+        X=1.E+15
+        DO 2 I=M,IDIM
+        IF(X.LT.E(I)) GO TO 2
+        X=E(I)
+        J=I
+   2    CONTINUE
+        X=E(M)
+        E(M)=E(J)
+        E(J)=X
+        X=A(M)
+          A(M)=A(J)
+          A(J)=X
+   1    CONTINUE
+        RETURN
+        END
+
+
+        SUBROUTINE ORDER2(E,IA,IDIM)
+C       ----------------------------
+        DIMENSION E(IDIM),IA(IDIM)
+        DO 1 M=1,IDIM
+        X=1.E+15
+        DO 2 I=M,IDIM
+        IF(X.LT.E(I)) GO TO 2
+        X=E(I)
+        J=I
+   2    CONTINUE
+        X=E(M)
+        E(M)=E(J)
+        E(J)=X
+        K=IA(M)
+          IA(M)=IA(J)
+          IA(J)=K
+   1    CONTINUE
+        RETURN
+        END
+
+
+        SUBROUTINE OME(NNN,OMOM,NYI)
+C       ----------------------------
+        COMMON/CMN2/ EPS1,EPS2,EPS3,EPS4,EPS5,EPS6
+        REAL NYI,NY
+        INTEGER T
+        REAL I
+        EXTERNAL F1
+        NY=NYI
+        T=NNN
+        GO TO 332
+ 331    T=2*T
+        IF(T.LE.3000) GO TO 332
+   1    FORMAT(1X,' INTEGRATION INTERVAL IN OME DIVIDED INTO',
+     1  'MORE THAN 3000 PARTS')
+        WRITE(2,1)
+        STOP
+ 332    CALL SIMPS(-1.0,1.0,T,F1,NY,I,IFLAG,0)
+C       --------------------------------------
+        IF(IFLAG.NE.0) GO TO 331
+        OMOM=(0.5*I/(1.0+EPS2/3.0)/SQRT(1.0-2.0*EPS2/3.0))**(1.0/3.0)
+        RETURN
+        END
+
+
+        SUBROUTINE F02ABF(A,IA,N,R,V,IV,E,IFAIL)
+C       ----------------------------------------
+C       MARK 2 RELEASE,NAG COPYRIGHT 1972
+C       MARK 3 REVISED,
+C       MARK 4,5 REVISED
+C
+C       EIGENVALUES AND EIGENVECTORS OF A REAL SYMMETRIX MATRIX
+C       1 AUGUST 1971
+        INTEGER P01AAF,ISAVE,IFAIL,N,IA,IV
+        DOUBLE PRECISION SRNAME
+        DOUBLE PRECISION TOL,XXX,A(IA,N),R(N),V(IV,N),E(N),
+     *  X02ADF,X02AAF
+        DATA SRNAME/8H F02ABF /
+        ISAVE=IFAIL
+        IFAIL=1
+        TOL= X02ADF(1.0E0)
+C       ------------------
+        CALL F01AJF(N,TOL,A,IA,R,E,V,IV)
+C       --------------------------------
+        TOL= X02AAF(1.0E0)
+C       ------------------
+        CALL F02AMF(N,TOL,R,E,V,IV,IFAIL)
+C       ---------------------------------
+        IF(IFAIL.NE.0) IFAIL=P01AAF(ISAVE,IFAIL,SRNAME)
+C                       --------------------------------
+        RETURN
+        END
+
+
+        SUBROUTINE F01AJF(N,ATOL,A,IA,D,E,Z,IZ)
+C       ---------------------------------------
+        INTEGER I,IA,II,IZ,J1,J,K,L,N
+C       REAL*4 ATOL,F,G,H,HH,A(IA,N),D(N),E(N),
+C     * Z(IZ,N)
+        DIMENSION A(IA,N),Z(IZ,N)
+        REAL*4 ATOL,F,G,H,HH,A,D(N),E(N),Z
+        DO 40 I=1,N
+        DO 20 J=1,I
+        Z(I,J)=A(I,J)
+   20   CONTINUE
+   40   CONTINUE
+        IF(N.EQ.1) GO TO 280
+        DO 260 II=2,N
+        I=N-II+2
+        L=I-2
+        F=Z(I,I-1)
+        G=0.0E0
+        IF(L.EQ.0) GO TO 80
+        DO 60 K=1,L
+        G=G+Z(I,K)*Z(I,K)
+  60    CONTINUE
+  80    H=G+F*F
+        IF(G.GT.ATOL) GO TO 100
+        E(I)=F
+        H=0.0E0
+        GO TO 240
+ 100    L=L+1
+        G=SQRT(H)
+        IF(F.GE.0.0E0) G=-G
+        E(I)=G
+        H=H-F*G
+        Z(I,I-1)=F-G
+        F=0.0E0
+        DO 180 J=1,L
+        Z(J,I)=Z(I,J)/H
+        G=0.0E0
+        DO 120 K=1,J
+        G=G+Z(J,K)*Z(I,K)
+ 120    CONTINUE
+        J1=J+1
+        IF(J1.GT.L) GO TO 160
+        DO 140 K=J1,L
+        G=G+Z(K,J)*Z(I,K)
+ 140    CONTINUE
+ 160    E(J)=G/H
+        F=F+G*Z(J,I)
+ 180    CONTINUE
+        HH=F/(H+H)
+        DO 220 J=1,L
+        F=Z(I,J)
+        G=E(J)-HH*F
+        E(J)=G
+        DO 200 K=1,J
+        Z(J,K)=Z(J,K)-F*E(K)-G*Z(I,K)
+ 200    CONTINUE
+ 220    CONTINUE
+ 240    D(I)=H
+ 260    CONTINUE
+ 280    E(1)=0.0E0
+        D(1)=0.0E0
+        DO 400 I=1,N
+        L=I-1
+        IF(D(I).EQ.0.0E0) GO TO 360
+        DO 340 J=1,L
+        G=0.0E0
+        DO 300 K=1,L
+        G=G+Z(I,K)*Z(K,J)
+ 300    CONTINUE
+        DO 320 K=1,L
+        Z(K,J)=Z(K,J)-G*Z(K,I)
+ 320    CONTINUE
+ 340    CONTINUE
+ 360    D(I)=Z(I,I)
+        Z(I,I)=1.0E0
+        IF(L.EQ.0) GO TO 400
+        DO 380 J=1,L
+        Z(I,J)=0.0E0
+        Z(J,I)=0.0E0
+ 380    CONTINUE
+ 400    CONTINUE
+        RETURN
+        END
+
+
+        SUBROUTINE F02AMF(N,ACHEPS,D,E,Z,IZ,IFAIL)
+C       ------------------------------------------
+C       THIS SUBROUTINE FINDS THE EIGENVALUES AND EIGENVECTORS
+C       OF A TRIDIAGONAL MATRIX ,T
+C
+        INTEGER P01AAF,ISAVE,IFAIL,N,I,L,J,M,I1,M1,II,K,IZ
+        DOUBLE PRECISION SRNAME
+        DATA SRNAME /8H F02AMF /
+C       DOUBLE PRECISION B,F,H,ACHEPS,G,P,C,S,D(N),E(N),Z(IZ,N)
+        DIMENSION Z(IZ,N)
+        REAL*4 B,F,H,ACHEPS,G,P,R,C,S,D(N),E(N),Z
+        ISAVE=IFAIL
+        IF(N.EQ.1) GO TO 40
+        DO 20 I=2,N
+        E(I-1)=E(I)
+  20    CONTINUE
+  40    E(N)=0.0E0
+        B=0.0E0
+        F=0.0E0
+        DO 300 L=1,N
+           J=0
+        H=ACHEPS*(ABS(D(L))+ABS(E(L)))
+        IF(B.LT.H) B=H
+        DO 60 M=L,N
+        IF(ABS(E(M)).LE.B) GO TO 80
+  60    CONTINUE
+  80    IF(M.EQ.L) GO TO 280
+ 100    IF(J.EQ.30) GO TO 400
+        J=J+1
+        G=D(L)
+        H=D(L+1)-G
+        IF(ABS(H).GE.ABS(E(L))) GO TO 120
+        P=H*0.5/E(L)
+        R=SQRT(P*P+1.0)
+        H=P+R
+        IF(P.LT.0.0E0) H=P-R
+        D(L)=E(L)/H
+        GO TO 140
+ 120    P=2.0E0*E(L)/H
+        R=SQRT(P*P+1.0E0)
+        D(L)=E(L)*P/(1.0E0+R)
+ 140    H=G-D(L)
+        I1=L+1
+        IF(I1.GT.N) GO TO 180
+        DO 160 I=I1,N
+           D(I)=D(I)-H
+ 160    CONTINUE
+ 180    F=F+H
+        P=D(M)
+        C=1.0E0
+        S=0.0E0
+        M1=M-1
+        DO 260 II=L,M1
+           I=M1-II+L
+           G=C*E(I)
+           H=C*P
+           IF(ABS(P).LT.ABS(E(I))) GO TO 200
+           C=E(I)/P
+           R=SQRT(C*C+1.0E0)
+           E(I+1)=S*P*R
+        S=C/R
+        C=1.0E0/R
+        GO TO 220
+ 200    C=P/E(I)
+        R=SQRT(C*C+1.0E0)
+        E(I+1)=S*E(I)*R
+        S=1.0E0/R
+        C=C/R
+ 220    P=C*D(I)-S*G
+        D(I+1)=H+S*(C*G+S*D(I))
+        DO 240 K=1,N
+        H=Z(K,I+1)
+        Z(K,I+1)=S*Z(K,I)+C*H
+        Z(K,I)=C*Z(K,I)-S*H
+ 240    CONTINUE
+ 260    CONTINUE
+        E(L)=S*P
+        D(L)=C*P
+        IF(ABS(E(L)).GT.B) GO TO 100
+ 280    D(L)=D(L)+F
+ 300    CONTINUE
+        DO 380 I=1,N
+        K=I
+        P=D(I)
+        I1=I+1
+        IF(I1.GT.N) GO TO 340
+        DO 320 J=I1,N
+        IF(D(J).GE.P) GO TO 320
+        K=J
+        P=D(J)
+ 320    CONTINUE
+ 340    IF(K.EQ.I) GO TO 380
+        D(K)=D(I)
+        D(I)=P
+        DO 360 J=1,N
+        P=Z(J,I)
+        Z(J,I)=Z(J,K)
+        Z(J,K)=P
+ 360    CONTINUE
+ 380    CONTINUE
+        IFAIL=0
+        RETURN
+ 400    IFAIL=P01AAF(ISAVE,1,SRNAME)
+        RETURN
+        END
+
+
+        INTEGER FUNCTION P01AAF(IFAIL,ERROR,SRNAME)
+C       -------------------------------------------
+        INTEGER ERROR,IFAIL,NOUT
+        DOUBLE PRECISION SRNAME
+        INTEGER P01ZZF
+        IF(ERROR.EQ.0) GO TO 20
+        NOUT=P01ZZF(0)
+        IF(MOD(IFAIL,10).EQ.1) GO TO 10
+        WRITE(NOUT,99999) SRNAME,ERROR
+        CALL P01AAZ
+C       -----------
+   10   IF(MOD(IFAIL/10,10).EQ.0) GO TO 20
+        WRITE (NOUT,99999) SRNAME,ERROR
+   20   P01AAF=ERROR
+        RETURN
+99999   FORMAT(1H0, 38HERROR DETECTED BY NAG LIBRARY ROUTINE ,A8,
+     1   11H - IFAIL = , I5//)
+        END
+
+
+        SUBROUTINE P01AAZ
+C       -----------------
+        STOP
+        END
+
+
+        INTEGER FUNCTION P01ZZF(X)
+C       --------------------------
+        REAL*4  X
+        INTEGER NOUT
+        CALL X04AAF(0,NOUT)
+C       -------------------
+        P01ZZF=NOUT
+        RETURN
+        END
+
+
+        REAL FUNCTION X02AAF(X)
+C       -----------------------
+        REAL*4 X,Z
+C       DATA Z/12RE62           /          
+C       XO2AAF=Z
+        X02AAF=2.0**(-55)
+        RETURN
+        END
+
+
+        REAL FUNCTION X02ADF(X)
+C       -----------------------
+        REAL*4 X,Z
+C       DATA Z/12RDSH           /
+C       X02ADF= Z
+        X02ADF=2.0**(-73)
+        RETURN
+        END
+
+
+        SUBROUTINE X04AAF(I,NERR)
+C       -------------------------
+        INTEGER I,NERR
+        INTEGER NERR1
+        DATA NERR1 /2/
+        IF(I.EQ.0) NERR=NERR1
+        IF(I.EQ.1) NERR1=NERR
+        RETURN
+        END

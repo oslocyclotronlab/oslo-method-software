@@ -1,0 +1,78 @@
+The transport of mama from sun to MacX required that
+the GNU G95 and gcc should be used. However, here
+all calls to c-routines goes by addresses. Typically,
+
+From fortran program we make the call:	CALL LIMG(NX,0,NY,LOY)
+Here is the c-function that will be called from F95:
+/* ======================================================================= */
+int limg_(int *pnx, int *pix, int *pny, int *piy)
+{
+  /* define region of screen to hold display (i.e. screen window) */
+  int nx, ix, ny, iy;
+  nx=*pnx;
+  ix=*pix;
+  ny=*pny;
+  iy=*piy;
+  idx = nx;
+  ix0 = ix;
+  idy = ny;
+  iy0 = iy + 20;
+  return 0;
+} /* limg */
+
+Remember the underscore in the function name. You have to
+use 2 underscores if the name already has an underscore 
+already e.g.: 
+    extern int pr_and_del_file__(char *);
+    
+********************************************************************
+For subroutines where limg() is used, one have to get the
+graphic windows parameters back to the common which are
+used for the trax.f subroutine used for drawing axis.
+
+      REAL               FDX,FX0,FDY,FY0
+      INTEGER            IDX,IX0,IDY,IY0,IYFLAG,ITERM
+      COMMON /MINIG_DAT/ FDX,FX0,FDY,FY0,IDX,IX0,IDY,IY0,IYFLAG,ITERM
+...      
+      CALL LIMG(NX,0,NY,LOY)
+      
+C Gets window parameters for use for F95 routines through
+C COMMON /MINIG_DAT/ FDX,FX0,FDY,FY0,IDX,IX0,IDY,IY0,IYFLAG,ITERM
+      CALL GETGLOBALS(FDX,FX0,FDY,FY0,IDX,IX0,IDY,IY0,IYFLAG)  
+ 
+The corresponding "common" in c-programs are global variabels
+found in miniga.c:
+ 
+ /* global data */
+float fdx, fx0, fdy, fy0;
+int   idx, ix0, idy, iy0, yflag;
+/* fdx = range of channels on x-axis
+   fx0 = starting channel on x-axis
+   fdy = range of counts on y-axis
+   fy0 = starting counts on y-axis
+   idx = no. of x-pixels in display region
+   ix0 = low x-pixel in display region
+   idy = no. of y-pixels in display region
+   iy0 = low y-pixel in display region
+   yflag = 1 for linear y-axis
+           2 for sqrt y-axis
+           3 for log y-axis */
+
+Display   *disp_id;
+....
+
+************************************************************
+A lot of c-routines are not used in the f95 part,
+and they have no undescore, e.g. 
+int get_focus(int *focus_id)
+
+*******************************************************************
+In one of the gf2-fit subroutines parset.f, we had MSPEC() instead of rSPEC():
+      COMMON/Sp1Dim/MSPEC(2,0:8191),MAXCH
+**************************************************************
+The gf2 fit of peaks went wrong. It seems like the g95 compiler
+is remembering last values of a number from last time the
+subroutine was called. After 2 weeks of debugging I found
+this out, and corrected with a statement
+IX0=0
+in the eval.f subroutine. Now everything runs smooth. 

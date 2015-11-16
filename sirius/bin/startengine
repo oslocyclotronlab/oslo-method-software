@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if false; then
+  set LD_BIND_NOW=1
+  /Applications/sirius/bin/acq_engine
+else
+  /home/abuerger/daq-programs/engine/usb-engine
+fi

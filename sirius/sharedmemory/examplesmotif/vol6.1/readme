@@ -1,0 +1,181 @@
+NOTICE:
+-------
+
+This distribution contains the example programs from the Motif
+Programmer's Manual, Volume 6 of the series on X Windows Programming
+from O'Reilly & Associates.  All programs are written exclusively
+by Dan Heller and are Copyright 1991 by O'Reilly && Associates and
+Z-Code Software (where indicated).  The programs are not in the
+public domain, but they are freely distributable without licensing
+fees.  These programs are provided without guarantee or warrantee
+expressed or implied.
+
+General Info:
+-------------
+
+The sources are distributed over 19 directories, each pertaining
+to a particular chapter in the book.  The book is not required to
+use or build the example programs, although the corresponding
+chapters do add quite a bit of explanation about what's going on.
+
+What you need to use this stuff:
+--------------------------------
+You must have built and installed X11R4 and at least Motif 1.1.1 before you
+attempt to run these programs.  The assumption is that everything is in
+the standard places: /usr/include/X11, /usr/include/Xm, /usr/lib/libXm.a,
+and so on...  If these directories are not in the standard locations, it's
+up to you to modify appropriate files to build things correctly.
+(See "compiling" below.)
+
+The programs will not compile using any version of Motif 1.0.
+
+The example programs will NOT work using X11R3 Xlib and Xt libraries,
+although you may use an X11R3 X server.  (Your performance may be
+poor, though.)
+
+X11R5 *will* work.  If you have X11R5 and have not yet built Motif
+1.1.?, you'll have to [re]compile Xlib and Xt with a MOTIF_BC flag set,
+or you'll also have a link problem (LowerCase) and a fatal run time
+problem (XContext manager).  (Mrm won't compile, but none of my examples
+use Mrm/Uil, nor does the book cover these tools.)
+ 
+Motif 1.1.4 (when it becomes available) should work with vanilla X11R5
+with no modifications.
+
+The programs have successfully been compiled and tested using
+X11R4, Motif 1.1.1, 1.1.2 and/or 1.1.3.  There are some programs
+that require fixes to the Motif toolkit that are only present in
+1.1.2 and 1.1.3.  At the minimum, however, you should have 1.1.1.
+All programs were written, tested and run on a Sun3/60 running
+SunOS 4.0.3, and a sun4/110 running 4.1.1.  A random selection of
+programs have been verified for SYSV compatibility using SCO UNIX.
+
+    NOTE: SCO UNIX at this time does NOT distribute X11R4 or Motif
+	  1.1.1 by default.  I had to compile these libraries separately
+	  to get the programs to run on that platform.
+
+Distribution Contents:
+----------------------
+
+Included in each directory are:
+    1) directories (and .c files within):
+	ch0{2,4,5,6,7,8,9} ch1* ch20 appendix
+    2) Imakefile     --in each directory and at toplevel
+    3) Makefile.raw  --in each directory and at toplevel
+    4) app-defaults file ("Demos", toplevel only)
+
+The examples in this distribution are all of the same application
+class for purposes of the app-defaults file.  The class name is
+"Demos", and the app-defaults file ("Demos") which is included in
+this distribution should be placed in /usr/lib/X11/app-defaults/Demos.
+If you can't write to that directory, or if your normal X11 directory
+tree is installed elsewhere, you should set the environment variable
+XAPPLRESDIR to that directory.  (That dir will be searched for the
+file "Demos" when any of the examples are run.)
+
+Compiling:
+----------
+
+These examples assume you are *NOT* using an ANSI C compiler.  However,
+if you are using such a compiler, things will still work, but you may
+get errors of the following type:
+
+"file.c", line ???: warning: argument is incompatible with prototype: arg #3
+"file.c", line ???: warning: argument is incompatible with prototype: arg #4
+
+These errors may be generated on new SunOS machines or others that have
+prototyping on by default.
+
+You should be able to type
+    make -f Makefile.raw
+in each subdirectory to make the programs.  If you have a standard compiler
+(or you at least know your way around the quirks in your compiler),
+you shouldn't have a problem with this method.  However, this may not be
+enough for all compiler.  That is, some require additional options,
+include and library path specifications, dependencies, etc..  You can
+either modify each of the makefiles accordingly, or you can use the
+"imake" facility to do this for you.
+
+"imake" is used as a replacement for Makefiles, since Makefiles are
+inherently non-portable.  If you have installed X on your system, then
+you should also have all the tools necessary to run imake.
+
+Imake is -very- easy to use.  Basically, it is a facility that allows
+programmers to create makefile "templates" describing, in a very general
+sense, what the Makefile is expected to do.  "imake" waves its magic
+wand over the Imakefile (uses the C-preprocessor) to create a real
+Makefile based on the dependencies of each particular system/compiler.
+This way, a simple Imakefile can be used by anyone who uses imake, and
+no one has to worry about munging up someone else's Makefiles.....at least,
+in theory...things don't always go as planned (imake still has some quirks).
+
+At any rate, to use the Imakefiles in this distribution, from the
+parent directory (where you are reading this file), type:
+
+% xmkmf
+[short output]
+% make Makefiles
+[lots of output]
+% make
+
+If you have any problems building Makefiles, and you are completely
+clueless about Imakefiles, punt the whole thing and try using the
+Makefile.raw files in each directory.  Don't ask me! If all else
+fails, you can build each file manually using the simple command:
+
+    % cc -D_NO_PROTO filename.c -o filename -lXm -lXt -lX11
+
+Compiling with/without Prototypes:
+----------------------------------
+
+The use of -D_NO_PROTO is *imperative* unless you really know what you're
+doing.  The Motif toolkit was written to eventually support prototyping
+compilers, but it falls short of doing it successfully (especially in
+1.1.1 and 1.1.2).  If you do not provide -D_NO_PROTO on your compilation
+line, you might get errors like:
+
+"/usr/include/Xm/VirtKeys.h", line 145: syntax error at or near variable name "shell"
+"/usr/include/Xm/VirtKeys.h", line 145: Widget declared as parameter to non-function
+"/usr/include/Xm/VirtKeys.h", line 145: shell undefined
+"/usr/include/Xm/VendorE.h", line 209: syntax error at or near variable name "shell"
+"/usr/include/Xm/VendorE.h", line 209: Widget declared as parameter to non-function
+"/usr/include/Xm/Xm.h", line 1761: syntax error at or near type word "XColor"
+"/usr/include/Xm/Xm.h", line 1761: unknown size
+"/usr/include/Xm/Xm.h", line 1762: unknown size
+"/usr/include/Xm/Xm.h", line 1763: unknown size
+"/usr/include/Xm/Xm.h", line 1764: unknown size
+...
+
+the errors go on for a long time...You can solve the problem in several
+ways -- one of which is to "define" _NO_PROTO as shown above.  Note, the
+Imakefiles do not do this for you!!  My favorite solution to the problem
+is to go right to the heart of the problem and solve it: edit Xm.h in
+the following way:
+
+After all the copyright info, add the lines preceded by a `+' (other lines
+are given for context):
+
+#ifndef _Xm_h
+#define _Xm_h
+
++ #ifndef _NO_PROTO
++ #define _NO_PROTO
++ #endif /* _NO_PROTO */
+
+#include <X11/Intrinsic.h>
+#include <X11/Vendor.h>
+#include <Xm/VirtKeys.h>
+
+One or two files use regular expression functions (that do pattern-
+matching on strings).  For these programs, some SYSV machines may have
+to add the -lPW library to the LOCAL_LIBRARIES part of the Imakefiles
+or the "LIBS" directive for all Makefile.raw files...
+
+Thanx:
+------
+Many thanx go to Danny Backx at BIM in Belgium, for providing
+me with Motif 1.1.1 libraries as soon as they were available.
+His continued on-going support was extremely appreciated and
+very helpful in this enormous, 14-month effort.  If you need
+Motif sources and/or binaries, I highly recommend BIM.  Danny
+can be reached via email at <db@sunbim.be>.

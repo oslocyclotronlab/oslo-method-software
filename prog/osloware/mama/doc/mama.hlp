@@ -1,0 +1,1419 @@
+>>>SUMMARY
+AN            Fit A and N separately to exp. first-gen. matr.
+AP            Add a new Peak to the fit set-up
+AR            Arithmetic's (+-/*) on matr./spc.
+CA            Get info and give a0,a1 and a2 and dimension for matr./spc.
+CC [N1,N2...] Change Color map to N1,N2...
+CE            Change from channel display to energy display (or back again)
+CF filename   take commands from disk command file
+              CF CHK : check whether to proceed with command file
+              CF END : end of command file
+              CF CON : continue with present command file
+              CF LOG : log all typed input to create a new command file
+              (Use CF END to close new file)
+CL            Calibration Lines for gammas
+CO            COmpress matr./spc. by integer value (see ELastic)
+CR [N]        Call CursoR and get info, or activate matr./spc.(X to exit)
+CT            Set CounTs per channel in a singles spectrum using cursor
+CU            CUt in matrix, e.g. xnew=x-1.0*y and ynew=y	
+DE            Divide spc. by det. Effic.(from an EFFIT .eff file)
+DF            Display Fit for present parameter values	
+DM            Display Multiple spectra (matrix)
+DP [N]        Delete a Peak [peak no. N] from the fit set-up
+DS [I,J[,K]]  DiSplay matr./spc.[in Ith of J parts of window]
+              [I,J=1,0 or K=1:full scale]
+              [I,J=2,0 or K=2:autoscale]
+DW            Display Windows as they are presently defined	
+DX  M1 M2     Low/high markers for Display of X axis
+DY  M1 M2     Low/high markers for Display of Y axis    
+DZ  M1 M2     Low/high markers for Display of Z axis
+EL            ELastic stretch/compress giving new a0,a1 and a2 calibr. 
+EX            EXpand display using cursor (mouse)
+FD            Fit Data points with polynomial, exponential, range, etc.
+FG            Make First Generation matrix from exp. p-gamma coinc.
+FI            Fix/unfix x-y display for PM command
+FN            Fill ch. with Neg. counts from neighb., Gauss. weighting		
+FO            FOld matr./spc. with NaI or Gaussian response matrix	
+FR [P,Q..]    Free additional parameters P,Q.. in peak fit
+FT [N]        N=1-15: set-up for N peaks and do fit
+              [N=0]: do fit using present parameter values
+              N=-1: recalculate initial param. estimates and do fit
+FX [P]        FiX additional param. P or change fixed value(s)
+GR            Get Response matrix into working matrix 1 or 2
+HC            Hard Copy of window, region or screen (snapshot)
+HE            Prints commands and other HElp-topics
+HE/P          Send this output to the laser printer
+HE <TOPIC>    Help on command or topic <TOPIC> (2 or 3 letters needed)
+IC            Select ICon for matr.spectra
+LP            List Parameter values
+LS            LiSt files in current directory (ls from UNIX)
+LU filename   Create Look-Up table file
+MA [N]        Change limits for fit and/or peak positions
+              [N=1-17 : change MArker no. N]
+MP 	         Marker Position
+NF            Set-up New Fit for peaks ( <16 ) and do fit
+NO            NOrmalize to 100000 along X axis in matrix
+NU            Extract NUclear temperature from exp. first-gen. matr.
+OD            Offline Display, shows shared-memory spectra of offline sorting
+OM [I,J[,K]]  Overlay (no erase) Multiple spectra into Ith of J parts of 
+              window, where I,J=1,0 or K=1 gives full scale and
+                            I,J=2,0 or K=2 gives autoscale
+OS [I,J[,K]]  Overlay (no erase) Spec./matr. into Ith of J parts of 
+              window, where I,J=1,0 or K=1 gives full scale and
+                            I,J=2,0 or K=2 gives autoscale
+PA            PArtition of matr./spc. Choose new origo
+PO            Polynom fit to set of data
+PC            Put Constant in matr./spc. Only RETURNs make erase (=0) 
+PF            Peak Find on spectrum or matrix
+PM            Project Matrix down on X or Y axis1
+RA            RAndomize spectrum. Modifies with random +/- stat. errors
+RE            REad matr./spc. Auto-check of what kind of matr./spc.
+RF            Reset Free param. to their original value
+RM            Make Response Matr. of NaI or Gaussian shape
+RN            Replace counts with new content
+RP N          Free (N=1) or fix (N=0) rel. peak positions
+RW N          Free (N=1) or fix (N=0) relative widths
+SC N          SCale for Y axis: N=-1/-2/-3=lin/square-root/log
+SD            Sirius Display, shows shared-memory spectra of acquisition
+SE            Set environment: numbers of telescopes, names on axis, etc.
+SH            SHow counts of matr./spc. as numbers on TTY
+SL filename   Create SLice input file
+SM            SMooth matr./spc. with Gaussian weighting
+SP filename   Read in new spectrum (not Oslo file format)
+              [SP-1 asks for new initial estimates etc. for R, Beta, Step]
+SP/C          Read (not Oslo) in spectrum from matr. w/cursor for limits
+ST            STop and exit Mama 
+SU [I,J]      SUm counts between channel I and J using cursor
+SW            Change Starting Widths FWHM parameters, etc.
+TF            Total Fit of (a,n) to the exp. first-gen. matr.
+TR            Transform spectrum to one or many rows in a matrix
+TX            TeXt in display window (name and time) on/off
+UD            UpDate SIRIUS and OFFLINE spectra every 2-20 seconds
+UN            UNfold matr./spc. with NaI or Gaussian response matrix
+UC            Subtraction of UnCorrelated events in gamma-gamma-matrix
+UX            Type in your UniX command	
+WI            Add WIndow to look-up table or slice file using cursor
+WM [N]        Change Weighting Mode (i.e. error bar)
+              N=1/2/3: weight with fit/data/another spectrum
+WP            Write Paw file (can be read by PAW, no header, etc.)
+WR            WRite matr./spc. and give a0,a1,a2 and dimensions
+WS filename   Write Spectrum (not Oslo file format)
+XY            Interchange XY axis (reflection about diagonal in matr.)
+>>>>END
+>>>TOPICS
+File Info Display  Modify   Fit  Fold Special
+---- ---- ------- ------- ------ ---- -------
+ GR   CA   CC CE  AR  CO  FD  FR  FG    AN
+ RE   CL   DS DX  CU  EL  FX  FT  FO    HC
+ TR   CR   DY DZ  FN  NO  NF  LP  RM    NU
+ WR   HE   EX FI  PA  PC  PO  PF  UN    UX
+ WP   LS   IC OD  PM  RN  RP  RF        ST
+(SP)  SH   DM OS  SM  UC  SW  RW        TF
+(WS)  SU   SC SD  XY  CT (AP)(DF)      (CF)
+      SE   TX(MP) RA (DE)(DP)(MA)      (LU)
+     (DW)  UD OM         (WM)          (SL)
+                                       (WI)
+Topics: ABOut Mama, PEAkfit, SUMmary, NEWs  
+>>>>END
+>>>AN
+AN Fit A and N separately
+
+The level density parameter a (1/MeV) and the exponent n of Egamma are
+used as fitting parameters to the 2-dimensional landscape of (Egamma,Ex)
+obtained from the first generation gamma-spectra.
+>>>>END
+>>>AP
+AP Add a new Peak to the fit set-up
+
+If you have a peak fit set up, but wish to add a peak to this fit, use 
+the command AP. You will be prompted for the position of the new peak. 
+The width of the new peak will be set to its initial starting value, so 
+if the widths are free, but relative widths fixed, you will be given the 
+option of resetting all non-fixed widths to their initial values also. 
+If the new peak is not higher in energy than the previous last peak, 
+you may also select to re-order the peaks in order of increasing energy.
+>>>>END
+>>>AR
+AR ARithmetic operations +, -, /, and * on matr./spc.
+
+You can add matr./spec., multiply by factors etc. The operations
+possible are listed below:
+adding spectra               1=1+2    
+adding constant              2=1+120.0
+subtracting spectra          2=1-2
+subtract constant            2=1-120.0
+multiply spectra             2=1*2
+multiply by constant         1=2*1.17
+divide spectra               2=1/2
+divide by constant           2=2/1.17
+multiply spectrum*matrix     1=1x1
+natural logarithm (x1000)    2=2log
+derivate (x1000)             2=2der
+NOTE: Integer numbers mean spectra, and real numbers mean constants
+>>>>END
+>>>CA
+CA Get CAlibr. and dimension info. and eventually change these
+
+The command tells what is the current energy calibration and
+dimension of matr./spc. These values can be changed by you.
+>>>>END
+>>>CC
+CC [N1,N2...] Change Color map to N1,N2...
+
+The program uses a "color map" to display spectra in different colors
+according to the value of the parameter I in the DS command. Thus, for 
+example, DS 1 4  will display the spectrum in color 1,  DS 3 5  in 
+color 3, etc. In order to overlay spectra in the same region but in 
+different colors, use the CC command to change the color map. The old 
+map will be listed, and the new map requested. You need provide only 
+those values you wish to change; the other values will remain at their 
+old values.
+>>>>END
+>>>CE
+CE  Channel/Energy toggling for display of axis
+
+The CE command simply toggles between these two modes: If you have 
+channels, you get keV (or MeV) on the axis. If you have energy,
+you get channel display. This is activated by next display 
+command. If the energy is higher than 2000 keV, the command
+switches to MeV units. If no calibration exists, channel display
+will be used.
+>>>>END
+
+>>>CF
+CF Execute/create Command File
+
+CF filename   take commands from disk command file
+              CF CHK : check whether to proceed with command file
+              CF END : end of command file
+              CF CON : continue with present command file
+              CF LOG : log all typed input to create a new command file
+              (Use CF END to close new file)
+
+Batch processing of sets of commands within Mama is achieved through the
+use of the command CF to execute command files. The default extension for 
+these files is .cmd. They may be written using the system editor utility, 
+and can include any valid Mama commands. Be sure, however, to include 
+valid responses to any prompts or questions the program may ask, since 
+while the command file is being executed, it will replace the keyboard 
+as the source of all user responses, with the exception of those 
+involving the graphics cursor. If the program reads a command it does 
+not recognize, you will be informed of this and asked if you wish to 
+continue with the file execution.
+>>>>PAGE
+If you put  CF CHK  (Command File CHecK) as a command entry in your file,
+execution will be interrupted at that point, and you will be given the 
+option of continuing or stopping execution. This may be used, for example, 
+to verify the quality of fits while the command file is being used to 
+automate the fitting of a series of related spectra. If you elect to stop 
+the execution of the file, you may resume at the same point in the same 
+file at a later time by typing the command  CF CON (Command File 
+CONtinue). In addition, the window may be cleared from within the 
+command file by use of the command  CF ERA (Command File ERAse).
+
+You may create command files directly in Mama, without using the system
+editor, by typing  CF LOG. This will cause all typed commands and 
+responses to be logged to a new command file, with a filename specified 
+by you. You may enter the commands  CF CHK  and  CF ERA  into the file 
+simply by typing them, and the commands  CF END,  CF filename  and  
+CF LOG  will all close the new file. NOTE that these last commands will 
+also be entered into the file, and executed when the file is called.
+>>>>END
+>>>CL
+CL Calibration Lines for gammas
+
+The command lists the energies (keV) and intensities for well known
+gamma-sources
+>>>>END
+>>>CO
+CO COmpress matr./spc. by integer value
+
+This command contracts the current spectrum by the integer factor n.
+Channels 0 through n-1 will be summed into channel 0, etc. The program
+automatically calculates the new calibration for the matr./spec.
+
+If you need to stretch/compress or turn over the direction of axis,
+use the EL command (ELastic massage).
+>>>>END
+>>>CR
+CR [N] Call CursoR and get info, or activate matr./spc.(X to exit)
+
+This command causes the cursor to be called. By positioning the cursor and
+typing any character other than X (e.g. a space, or the mouse button), the
+co-ordinates of any point in the presently displayed axes may be 
+determined. The counts in the channel is also given, and the energy 
+is listed as well. 
+
+If you point on the matr./spc. icon at the top of the window, you get
+info on the matr./spc.: Energy calibration, dimension and number of 
+counts. If you want to change these values, use CA (CAlibrate).
+
+In order to leave the cursor mode of operation, click on the green button
+in the upper right corner or type X. 
+
+CR followed by an integer will cause a marker to be displayed in the
+channel corresponding to that integer, and the counts and energy for that
+channel to be listed. (See also the command IC).
+>>>>END
+>>>CT
+CT Set CounTs per channel in singles spectrum using cursor
+
+This command operates just on a singles spectrum. For matrices, use 
+instead the PC (Put Content) command.
+
+The CT command enables the user to alter the counts per channel over a
+selected range of the display spectrum, by specifying the required 
+contents. This may be done either through the cursor or by typing the 
+desired value. If the spectrum is displayed, the cursor will be called 
+up repeatedly. Each pair of entries through the cursor specifies a 
+straight line between the cross-hair positions; the spectrum counts will 
+be set to correspond to this line. To exit from the CT routine, simply 
+type X. If, at either cursor entry, you type the character T (for Type), 
+you will asked to type limiting channel numbers and the required counts 
+per channel for that range.
+>>>>END
+>>>CU
+CU Cut in matrix, e.g. xnew=x-1.0*y and ynew=y
+
+The X and Y axis can be transformed to a new set of axis by defining
+Xnew=Xold+F1*Yold and Ynew=Yold+F2*Xold. The calibration (keV/ch) is
+conserved in the transformation.
+>>>>END
+>>>DE
+DE Divide spc. by det. effic.(from an EFFIT .eff file)
+
+Divides the display spectrum by a detector efficiency. The parameters
+defining this efficiency should have been stored in an .eff file from 
+program EFFIT. See also HElp EFFit.
+>>>>END
+>>>DF
+>>>MP
+MP Marker Position
+DF Display Fit
+
+These commands simply display the marker positions and fit, as currently
+defined, on top of the most recent display of the spectrum. The
+limits of the fit are shown as the vertical lines from the X axis to the
+spectrum, and the vertical arrows with numbers below them are peak position
+markers. The difference between the data and the fit (in counts per 
+channel) is shown halfway between the spectrum and the X axis. The 
+vertical offset is added to the difference to separate it from the X axis 
+for reasons of visibility.
+>>>>END
+>>>DP
+DP [N] Delete a Peak [peak no. N] from the fit set-up
+
+Use this command to delete a peak from a fit you have set up, if you wish
+to have fewer peaks. If you do not provide the number of the peak you want
+deleted, the program will prompt you for it.
+>>>>END
+>>>DS
+>>>OS
+DS Display Spectrum, OS Overlay Spectrum
+
+The commands DS and OS are used to display the current spectrum or matrix.
+DS causes the window to be cleared before the spectrum is displayed.  
+OS, which does not clear the screen, allows different spectra or portions 
+of spectra to be displayed simultaneously. OS accepts the same integer 
+arguments as DS, so that the spectra may be either overlapped or drawn 
+on different parts of the window.
+
+Using the command with the parameters DS [I,J[,K]] and OS [I,J[,K]] means
+display Ith of J parts of the window. If the third parameter K is given
+(or just the first parameter is given) then 1 gives full scale and 2 
+gives autoscale.
+>>>>PAGE
+By default, the whole window will be used to display the part of the 
+spectrum between channel limits previously defined using the DX, DY, 
+DZ or EX, commands. However, by following the command with up to three 
+integers, you may select a certain portion of the window for the display, 
+and/or display the entire spectrum. In general, DS n m will select the 
+nth of m parts of the screen for the display, while a trailing 1 
+displays the full scale spectrum. Thus DS 1, for example, will display 
+the entire spectrum on the whole of the screen. DS 1 4 will display the 
+selected portion of the spectrum in the lowest fourth of the screen, 
+while DS 2 3 1 will display the entire spectrum in the middle third.
+
+The last display drawn is always considered to be the current display for
+the purposes of the cursor, summing of counts, multiplication etc.
+>>>>END
+>>>DW
+DW Display Windows as they are presently defined (not Oslo format)	
+
+Displays the ranges and window labels of the currently defined window 
+file (either SLice or Look-Up). For slice files, a background calculated 
+from the stored peak-to-total ratio is also displayed. 
+>>>>END
+>>>DX
+>>>DY
+>>>DZ
+DX  M1 M2    Low/high markers for Display of X axis
+DY  M1 M2    Low/high markers for Display of Y axis    
+DZ  M1 M2    Low/high markers for Display of Z axis 
+	     
+These commands are used to define the limits of display. 
+Using the display commands DS, OS, DM, OM the matr./spc. is displayed 
+with the markers defined by DX, DY and/or DZ. DZ -1, gives manual 
+setting of 2-dim. levels. These limits will be deactivated (not 
+active) if you apply e.g. DS 1 (full scale) or DS 2 (auto scale).
+>>>>END
+>>>EL
+EL ELastic stretch/compress giving new a0,a1 and a2 calibration
+
+This command work either on X or Y axis. You type the a0,a1 and a2 of
+the old and new calibration. The program then changes the matr./spc. 
+to give the wanted calibration. If e.g. the new a1 is not a multiple
+of the old one, the counts in one channel before, will be distributed
+on two or more channels afterwards. Thus, be aware of that a certain
+smoothing (usually just over two channels) might take place. 
+
+You can also use the EL command to change the direction of the e.g. X axis. 
+Let us say the spectrum has 1000 channels. Type then 0,1,0 for the
+old calibration and 1000,-1,0 for the new one.
+
+If you simply want a compression of e.g. 3 and 3 channels, use instead the
+CO (COmpress) command.
+>>>>END 
+>>>EX
+EX     EXpand display using cursor (mouse)
+
+The lower and upper limits of the X axis (channels) may be changed by
+using the EX command. To change both limits, type EX. The cursor
+will be called, and you must position it and reply with a character, 
+once for each of the lower and upper limits. You may enter them in either 
+order. You will be asked to provide either the new lower limit or new 
+upper limit using the cursor. 
+
+The EX command works also on matrices. The rectangular region to expand 
+is defined by the hair-cross of the cursor. Click the mouse at lower left
+corner and then click on higher right corner to define the region.
+>>>>END
+>>>FD
+FD Fit Data points with polynomial, exponential, range, etc.
+
+The FD command first ask the type of function you want to fit your
+data points:   Polynomial  y=a+bx+cxx+dxxx ..(0)
+               Hyperbolic  y=a/x ............(1)
+               Exponential y=ae^(bx).........(2)
+               Range R(E) from dE-E plot.....(3)
+In the Chi**2 tests it is assumed that the data points are uncertain
+within Ysigma=1, giving artificial Chi**2 values. Input values are 
+given by clicking the mouse or typing from keyboard. Option (3) is 
+made to extract range function for sorting events from particle 
+dE-E telescope. You first have to sort out socalled bananas from the 
+energy of the front detector dE (along y-axis) and the energy of the 
+back detector E (along x-axis). The dispersion (keV/ch) of the 2 
+detectors should be the same. The range function is described in the 
+FUNCTION range(x,A), and might vary from time to time. Candidates are:
+     range=x*(A(1)+A(2)*x)+A(3)*x/(x+A(4))     ,seems best
+     range=A(1)*(x**A(2))                      ,in theory the best
+     range=A(1)+A(2)*x+A(3)*x*x+A(4)*x*x*x     ,polynomial could work
+>>>>END
+>>>FG 	
+FG Make First Generation matrix from exp. particle-gamma coincidences
+
+This is a relative complicated procedure and you should read the paper in
+Nucl. Instr. and Methods: M. Guttormsen et al. NIM A255(1987)518.
+
+You need a set of unfolded gamma (NaI) spectra representing various
+excitation energies. You also need to know the intensity (counts) N(Ex)
+in the corresponding particle spectrum at these excitation energies. 
+Alternatively, you may use the gamma-multiplicity M(Ex). To get an
+idea of what is needed of inputs, just run the command (without writing
+spectra to disk) and find what is needed.
+>>>>END
+>>>FI
+FI Fix/unfix x-y display for PM command
+
+If you make a lot of projections from matrices, it is often convinient
+to conserve the old x and y axis. To disactivate the fix, type fi once
+more.
+>>>>END
+>>>FN
+FN Fill channels with Negative counts from neighbour chs.
+
+The FN command looks first for channels with negative counts in the 
+matr./spc. Then it searches the channels around if there are positive 
+channels to take counts from and put into the negative channels. In 
+this way the holes might be totally or partially filled up (=0).
+The FN command conserves the total number of counts.
+
+The region for search is given by a 1 (or 2) dimensional Gaussian 
+described by FWHM in X (and Y) direction by the user. The channels
+most close to the negative counts will then be used in the filling 
+procedure.
+
+If you need stronger effects, see the RN command (replace numbers).
+>>>>END
+>>>FO
+>>>UN
+FO FOld matr./spc. with NaI or Gaussian response matrix
+UN UNfold matr./spc. with NaI or Gaussian response matrix
+
+FO (and UN) (un)folds the gamma-ray spectrum with the NaI 
+response function. It is also possible to use a Gaussian response
+which is suitable for particle spectra. The command requires that
+the response matrix has been created first by the command 
+RM (Response Matrix). The response function must (of course) have 
+the calibration of the matr./spc. which you wish to fold or unfold.
+>>>>END
+>>>FX
+>>>FR
+FX [P]    Fix additional param. P or change fixed value(s)
+FR [P,Q..]Free additional parameters P,Q..
+
+These commands are used to fix or free (i.e. unfix) additional parameters,
+or to change the values of parameters already fixed. If the command is not
+followed by a parameter name or number, the parameters will be listed, with
+asterisks indicating any fixed parameters, and you will be asked which
+parameters you wish to fix or free. If you wish to fix or free just one
+parameter, you may do so by typing the name or number of that parameter
+following the command. For FX, you will also be asked for the fixed 
+parameter value. <Rtn> to this question indicates that the parameter 
+should remain at its current value.
+
+In addition, you may fix or free the RELATIVE widths and/or peak positions
+by giving RW (Relative Widths) or RP (Relative Positions) as the parameter 
+name. You may fix as many parameters as you wish, provided that at least 
+two independent parameters are left to vary in the fit. See also HELP RW 
+or HELP RP - relative widths/positions.)
+>>>>END
+>>>FT
+>>>NF
+FT FiT spectrum
+NF New Fit
+
+FT [N] N=1-15: set-up for N peaks and do fit
+       [N=0] : do fit using present parameter values
+       N=-1  : recalculate initial param. estimates and do fit
+
+Before typing these commands, you should first display the portion of
+the spectrum which you wish to fit. The FT command has three slightly
+different functions, depending on whether it is followed by an integer:
+(a) >0,
+(b) non-existent (or 0), or
+(c) -1.
+These are discussed below.
+>>>>PAGE
+When the command FT is followed by an integer between one and fifteen, 
+this integer is taken to be the number of peaks required in the fit, 
+and the program will proceed to set up for a new fit. You will be prompted
+with "Limits for fit? (hit T to type)", and the cursor will appear on the
+screen. You may then enter the boundaries of the spectrum region you wish 
+to fit by positioning the cursor at the required channels and typing any 
+character other than T (e.g. the mouse button or the space bar), once for 
+each limit. The prompt "Peak positions? (hit T to type, R to restart)" 
+will then appear, and you should respond by using the cursor to give an 
+approximate position for each peak. If there are limit channels or peak 
+positions that you would like to have given a special value, you may type 
+the character T in response to the cursor when asked for that position; 
+you will then be prompted to type the value. Limits should be given as 
+integers, but peak positions may be real numbers. If you wish to restart 
+the limit and/or peak position definition, type R at one of the peak 
+positions; the program will then return to requesting the fit limits.
+>>>>PAGE 
+The NF command is equivalent to the FT n command except that you do not 
+have to specify the number of peaks that you wish to fit. You just choose 
+the fit limits and then indicate the peak locations until you have entered 
+as many peaks as you wish (up to the maximum of 15). Then, type X or hit 
+the third mouse button and the fit will proceed as described below.
+
+The parameters of the fit will then be written on the screen, together with
+the "parameter number" that identifies it. An asterisk in place of the
+parameter number will denote any parameter that is already fixed at its 
+initial estimate; that is, will not be varied in the chi-squared 
+minimization. You will be prompted to type the name or number of any 
+(additional) parameters that you wish to fix, one per line. Each time you 
+fix a parameter, you will also be asked for the value you wish it to be 
+fixed to. <Rtn> to this question indicates that the parameter should 
+remain at its current value (in this case, at the initial estimate). 
+Note that you may fix any parameter you wish, by giving either its 
+number or its name (e.g. 7 or P1). In addition, you may fix the RELATIVE 
+widths and/or peak positions by responding with RW ("Relative Widths") or 
+RP ("Relative Positions"). In this way you may fix as many parameters as 
+you wish, provided that at least two are left to vary in the fit.
+>>>>PAGE
+When you have finished fixing parameters, or if you do not wish to fix any,
+type <rtn>. You will then be prompted for a maximum number of iterations 
+to be performed. If the fitting algorithm has not converged before this 
+number of iterations has been completed, the fit will be aborted. If you 
+are unhappy with the way the parameters or markers have been set up 
+(e.g. if you would like to fit more peaks, or free parameters etc.), 
+answer 0 to this question, and no iterations will be performed. A <rtn> 
+in response to the prompt will select the default of 50 as the maximum 
+number of iterations.
+>>>>PAGE
+Once you have defined the maximum number of iterations, the fit will begin.
+When the fit has been completed such information as the limits, number of 
+peaks and iterations, and chi-square will be listed on the terminal. 
+Provided that the fit converged, these data will also be written to the 
+print file. You will then be asked if you wish to type and/or print the 
+parameters; that is, have a listing of the parameter values sent to the 
+screen and/or print file. This print file is labelled GF2.OUT, and may 
+be saved, deleted, or printed and then deleted, on exiting the program.
+   FT
+If you type simply FT, without a following number, the program will return
+to the point where it asks you for the maximum number of iterations, and 
+then proceeds to do the fitting with the present parameter values as the 
+new initial estimates. This command is used, for example, when the fit 
+
+has previously failed to converge, or you have read in a new spectrum.
+   FT -1
+FT -1 has the same effect as the above (FT), except that before the fitting
+is begun the non-fixed parameters will first be reset to their original 
+initial estimates.
+>>>>END
+>>>GR
+GR Get Response matrix into working matrix 1 or 2
+
+The command copies the response function into one of the working matr./spc.
+Thus, one can inspect the matrix, make laser print, etc.
+>>>>END
+>>>HC
+HC Hard Copy of screen
+
+The command uses the snapshot utility of the OpenWindow to make either
+raster plot of window, screen, or region. Normally, you make a copy
+of the mama window. The snapshots take a few seconds, so be patient.
+>>>>END
+>>>HE
+>>>HE/P
+HE         Prints commands and other HElp-topics on TTY
+HE/P       Send this output to the laser printer
+HE <TOPIC> Help on command or topic <TOPIC> (2 or 3 letters needed)
+
+The command HE or HE TOPics lists the topics with help information
+available in Mama, and prompts for a topic to be explored. The command
+HE SUMmary causes a summary of the valid commands to be listed on the
+terminal screen. The command HE/P causes the same listing to be printed
+on the laser printer. 
+>>>>END
+>>>IC        
+IC   Select ICon for matr.spectra
+
+The command selects (activates) the next of the 4 matr./spc. shown
+as icons in the upper part of the MAMA WINDOW.
+>>>>END
+>>>LP
+LP List Parameter values
+
+This command simply causes all the present limits, peak position markers
+and parameter values to be listed on the TTY.
+>>>>END
+>>>LS
+LS LiSt files in current directory
+
+This command corresponds to the ls UNIX command. Files in your
+current directory are listed on the screen. For more sophisticated
+UNIX commands, like "ls -a" or "pwd", type the UX command which allows
+you to send a text string to the UNIX shell.
+>>>>END
+>>>LU
+LU filename   Create Look-Up table file (not Oslo format)
+
+This command allows the user to create a look-up file of numerically
+labelled regions (gates), that can be used in tape replay tasks (e.g. 
+MATLUHK, MATTRIP, and  MATBGO). Windows can be added to the file, or 
+overwritten, through the use of the command WI. If the filename does 
+not exist, a new look-up table, initially containing only zeroes, is 
+created. If it does exist, the user is allowed the option of reading 
+and modifying it.
+>>>>END
+>>>MA
+MA [N] Change limits for fit and/or peak positions
+       N=1-17 : change MArker no. N
+
+The MA command is used to change the limits for the fit and/or the peak
+positions. If followed by an integer N, it will be assumed that you wish 
+to change only one marker. Here N=1 and 2 for the lower and upper limits,
+respectively, and N=n+2 for the position of peak number n. If there is no
+integer on the command line, you will be asked if you wish to change the 
+limits and/or peak positions, at which time you will be prompted with the 
+cursor for the new positions. Again, you may hit T to type specific 
+values. After the markers have been changed, you will be asked if 
+you wish to reset the free parameters to their new initial estimates.
+>>>>END
+>>>NO
+NO NOrmalize to 100000 along X axis in matrix
+
+The total number of counts are normalized to 100000 along the X axis. 
+If you instead want the Y axis, you have first to type XY (interchange X 
+and Y axis, max 512x512 matrix).
+>>>>END
+>>>NU
+NU Extract NUclear temperature from exp. first-gen. matrix
+
+First an unfolded first generation NaI matrix have to be read in.
+The procedure finds then the nuclear temperature as a function of 
+excitation energy.
+>>>>END
+>>>OD
+OD Offline Display, shows shared-memory spectra of offline sorting
+
+The OD command shows predefined spectra and matrices (e.g. ALFNA and 
+THICKSP) directly from offline sorting. This means that you do not have 
+to dump spectra in OFFLINE before looking at them.
+>>>>END
+>>>DM
+>>>OM
+DM Display Multiple spectra (from matrix), OM Overlay Multiple spectra
+DS Display Spectrum, OS Overlay Spectrum
+
+The command helps you displaying a number of rows or columns
+from a matrix as multiple singles spectra. DM 1 gives full scale.
+We recommend the DM 2 alternative, which gives auto scale. If you
+write DM only, the markers from last DX and DZ are used. Often
+it is convenient with DX 0 200 and DZ 2. This gives x-axes from
+channels 0 200, and auto-scaling for number of counts. Up to 
+8x8 spectra can be shown simultaneously. If you wish to display singles
+spectra of the whole matrix with more then 64 rows (columns), you should 
+first compress (CO) the matrix one or more times.
+OM is used to overlay (with another color) multiple spectra
+(without erasing the old spectra). In forehand, you should
+use DX and DZ (not DY), so that the markers are all the same
+for proper comparison.
+>>>>END
+>>>PA
+PA PArtition of matr./spc.
+
+You can choose a new origo for the matr./spc. The linear transformation 
+of the axis is in units of channels.
+>>>>END
+>>>PO
+PO POlynom fit to set of xy-pairs
+Type in a sequence of numbers e.g.:
+ ch1  energy1
+ ch2  energy2
+ ch3  energy3
+ x
+Terminate the sequence by typing a character e.g. x.
+The program fits a0,a1,a2... coeff. of polynoms up to third order:
+energy=a0+a1*(ch)+a2*(ch)**2 + ... The degree of polynom is limited 
+by the number of xy-pairs. The coeff. can then be typed in as e.g. 
+calibration for a spectrum by using the CA (CAlibrate) command.
+
+(You might also apply the fit data command (FD) if yuo want other 
+functions for the fit.) 
+>>>>END
+>>>PC
+PC Put Constant in matr./spc.
+
+You can put in a constant value of counts in a part of the
+matr./spc. If you just answers with defaults (RETURNs) the data
+are zeroed (=0). See also the set CounTs command CT.
+>>>>END
+>>>PF 
+PF Peak Find on spectrum or matrix
+
+This command starts a peak find routine and list energies, fwhm, 
+areas etc. of significant peaks on the screen. The results are also
+automatically written (added) to your file peakfit.out file. This file
+might grow big, if you use the routine on matrices with many peaks.
+In cases you have displayed a singles spectrum, the peak position (keV)
+and background is displayed for the peaks found.
+
+The peakfind routine needs an estimate of the experimental fwhm given 
+as a linear function of channels by fwhm=fw0+fw1*channel, and the
+threshold for when peaks are listed according to the uncertainty
+in counts: dA/A < threshold. The program makes automatically two
+peak searches first, in order to give you good initial values for the peak
+search.
+
+The routine might fail on multiple peak structures and cases with low
+statistics. You should then use the FT [N] command (or NF) instead.
+>>>>END
+>>>PM
+PM  Project Matrix down on X or Y axis
+
+The rows or columns are summed up and put into singles spec. 1 or 2 
+>>>>END
+>>>RA 
+RA RAndomize spectrum
+
+Modifies present counts with random +/- of statistical errors
+>>>>END
+>>>RE
+RE Read matrix or spectrum from disk
+
+The procedure make an auto-check of the file you want, and
+decides what kind of matr./spc. you ask for. Spectra can be
+   - Singles spectra (one dimensional) 
+   - Matrices        (two dimensional)
+   - A set of singles spectra labelled e.g. spec-1, spec-2,..
+   - A PAW spectr./matrix (a long array with numbers)
+   - A singles spectrum obtained with ORTEC MCA from PC
+The calibration and dimensions are read. These properties are glued
+to the matr./spec. throughout the Mama session. By writing (WR) the 
+manipulated matr./spc. is written back to disk. You get qualified 
+suggestions for the calibrations and dimensions to be written away.
+>>>>END
+>>>RF   
+RF Reset Free parameters to their original value
+
+RF causes the non-fixed peak fit parameters to be reset to their 
+original initial estimates.
+>>>>END
+>>>RM
+RM Make Response Matrix of NaI or Gaussian shape
+
+Before folding (FO) or unfolding (UN) spectra, the response matrix have
+to be created. The inputs needed are the energy calibration, dimension 
+and FWHM values. For each Y channel (full-energy) a spectrum is 
+created which describes the detector response function for that energy.
+Thus, the response matrix covers a triangle of a quadratic matrix
+with dimension up to 512x512. The response matrix can be inspected by
+the GR (Get Response matrix) command.
+>>>>END
+>>>RN
+RN Replace contents of channels with another value
+
+With this command you may replace the counts in the  
+spectrum/matrix with a given value. The options are:
+-replace counts if they are below a certain value
+-replace counts if they are in-between two values
+-replace counts if they exceed a certain value
+-replace floating counts by integers  
+By pushing default values, all negative numbers will be
+deleted.
+ ----------------------------------------------------- 
+       Counts < Max is replaced........... choose: (1)
+ Min < Counts < Max is replaced........... choose: (2)
+ Min < Counts       is replaced........... choose: (3)
+ Replace floating counts by integers...... choose: (4)
+ ----------------------------------------------------- 
+>>>>END
+>>>RP
+>>>RW
+RP N  Free (N=1) or fix (N=0) relative peak positions
+RW N  Free (N=1) or fix (N=0) relative widths
+
+RP [0] and RP 1 fix and free, respectively, the relative peak positions,
+for those peaks whose position is not fixed. Similarly, RW [0] and RW 1 
+fix and free, respectively, the relative peak widths, for those peaks 
+whose width isnot fixed. The same effect may be achieved using the FX 
+and FR commands, with RP or RW as a parameter name.
+
+Fixing the relative positions and/or widths is very useful in analyzing a
+series of spectra for which there may be slight gain shifts, so that the 
+peaks may move slightly in absolute position but have a constant spacing. 
+Fixing the relative widths from the start of a fit also has the effect 
+of fitting one common width to all peaks in the fitted region. This is 
+usually an excellent approximation, and has the additional advantage of 
+decreasing the uncertainties on the peak areas, especially for weak peaks.
+>>>>END
+>>>SC
+SC N SCale-type for Y axis
+
+The command can make three types of scaling for singles spectra:
+N=-1 linear scale
+N=-2 square-root scale
+N=-3 logarithmic scale
+Default is linear scale.
+>>>>END
+>>>SD
+SD Sirius Display, shows shared-memory spectra of acquisition
+
+The SD command shows predefined spectra and matrices (e.g. EDESP and 
+THICKSP) directly from shared memory during acquisition. This means
+that you do not have to dump spectra in SIRIUS before looking at them.
+>>>>END
+>>>SE
+SE Set Environment
+
+The SE command shows the present settings for the number of telescopes
+used in SIRIUS and OFFLINE sortings. The SE command also allows to set
+other names on the x- and y-axis, like ns, c/s or similar instead of the
+defaults of ch, keV (or MeV). Only 3 characters are valid.
+>>>>END
+>>>SH
+SH SHow counts
+
+The command lists on the TTY the counts in of matrix or spectrum around
+a given channel.
+>>>>END
+>>>SL
+SL filename   Create SLice input file
+
+The SL command works on GF2 files and not on files with the Oslo format.
+The command allows the user to create a gate file for use by the program
+SLICE, to "slice", or set gates on, 2-dimensional matrices. Windows can be
+added through the use of the command WI. If the file does not exist, a 
+new (empty) file will be created. If it does exist, the user is allowed 
+the option of reading and adding to it. Windows saved to the file specify 
+both the upper and lower limits, and a peak-to-total ratio. The user 
+specifies the background used to calculate this ratio by the vertical 
+position of the cursor when adding windows.
+>>>>END
+>>>SM
+SM SMooth matr./spc.
+
+The command smooths the matr./spc. with a Gaussian weighting function. 
+The inputs needed are FWHMx (and FWHMy) values at two different channels.
+>>>>END
+>>>SP
+>>>SP/C
+SP filename  Read in new spectrum (not Oslo format)
+             [SP-1 asks for new initial estimates etc for R, Beta, Step]
+SP/C         Read in spectrum from matr. w/cursor for limits
+
+This command is used to read a new spectrum from disk. The default 
+extension for spectrum filenames is .spc, which corresponds to the GF2 
+format. The CRL version can also read spectra from ORNL .SPK files, and 
+from Chalk River style .mat and .spn files. For these latter formats, 
+you need to specify the filename extension. If the last spectrum you 
+read was from a .SPK, .mat or .spn file, and you wish to read a 
+different spectrum from that same file, there is no need to retype the 
+filename; simply give the number(s) corresponding to the desired 
+spectrum or range of y-channels. In these cases, the program will read 
+from the last file opened.
+>>>>PAGE
+SP/C (SPectrum using Cursor) will assume that you are reading from, or
+intend to read from, a matrix (.mat) file. The cursor will be called, and 
+you can use it to enter two gate limits from previously displayed spectra. 
+If the last spectrum was not read from a matrix, you will then be prompted 
+for the matrix file name.
+
+The command SP-1 allows you to change the initial estimates of, or by 
+default fix or free, the parameters R, Beta and Step. SP-1 will have 
+this effect regardless of whether you previously used the file gfinit.dat 
+or gfinit.cmd to initialize these parameters. You can also type SP-2 to 
+re-execute the file gfinit.dat and/or gfinit.cmd. See also HElp INIt files.
+>>>>END
+>>>ST
+ST STop and exit from Mama
+
+After checking that you do indeed wish to stop the program execution, this
+command will cause Mama to terminate.
+>>>>END
+>>>SU 
+SU [I,J] SUm counts between channel I and J using cursor
+
+The commands SU may be used to sum over a range of channels, with
+and without background subtraction, respectively. By default, the cursor 
+will be called up, and you use it to enter the channel limits, in either 
+order. The subtracted background is taken as the straight line joining the
+positions of the horizontal cross-hair at the two limiting channels. 
+In each case, the area, centroid and width are computed. Negative
+counts are neglected, since they strongly influence centroide and width.  
+
+You may also sum over a selected range of channels by entering the command
+SU <lim1> <lim2>, where <lim1> and <lim2> are the limiting channel numbers.
+This form of the command does not require the current spectrum to be 
+displayed on the screen.
+>>>>END
+>>>SW
+SW Change Starting Widths FWHM parameters, etc.
+
+This command may be used to change the parameters defining the starting
+FWHM of the peaks, and whether the absolute and relative widths are 
+fixed by default. After the starting width has been changed, you will 
+be asked if you wish to reset the free parameters to their new initial 
+estimates.
+>>>>END
+>>>TF
+TF Total Fit with (a,n)
+
+The command makes a fit of the total landscape of the 2-dimensional
+experimental first-generation matrix. The level density parameter 
+a (1/MeV) and the exponent n of Egamma are used as fitting parameters.
+>>>>END
+>>>TR
+TR Transform spectrum to one or many rows in a matrix
+
+The command puts a singles spectrum into a matrix. The same
+spectrum can be copied to one or many rows in the matrix.
+>>>>END
+>>>TX
+TX TeXt in display window (filename and time) on/off
+
+Often filename and time written in the upper right corner
+of the display window overwrites important parts of the spectra.
+This text information can be omitted by the TX command. To
+reactivate the text, type TX once more.
+>>>>END
+>>>UD
+UD            UpDate SIRIUS and OFFLINE spectra
+
+The command creates a new window where SIRIUS or OFFLINE spectra
+are displayed with a certain frequency. The spectrum shown is 
+determined from the last spectrum you viewed with MAMA. However,
+it have to be an OD or SD spectrum - or deduced from these. For
+example the projection of an OFFLINE matrix down in a singles
+spectrum will be identified by the UD command, and you will
+see a singles spectrum beeing updated. To stop the update
+process, simply close the UPDATE window with the mouse.
+Information transferred from MAMA to UPDATE is written in your
+present directory as updateinfo.dat. Thus you can also start
+the process without MAMA, if this file is in your directory -
+just type update &.
+
+>>>>END
+>>>UC
+UC Subtraction of UnCorrelated events in gamma-gamma-matrix
+
+The command makes a socalled uncorrelated background subtraction
+of a gamma-gamma matrix of maximum dimension 512*512.
+The background to be subtracted in channel (i,j) of the original
+matrix is given by
+       B(i,j)=(SumMat(i,jj)*SumMat(ii,j))/SumMat(ii,jj),
+were double index indicates summation. We obtain a new corrected matrix
+       MatCorr(i,j)=Mat(i,j)-0.9*Bij.
+One should iterate a few times in order to obtain convergence. The
+procedure was first presented by the Risoe group around 1985
+in Nucl. Phys. A by Ole Andersen et al.
+>>>>END
+>>>UX
+UX Type in your UniX command
+
+The UX command allows you to send a text string to the UNIX shell.
+However, to make "cd" to another directory, will not change your
+working directory (the directory were you started Mama).	
+>>>>END
+>>>WI
+WI Add WIndow to look-up table or slice file using cursor
+
+The command works on GF2 files (not Oslo format). The command
+adds a window to the currently defined file (Look-up or Slice). The cursor
+is called, and is used to specify the upper and lower limits of each 
+window. For each window, in LU mode, the user is also asked for a look-up 
+value to be inserted in the table for the appropriate range of channels. 
+In SLice mode, the y position of the cursor is used to define a background 
+for the gate, used to calculate the peak-to-total ratio.
+>>>>END
+>>>WM
+WM [N] Change Weighting Mode (i.e. error bar)
+       N=1/2/3: weight with fit/data/another spectrum
+
+This command lets you select the algorithm to be used in determining the
+weight to be applied to each channel in the fit. The integer n is by 
+default one, so that the standard deviation assigned to the counts in a 
+given channel is taken as the result of the fit, as calculated using the 
+current parameter values for each iteration. This option removes excessive 
+weighting of channels which have lower counts because of statistical 
+fluctuations, and is generally to be preferred. If n is given as 2, the 
+standard deviation is taken as the square root of the number of counts 
+in the data itself. The third option, n = 3, is used in fitting a 
+subtracted spectrum. Let us suppose, for example, that you are fitting 
+a spectrum A, which is computed by subtracting a spectrum C, multiplied 
+by a factor x, from spectrum B. That is, 
+          counts(A) = counts(B) - x * counts(C)
+then
+          sigma**2(A) = sigma**2(B) + x**2 * sigma**2(C)
+                      = counts(B)   + x**2 * counts(C)
+>>>>PAGE
+Thus the correct weighting spectrum may be obtained by computing a fourth
+spectrum which is the sum of B and x**2 times C, and weighting according to
+(the square root of) the counts in this fourth spectrum. After typing WM 3 
+you will be asked for the filename of this weighting spectrum.
+>>>>END
+>>>WP
+WP Write Paw-matr./spc. on disk
+
+The command ask you for the type of spectrum (singles(1) or matrix(3))
+to be written on disk. Furthermore, you have to give dimension(s) 
+and filename. The spectrum or matrix is written simply as numbers in
+free format, without information on calibration and dimensions
+(no header). The data can be read by PAW (or other graphical programs).
+>>>>END
+>>>WR
+WR Write matr./spc. on disk
+
+The command ask you for the type (1,2,3) of matrix or spectrum that you 
+wish to write on disk. Furthermore, you have to give the calibration(s),
+dimension(s) and filename. The procedure gives adequate defaults for these
+values.
+>>>>END
+>>>WS
+WS filename   Write Spectrum 
+
+This command write gf2 files (not Oslo format). Use instead WR for Oslo 
+format. The WS command writes the current spectrum to a disk file. 
+If the file name is omitted from the command line, the program will 
+prompt for it. You will also be asked for a spectrum name, or title, 
+which will be written to the file along with the data. The output file 
+always has the default extension .spc.
+    
+Note that WS cannot write to .SPK, .mat, .spn or Oslo files.
+>>>>END
+>>>XY
+XY Interchange X and Y axis
+
+The command puts the counts in (x1,y1) into the position (y1,x1). This
+corresponds to a reflection about the diagonal of the matrix. Note that the
+maximum dimension of the matrix after the XY command is 512x512.
+>>>>END
+>>>PEAKFIT
+Peak fit
+
+Mama offers two ways to make peakfit. The automatic version (use the
+command PF) is fast and even works on matrices, but is not so good as
+the manual approach (use NF or FT [N]).
+
+The manual least-squares peak fit program is designed primarily for use 
+in analyzing gamma-ray spectra from Germanium detectors. However, it can 
+also be used to analyze other types of spectra. The routine can fit portions of spectra with up to fifteen peaks on a quadratic background.
+>>>>PAGE
+The fitted parameters are :
+   A,B and C :    Background = A + B*X + C*X*X
+                  where X is the channel number minus an offset.
+   R,BETA, STEP : These define the shape of the peaks.
+                  The peak is the sum of a gaussian of height H*(1-R/100)
+                  and a skew gaussian of height H*R/100, where BETA is
+                  the decay constant of the skew gaussian (in channels).
+                  STEP is the relative height (in % of the peak height)
+                  of a smoothed step function which increases the
+                  background below each peak.
+   Pn,Wn AND Hn : The position (centroid of the non-skew gaussian),
+                  width and height of the nth peak.
+Initial estimates of A,B and C are taken to give a straight line
+                  between the limits for the fit.
+Initial estimates for Pn and Hn are taken from the given peak positions
+                  (Hn = counts at peak position - background)
+Initial estimate for R is taken as R = A + B*X (X = ch. no.)
+Initial estimate for BETA is taken as BETA = C + D*X (X = ch. no.)
+Initial estimate for STEP is taken as STEP = E
+>>>>PAGE
+FWHM = SQRT(F*F + G*G*x + H*H*x*x)  (x = ch. no. /1000)
+Default values are:  F =   3.00, G =   2.00, H =   0.00
+
+Mama fits a portion of the spectrum using the sum of up to fifteen peaks on
+a quadratic background. Each peak is composed of three components:
+    (1) a Gaussian,
+    (2) a skewed Gaussian, and
+    (3) a smoothed step function to increase the background on the 
+        low-energy side of the peak. Components (2) and/or (3) can 
+        easily be set to zero if not required.
+Component (1), the Gaussian, is usually the main component of the peak, and
+in Ge detectors, physically arises from complete charge collection of a
+photoelectric event in the detector.
+>>>>PAGE
+Component (2), the skewed Gaussian, arises from incomplete charge
+collection, often due to "trapping" of charge at dislocations in the 
+crystal lattice caused by impurities or neutron damage. If the detector 
+and electronics had infinite resolution, component (1) would be a delta-
+function and component (2) would yield an exponential tail on the 
+low-energy side. Convolution of this exponential tail with a Gaussian 
+
+resolution function yields the functional form:
+      y = constant
+               * EXP( (x-c)/beta )
+               * ERFC( (x-c)/(SQRT(2)*sigma) + sigma/(SQRT(2)*beta))
+where ERFC is the complement of the error function, x is the channel 
+number, c and sigma are the centroid and standard deviation of the 
+Gaussian in component (1), and beta is the decay constant of the 
+exponential. Beta now corresponds to the "skewedness" of the skewed 
+Gaussian.
+>>>>PAGE
+Component (3) arises mainly from Compton scattering of photons INTO the
+detector and from escape of photoelectrons from the Ge crystal, which 
+result in a slightly higher background on the low-energy side of the 
+peak. The functional form used in mama is:
+             y = constant * ERFC( (x-c)/(SQRT(2)*sigma) )
+which is produced by the convolution of a step function with a Gaussian of
+width sigma.
+
+When both R and Beta are allowed to vary during a fit, component (2) will
+usually greatly increase the uncertainties calculated for the peak areas. 
+This is because there is a large cross-correlation, between the heights of
+components (1) and (2), which is not properly taken into account in the
+calculation of the uncertainties. Since, if Beta is unknown, the relative
+height of the skewed Gaussian is not generally well-determined by the fit, 
+the large uncertainty in the relative heights yields a large uncertainty 
+in the area. If, however, at least one of the parameters R and Beta can 
+be fixed at some reasonable or previously determined value, then the 
+quoted error on the area is usually reliable.
+>>>>PAGE
+For this reason, and for the purpose of consistency, it is suggested that
+at the start of the analysis of a series of spectra, at least one 
+preliminary pass be made in the analysis of a source calibration 
+spectrum, to determine a set of shape parameters R, Beta and Step 
+which describe the peak shapes well, as a function of channel number. 
+Experience shows that Beta and Step do not seem to vary appreciably with 
+gamma-ray energy, and R can usually be approximated by a straight line 
+(or combination of two straight lines, one at low energies and the other 
+at higher energies) as a function of channel number. These values can 
+then be entered as the initial estimates, and one or more of the 
+parameters fixed, on entering the program. Initial estimates may also 
+be entered from within the program by typing the command SP-1.
+>>>>PAGE
+The limits of the fit are shown as vertical lines from the X axis to the
+spectrum, and the vertical arrows with numbers below them are peak position
+markers. The difference between the data and the fit (in counts per 
+channel) is shown halfway between the spectrum and the X axis. The 
+vertical offset is added to the difference to separate it from the X axis 
+for reasons of visibility.
+>>>>END
+>>>ABOut Mama
+About Mama (ver. 4.0, Oslo Cyclotron Laboratory, 1995-1996)
+
+Mama is a program for Manilulation of Matrices and spectra. You control
+2 big matrices of dimensions 4096*512 and 2 spectra of dimension 8192.
+You can make various operations on the matr./spec. and the best way to 
+learn how the program works, is to use it. A list of available commands
+can be obtained by typing HE SUM.
+
+When you start a Mama session, you should be located in the directory
+where your spectra are, because then you do not have to type the whole
+PATH name at read/write operations. Use the "cd" UNIX command to walk
+to the proper directory. Type then Mama, and you are up running. To 
+end your Mama session simply type ST (STop).
+
+>>>>PAGE
+Mama is designed to be user-friendly, in that it is as self-prompting and
+self-documenting as possible. Commands are entered as a two-character 
+command word, possibly followed by an optional filename, a number, or 
+a series of up to three numbers. Any additional information required 
+to execute the command is requested by the program. The space 
+following the two-character command, separating it from any parameters, 
+is optional. Also, delimiters between integer parameters may generally 
+be either spaces or commas.
+>>>>PAGE
+It is usually possible to exit gracefully from a multiparameter command 
+by answering with wrong data types. After e.g. the question "Destination 
+spectrum:" you type "a" instead of "1" or "2". Then you return to the 
+main program without executing the command.
+
+The program contains modules from the programs GF2 (ver. 6.4)
+written by D.C. Radford and R.W. Macleod  and KELVIN (ver. 1.0) written 
+by M. Guttormsen. The source code is mainly written in FORTRAN 77. The
+display and window routines are written in C with calls to XLIB functions.
+This version of Mama is implemented on the SPARCstation 10/512 (lynx) 
+at the Oslo Cyclotron Laboratory. It can be accessed either from the 
+console or from X-terminals (or emulated X-terminals on Mac or PC).
+A Department of Physics report on Mama 3.0 is available. If you have
+problems with the program, please contact:
+Magne Guttormsen,
+Department of Physics, University of Oslo,
+P.O.Box 1048 Blindern, 0316 Oslo, NORWAY
+Tel:+47-22-856460.     Fax: +47-22-856422
+Internet: magne.guttormsen@fys.uio.no
+>>>>END
+>>>NW
+>>>NEWs
+Latest news about commands
+
+Jan.2 1995
+The x-dimension for the matrices is now 4096, and spectra in 
+shared memory can be displayed by the new commands OD and SD. 
+The new command IC, simplifies the selection of matr./spc. 
+Please, use HE (help) to learn more about these commands.
+
+Febr. 2. 1995
+Display of matrices is several times accellerated in cases where 
+number of channels is lower than number of pixels.
+
+March 7. 1995
+The PF peakfit routine is completely rewritten and works much better
+now, including background subtraction. The command can also be applied
+on matrices.
+
+March 8. 1995
+The UC command makes a socalled uncorrelated background subtraction
+of a gamma-gamma matrix of maximum dimension 512*512. For details,
+type: he uc
+
+March 8. 1995
+Mama/spectrum window is no longer "hanging" by start.
+
+March 24. 1995
+New green button, and a few-pixel adjustment of y-axis.
+
+April 7. 1995
+The command HE gives menu listed according to topic.
+The command DZ gives slightly other levels for 2-dimensional
+representation of matrices.
+
+April 20. 1995
+A new command FD (Fit Data) allows you to fit various functions to
+data points. The inputs are given by clicking the mouse, or by keyboard.
+
+June 16. 1995
+New intelligent display-marker mechanism in function Setmarker.f.
+Now, hopefully, the program resets display-markers to dimensions 
+when reading in new spectra, and keep markers when projecting 
+matrices several times, and so on... Give me feedback, if it 
+doesn't work!!
+
+August 1. 1995
+World wide release of MAMA 4.0: 
+1. Old and not used commands deleted:
+   SA,SF,RD,FF,EF,DU,IN,GD together with the respective routines:
+   opengf2.f, edit.f, pfind.f, dump.f, contract.f, encal.f, storfit.f 
+   and storac.f.
+2. Spectrum icon displayes the marker limits if they are narrower than
+   the dimension of spectrum.
+3. No longer the GF2 COMMON block with SPEC(8192).
+4. Names for the 4 icons (and display spectra) treated separately.
+5. The comment of the header will now contain the history
+   of the file. For example, this comment "|SD:ALFNA CO 3 3SM:" means 
+   that the file was first time created by Sirius and called ALFNA, 
+   then compressed 3 times in x and y direction, and then finally
+   smoothed. The symbol "|" separates commands for each time Mama was started.
+6. The SU command also gives standard deviation of distribution.
+7. Often filename and time written in the upper right corner
+   of the display window overwrites important parts of the spectra.
+   This text information can be omitted by the TX command. To
+   reactivate the text, type TX once more.
+8. NEWs is now topic, so you must type HE NEW to learn about new commands.
+
+August 15. 1995
+1. The parameter ICAL listed just before the calibration constants
+   in the headerfile of spectra, now means number of calibration
+   constants. It is usually 3 for singles and 6 for matrix spectra.
+2. The option (type=2) to read a sequence of spectra allows now to
+   read as an example: NA-0, NA-6 and NA-44. The result is then a 
+   matrix with y from 0-44, having a dimension of 45. The empty rows
+   in between are zeroed. 
+
+September 4. 1995
+1. New and better interpolation between experimental responsefunctions
+   in order to get a reliable responsematrix.
+2. A new unfolding procedure, which works much better for continuum
+   NaI spectra. (You might still select the old version, but it gives
+   unfolded spectra with a lot higher fluctuations than the new routine.)
+
+October 17. 1995
+   The new command UD (UpDate) displayes in a new window SIRIUS or
+   OFFLINE spectra every 5-10 seconds.
+
+Dezember 20. 1995
+   The CL command lists calibration lines from gamma-sources.
+
+January 10. 1996
+   Version MAMA 4.01 released with new and better response functions 
+   and unfolding technique. Also other minor changes have been 
+   implemented.
+
+February 2. 1996
+   Version MAMA 4.1 released. Faster ds 2 for matrices. Subroutine cleanup.f
+   indicates if markers on icons are outside dimensions. Subroutine
+   setmarker.f is slightly changed for matrices, taking XDIM and YDIM into
+   account for auto mode.
+
+February 19. 1996
+   By overlay MAMA suggests new color for spectrum. DX 1 and DX 2
+   means now that full scale (1) or autoscale (2) is performed
+   only on x-axis. This feature also applies for the y- and z-axis.
+   Auto-scaling for matrices accelerated 4 times.
+   
+March 7. 1996
+   Cosmetics:
+   Changed ticks on axis to go from axis and into spectrum-area. Removed
+   free pixels at right side of spectra. 
+
+June 3. 1996
+   The 511 annihilation peak is now correctly centred around 511.0 keV
+   in the unfolding procedure. (Previous, the shift could in worst case
+   be a1/2.). Thus, if a peak (511, single esc., double. esc or full-energy),
+   falls in between two channels x1 and x2, a corresponding height of
+   y1 and y2 are distributed on the channels. In extreme, a peak might
+   then have a FWHM of Wch=2 channels before smoothing is performed. Thus, we
+   do not smooth with the total FWHM Wtot, but instead SQRT(Wtot**2-Wch**2).
+
+September 12. 1996
+   Release of MAMA 4.2 with about 10 small adjustments. Most important:
+   Display markers for the 2 matrices and 2 spectra are stored and are
+   applied next time the CR or IC commands are used. The CT command makes
+   it easy to draw or change spectra.
+
+October 1. 1996
+   New pallet of colors for 3D-plot. Can be changed by the change color (CC)
+   command.
+
+December 24. 1996
+   Release of MAMA 4.3:
+   (1)Spectra is now written and read in free format (not as 8I8).
+   Highest integer is limited to 2 147 483 646. Spectra take now much
+   less space on disk (sometimes 1/10). In addition, reading and writing
+   is faster. If some problems with the new format arise, use the old
+   mama-version called mama4.2. (The new subroutine is called rewr.f,
+   earlier readwrite.f).
+   (2) A new command WP allows to write spectra as a sequence of number,
+   so that PAW can read this as a vector.
+   (3) A new stand-alone program, mama2paw, transfers the new mama-spectra
+   to PAW, if needed. 
+   (4) The weighting function in Figega (FG) is slightly modified, only
+   positive weights are allowed. Furthermore, the areacorrection accepts
+   only 0.85 < alpha < 1.15. The program suggests Ex/Eg-multiplicities.
+   (5) In arithmetic command (AR), the last option allows matrix*vector
+   multiplication.
+
+June 1. 1997
+   Release of MAMA 4.4:
+   SC 3 remains until e.g. SC 1 is given.
+   Corrected OL: no calibrations allowed on y-axis (COMMON/OL/ changed).
+   Corrected OL: After dx 100 200, you may type dz 2 giving auto y-axis
+   for the command OL in region between x = 100 - 200.
+   Sets environment (SE) command implemented. Important for the access of
+   64 contra 8 telescopes using SD and OD commands.
+
+October 1. 1997
+   The autoscaling in y-direction was earlier overestimated when
+   number of pixels < number of channels. This is corrected in setmarker.f
+   and outlay.f subroutines. The program is also made more robust against
+   crashing, if you try to write files (peakfit.out, resp.dat, ...) to 
+   a directory where you have no write access. The project matrix (PM)
+   command gives more intelligent defaults values: by EX command the
+   low and high markers are used as default integration limits. PM also
+   remember last dimension (x or y) and the corresponding limits.
+
+December 10. 1997
+    The fit (FD) to bananas now contains 4 optional fit-functions. The 
+    first and fourth functions are the best ones, I think...
+
+March 20. 1998
+    New command FI will fix the x and y channel display for projections (PM).
+
+April 10. 1998
+   Implemented natural logarithm and derivation of spectra and matrices (AR).
+   The smooth command (SM) is modified so that the Gauss-tail is followed
+   all the way out to 1% of full amplitude (at center). The smoothing
+   matrix can be as large as 100 x 100 channels (previous 50 x 50). Also
+   slightly new treatment at the boarder of matrix, where part of the
+   smoothing matrix is outside the boarder. These modifications also 
+   influence the FN command. The changes are only important in special
+   cases. The elapsed time of the FN and SM commands might be 4x longer
+   compared to revious algorithms.
+
+May 20. 1998
+    Release of MAMA 5.0:
+    The MAMA is finnaly going REAL. Outputs and inputs may have format like
+    0.754572E-47. You are permitted to write dz (or dy) -0.000332 2.195
+    Real MAMA can read old MAMA spectra. You may still start the INTEGER 
+    version by typing mamai. The integer MAMA can read new real MAMA
+    spectra, however, numbers will be truncated.
+
+November 21. 1998
+    Implemented command RA, which randomize spectrum. Modifies 
+    number of counts with random +/- stat. errors. Corrected RN and
+    FN statistics. No more ABORT if writing to directory without
+    write-permission.
+
+January 19. 1999
+    MAMA 5.1 released:
+    The DS 2 command for matrices made more appropriate.
+    The FN command also treat filling of -0.321 correct.
+    The FN gives new and more clever estimates made for FWHMs.
+    The FN allows to delete very negative numbers before filling.
+    The RN (replace numbers) have now 4 options, to see type: he rn
+    The RM did not reset a vector. This caused crazy unfolding
+    if RM was repeted after each other - now corrected.
+
+February 12. 1999
+    The FD (fit data) command includes now also Fermi gas level density.
+    The various fit-functions can now be written to file. It is also
+    possible to write out the first trial function.
+    Corrections for DS command, so that singles spectra with very big
+    (or small numbers) may be displayed. Limits are 1.0E+38 and 1.0E-38.
+
+March 11. 1999
+    The following new commands operate now:
+    DS and OS - Display and Overlay Spectrum or matrix
+    DM and OM - Display and Overlay Multiple spectra
+    This convension makes that:
+    Use DM instead of OL
+    Use OS instead of OV
+    Use MP instead of DM
+>>>>END
+
+

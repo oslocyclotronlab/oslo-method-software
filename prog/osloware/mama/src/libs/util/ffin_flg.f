@@ -1,0 +1,26 @@
+
+C======================================================================
+
+      SUBROUTINE FFIN_FLG(CIN,NC,OUT1,OUT2,OUT3,ERR_FLG)
+
+C           free format floating point input routine....
+C           up to three real numbers (OUT1, OUT2, OUT3) decoded from CIN....
+C           input fields separated by commas or spaces....
+C           CIN = input character string          (input, up to char*80)....
+C           NC  = no. of valid characters in CIN  (input, integer)....
+C           OUT1, OUT2, OUT3 = decoded numbers    (output, real)....
+C           ERR_FLG: FALSE for valid decode....
+C                    TRUE for invalid character in CIN....
+C                    D.C. Radford   Jan. 1992
+
+      CHARACTER*(*) CIN
+      INTEGER       NC
+      REAL          OUT1, OUT2, OUT3
+      LOGICAL       ERR_FLG
+
+
+      ERR_FLG = .TRUE.
+      CALL FFIN(CIN,NC,OUT1,OUT2,OUT3,&10)
+      ERR_FLG = .FALSE.
+10    RETURN
+      END

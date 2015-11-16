@@ -1,0 +1,190 @@
+100 REM   CLEBSCH.BAS            APRIL 26, 1993              J. KANTELE
+
+110 COLOR 15, 1: CLS : PRINT
+
+120 PRINT "****************************************************************"
+
+130 PRINT
+
+140 PRINT " PROGRAM TO CALCULATE THE CLEBSCH-GORDAN COEFFICIENTS "
+
+150 PRINT " C(J1 J2 J3 ; M1 M2 M3) = (J1 J2 M1 M2 | J1 J2 J3 M3) =  "
+
+160 PRINT " (J1 M1 J2 M2 | J3 M3). THE UPPER LIMIT FOR (J1 + J2 - J3) = 100."
+
+170 PRINT
+
+180 PRINT "****************************************************************"
+
+190 DEFDBL A-Z
+
+200 PRINT : DIM A(6), B(6), C(5, 101), FC(5, 101), FU(101), V1(101), V2(101)
+
+210 INPUT " THE J-VALUES, J1, J2, J3 = ", J1, J2, J3
+
+220 PRINT
+
+230 INPUT " THE M-VALUES, M1, M2, M3 = ", M1, M2, M3
+
+240 PRINT
+
+250 A(1) = J1 + J2 - J3: A(2) = J1 - J2 + J3: A(3) = J2 - J1 + J3
+
+260 A(4) = J1 + J2 + J3 + 1: A(5) = 1: A(6) = 1
+
+270 B(1) = J1 + M1: B(2) = J1 - M1: B(3) = J2 + M2
+
+280 B(4) = J2 - M2: B(5) = J3 + M3: B(6) = J3 - M3
+
+290 FOR I = 1 TO 5
+
+300 FOR U = 0 TO 100
+
+310 IF C(I, U) < 0 THEN 350
+
+320 C(1, U) = J1 + J2 - J3 - U: C(2, U) = J1 - M1 - U: C(3, U) = J2 + M2 - U
+
+330 C(4, U) = J3 - J2 + M1 + U: C(5, U) = J3 - J1 - M2 + U
+
+340 NEXT U
+
+350 NEXT I
+
+360 FOR I = 1 TO 3
+
+370 FOR U = 0 TO 100
+
+380 IF C(I, U) < 0 THEN V1(I) = U - 1: GOTO 400
+
+390 NEXT U
+
+400 NEXT I
+
+410 FOR I = 1 TO 3
+
+420 IF V1(I) < 0 THEN V1(I) = 0
+
+430 NEXT I
+
+440 FOR I = 4 TO 5
+
+450 FOR U = 0 TO 100
+
+460 IF C(I, U) >= 0 THEN V2(I) = U: GOTO 480
+
+470 NEXT U
+
+480 NEXT I
+
+490 FOR I = 4 TO 5
+
+500 IF V2(I) < 0 THEN V2(I) = 0
+
+510 NEXT I
+
+520 IF V1(1) <= V1(2) AND V1(1) <= V1(3) THEN V1 = V1(1): GOTO 540
+
+530 IF V1(2) <= V1(1) AND V1(2) <= V1(3) THEN V1 = V1(2) ELSE V1 = V1(3)
+
+540 IF V2(4) <= V2(5) THEN V2 = V2(5) ELSE V2 = V2(4)
+
+550 IF V1 < V2 AND V1 >= 0 THEN C = 0: GOTO 730
+
+560 IF V1 >= V2 THEN VB = V1
+
+570 IF V2 > 0 THEN VA = V2 ELSE VA = 0
+
+580 IF M1 + M2 <> M3 THEN D = 0 ELSE D = 1
+
+590 FOR J = 1 TO 6
+
+600 FA = 1: FB = 1
+
+610 GOSUB 770
+
+620 NEXT J
+
+630 FOR J = 1 TO 5
+
+640 GOSUB 880
+
+650 NEXT J
+
+660 GOSUB 970
+
+670 S = 0
+
+680 FOR U = VA TO VB
+
+690 S = (-1) ^ U / FU(U) / (FC(1, U) * FC(2, U) * FC(3, U) * FC(4, U) * FC(5, U)) + S
+
+700 NEXT U
+
+710 G = (2 * J3 + 1) * FA(1) * FA(2) * FA(3) / FA(4)
+
+720 C = D * SQR(G * (FB(1) * FB(2) * FB(3) * FB(4) * FB(5) * FB(6))) * S
+
+730 COLOR 14
+
+740 PRINT USING " THE CLEBSCH-GORDAN COEFFICIENT IS  C = ##.####^^^^ "; C
+
+750 COLOR 15: GOTO 170
+
+760 END
+
+770 IF A(J) = 0 THEN FA(J) = 1: GOTO 830
+
+780 FOR I = 1 TO A(J)
+
+790 FA = I * FA
+
+800 NEXT I
+
+810 FA(J) = FA
+
+820 IF B(J) = 0 THEN FB(J) = 1: GOTO 870
+
+830 FOR I = 1 TO B(J)
+
+840 FB = I * FB
+
+850 NEXT I
+
+860 FB(J) = FB
+
+870 RESTORE: RETURN
+
+880 FOR U = VA TO VB
+
+890 FC = 1
+
+900 IF C(J, U) < 0 THEN 950
+
+910 FOR I = 1 TO C(J, U)
+
+920 FC = I * FC
+
+930 NEXT I
+
+940 FC(J, U) = FC
+
+950 NEXT U
+
+960 RESTORE: RETURN
+
+970 FU = 1
+
+980 FOR U = 1 TO VB
+
+990 FU = U * FU
+
+1000 FU(U) = FU
+
+1010 NEXT U
+
+1020 FU(0) = 1
+
+1030 RETURN
+
+
+

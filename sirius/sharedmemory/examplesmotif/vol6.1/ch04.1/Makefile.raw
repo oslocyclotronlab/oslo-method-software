@@ -1,0 +1,8 @@
+PROGRAMS = cmd_area dynapix main_list msg_area show_pix
+
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

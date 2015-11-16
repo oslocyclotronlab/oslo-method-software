@@ -1,0 +1,33 @@
+
+C=======================================================================
+
+      SUBROUTINE RMAT(LU,ICH0,NCHS,MATSEG)
+
+C           RMAT: subroutine to read matrix segment from disc....
+C           LU = logical unit of matrix file (must already be opened)....
+C           ICH0 = no. of first row to be read (0 to 4095)....
+C           NCHS = no. of rows to be read....
+C           MATSEG = integer*2 buffer, 4096 by at least NCHS in size....
+
+      INTEGER   LU, ICH0, NCHS
+      INTEGER*2 MATSEG(4096,*)
+
+
+      DO 100 I=1,NCHS
+         READ(LU,REC=ICH0+I) (MATSEG(J,I),J=1,4096)
+100   CONTINUE
+      RETURN
+
+      ENTRY WMAT(LU,ICH0,NCHS,MATSEG)
+
+C           WMAT: subroutine to write matrix segment to disc....
+C           LU = logical unit of matrix file (must already be opened)....
+C           ICH0 = no. of first row to be written (0 to 4095)....
+C           NCHS = no. of rows to be written....
+C           MATSEG = integer*2 buffer, 4096 by at least NCHS in size....
+
+      DO 200 I=1,NCHS
+         WRITE(LU,REC=ICH0+I) (MATSEG(J,I),J=1,4096)
+200   CONTINUE
+      RETURN
+      END

@@ -1,0 +1,248 @@
+#!/bin/csh -f
+#
+#       Filenameme:       makefile
+#
+#       Purpose:        Install the Bit 3 SBus device driver, bts.
+#
+#       Copyright (c) 1990-1993, 1995 by Bit 3 Computer Corporation.
+#       All rights reserved.
+#
+#       $Revision:   2.12  $
+#
+
+#DEBUG_FLAGS=-DDEBUG -g
+DEVICE=-DBTS_MODEL=466
+DEFNS=-Dsun $(DEVICE)
+#CFLAGS= -O2 -I.						# Solaris 1
+CFLAGS= -Xa -xO2 -I. -DSOL2 -dn -L/usr/ucblib -lucb		# Solaris 2
+LNTFLGS=-auxwPd
+
+
+HFILE=/usr/include/sys/btio.h /usr/include/sys/btsio.h
+HMMAP=/usr/include/sys/mman.h
+
+EXAMPLES=dumpmem dumpport dumpram readmem readram readport \
+	 btcat inthdlr bt_reset bt_snd_intr bt_xyint bt_xyrwi \
+	 win_mmap bt_sdma bt_qchk btparam
+
+ALLFILES=$(EXAMPLES)
+
+all:	$(EXAMPLES)
+
+lint:	dumpmem.lint dumpport.lint dumpram.lint \
+	readmem.lint readram.lint readport.lint \
+	btcat.lint inthdlr.lint bt_reset.lint bt_snd_intr.lint \
+	bt_xyint.lint bt_xyrwi.lint win_mmap.lint bt_sdma.lint \
+	bt_qchk.lint btparam.lint
+
+bit3_perror.c:
+	@mv bit3_per.c bit3_perror.c
+ 
+bt_devname.c:
+	@mv bt_devna.c bt_devname.c
+ 
+bt_snd_intr.c:
+	@mv bt_snd_i.c bt_snd_intr.c
+ 
+bt_xypoll.h:
+	@mv bt_xypol.h bt_xypoll.h
+
+clean:
+	rm -f *.o
+	rm -f $(ALLFILES)
+
+lint_clean:
+	rm -f *.ln
+	rm -f *.lint 
+
+bit3_perror.o:	bit3_perror.c $(HFILE)
+	cc bit3_perror.c $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bit3_perror.o -c
+
+bt_devname.o:  bt_devname.c $(HFILE)
+	cc bt_devname.c $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bt_devname.o -c
+
+bt_buf.o:  bt_buf.c $(HFILE)
+	cc bt_buf.c $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bt_buf.o -c
+
+dmpbuf.o:  dmpbuf.c $(HFILE)
+	cc dmpbuf.c $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o dmpbuf.o -c
+
+bt_cache.o:  bt_cache.c $(HFILE)
+	cc bt_cache.c $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bt_cache.o -c
+
+dumpmem: dumpmem.c bit3_perror.o bt_devname.o $(HFILE) $(HMMAP)
+	cc dumpmem.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o dumpmem
+
+dumpport: dumpport.c bit3_perror.o bt_devname.o $(HFILE) $(HMMAP)
+	cc dumpport.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o dumpport
+
+dumpram: dumpram.c bit3_perror.o bt_devname.o $(HFILE) $(HMMAP)
+	cc dumpram.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o dumpram
+
+readmem: readmem.c bit3_perror.o bt_devname.o $(HFILE)
+	cc readmem.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o readmem
+
+readram: readram.c bit3_perror.o bt_devname.o $(HFILE)
+	cc readram.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o readram
+
+readport: readport.c bit3_perror.o bt_devname.o $(HFILE) 
+	cc readport.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o readport
+
+btcat: btcat.c bit3_perror.o bt_devname.o $(HFILE) 
+	cc btcat.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o btcat
+
+inthdlr: inthdlr.c bt_devname.o $(HFILE)
+	cc inthdlr.c bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o inthdlr
+
+bt_reset: bt_reset.c bt_devname.o $(HFILE)
+	cc bt_reset.c bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bt_reset
+
+bt_snd_intr: bt_snd_intr.c bt_devname.o $(HFILE)
+	cc bt_snd_intr.c bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bt_snd_intr
+
+bt_xyint: bt_xyint.c bit3_perror.o bt_devname.o $(HFILE) bt_xypoll.h
+	cc bt_xyint.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bt_xyint
+
+bt_xyrwi: bt_xyrwi.c bit3_perror.o bt_devname.o $(HFILE) bt_xypoll.h
+	cc bt_xyrwi.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bt_xyrwi
+
+win_mmap: win_mmap.c bit3_perror.o bt_devname.o $(HFILE) 
+	cc win_mmap.c bit3_perror.o bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o win_mmap
+
+bt_sdma:	$$@.c $$@.h $(HFILE) bit3_perror.o bt_devname.o bt_buf.o \
+        dmpbuf.o bt_cache.o
+	cc $@.c bit3_perror.o bt_devname.o bt_buf.o dmpbuf.o bt_cache.o \
+            $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o $@
+
+bt_qchk: bt_qchk.c bit3_perror.o bt_devname.o dmpbuf.o $(HFILE)
+	cc bt_qchk.c bit3_perror.o bt_devname.o dmpbuf.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o bt_qchk
+
+btparam: btparam.c bt_devname.o $(HFILE) 
+	cc btparam.c bt_devname.o $(CFLAGS) $(DEFNS) $(DEBUG_FLAGS) -o btparam
+
+#
+#	Lint Checks
+#
+bit3_perror.ln:	bit3_perror.lint
+
+bt_devname.ln:	bt_devname.lint
+
+bt_buf.ln:      bt_buf.lint
+
+dmpbuf.ln:      dmpbuf.lint
+
+bt_cache.ln:    bt_cache.lint
+
+bit3_perror.lint: bit3_perror.c $(HFILE)
+	lint -c $(LNTFLGS) $(DEFNS) bit3_perror.c >bit3_perror.lint
+	@echo "____________________________________________" >>bit3_perror.lint
+	lint -c $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) bit3_perror.c >>bit3_perror.lint
+
+bt_devname.lint: bt_devname.c $(HFILE) 
+	lint -c $(LNTFLGS) $(DEFNS) bt_devname.c >bt_devname.lint
+	@echo "____________________________________________" >>bt_devname.lint
+	lint -c $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) bt_devname.c >>bt_devname.lint
+
+bt_buf.lint:  bt_buf.c $(HFILE)
+	lint -c $(LNTFLGS) $(DEFNS) bt_buf.c >bt_buf.lint
+	@echo "____________________________________________" >>bt_buf.lint
+	lint -c $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) bt_buf.c >>bt_buf.lint
+
+dmpbuf.lint:  dmpbuf.c $(HFILE)
+	lint -c $(LNTFLGS) $(DEFNS) dmpbuf.c >dmpbuf.lint
+	@echo "____________________________________________" >>dmpbuf.lint
+	lint -c $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) dmpbuf.c >>dmpbuf.lint
+
+bt_cache.lint:  bt_cache.c $(HFILE)
+	lint -c $(LNTFLGS) $(DEFNS) bt_cache.c >bt_cache.lint
+	@echo "____________________________________________" >>bt_cache.lint
+	lint -c $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) bt_cache.c >>bt_cache.lint
+
+dumpmem.lint:	dumpmem.c $(HFILE) $(HMMAP) bit3_perror.ln bt_devname.ln
+	lint  $(LNTFLGS) $(DEFNS) dumpmem.c  bt_devname.ln bit3_perror.ln >dumpmem.lint
+	@echo "____________________________________________" >>dumpmem.lint
+	lint  $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) dumpmem.c bt_devname.ln bit3_perror.ln >>dumpmem.lint
+
+dumpport.lint:	dumpport.c $(HFILE) $(HMMAP) bit3_perror.ln bt_devname.ln
+	lint  $(LNTFLGS) $(DEFNS) dumpport.c  bt_devname.ln bit3_perror.ln >dumpport.lint
+	@echo "____________________________________________" >>dumpport.lint
+	lint  $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) dumpport.c bt_devname.ln bit3_perror.ln >>dumpport.lint
+
+dumpram.lint:	dumpram.c $(HFILE) $(HMMAP) bit3_perror.ln bt_devname.ln
+	lint  $(LNTFLGS) $(DEFNS) dumpram.c bit3_perror.ln bt_devname.ln >dumpram.lint
+	@echo "____________________________________________" >>dumpram.lint
+	lint  $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) dumpram.c bit3_perror.ln bt_devname.ln >>dumpram.lint
+
+readmem.lint:	readmem.c $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) readmem.c bit3_perror.ln bt_devname.ln >readmem.lint
+	@echo "____________________________________________" >>readmem.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) readmem.c bit3_perror.ln bt_devname.ln >>readmem.lint
+
+readport.lint:	readport.c $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) readport.c bit3_perror.ln bt_devname.ln >readport.lint
+	@echo "____________________________________________" >>readport.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) readport.c bit3_perror.ln bt_devname.ln >>readport.lint
+
+readram.lint:	readram.c $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) readram.c bit3_perror.ln bt_devname.ln >readram.lint
+	@echo "____________________________________________" >>readram.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) readram.c bit3_perror.ln bt_devname.ln >>readram.lint
+
+btcat.lint:	btcat.c $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) btcat.c bit3_perror.ln bt_devname.ln >btcat.lint
+	@echo "____________________________________________" >>btcat.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) btcat.c bit3_perror.ln bt_devname.ln >>btcat.lint
+
+inthdlr.lint:	inthdlr.c $(HFILE) bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) inthdlr.c bt_devname.ln >inthdlr.lint
+	@echo "____________________________________________" >>inthdlr.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) inthdlr.c bt_devname.ln >>inthdlr.lint
+
+bt_xyint.lint:	$$@.c bt_xypoll.h $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) $@.c bit3_perror.ln bt_devname.ln \
+            >bt_xyint.lint
+	@echo "____________________________________________" >>bt_xyint.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) $@.c bit3_perror.ln \
+            bt_devname.ln >>bt_xyint.lint
+
+bt_xyrwi.lint:	$$@.c bt_xypoll.h $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) $@.c bit3_perror.ln bt_devname.ln \
+            >bt_xyrwi.lint
+	@echo "____________________________________________" >>bt_xyrwi.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) $@.c bit3_perror.ln \
+            bt_devname.ln >>bt_xyrwi.lint
+
+bt_reset.lint:	bt_reset.c $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) bt_reset.c bt_devname.ln >bt_reset.lint
+	@echo "____________________________________________" >>bt_reset.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) bt_reset.c bt_devname.ln >>bt_reset.lint
+
+bt_snd_intr.lint:	bt_snd_intr.c $(HFILE) bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) bt_snd_intr.c bt_devname.ln >bt_snd_intr.lint
+	@echo "____________________________________________" >>bt_snd_intr.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) bt_snd_intr.c bt_devname.ln >>bt_snd_intr.lint
+
+win_mmap.lint:    win_mmap.c $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) $(DEFNS) win_mmap.c bit3_perror.ln bt_devname.ln >win_mmap.lint
+	@echo "____________________________________________" >>win_mmap.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) win_mmap.c bit3_perror.ln bt_devname.ln >>win_mmap.lint
+
+bt_sdma.lint:	$$@.c $$@.h $(HFILE) bit3_perror.ln bt_devname.ln bt_buf.ln \
+            dmpbuf.ln bt_cache.ln
+	lint $(LNTFLGS) $(DEFNS) $@.c bit3_perror.ln bt_devname.ln bt_buf.ln \
+            dmpbuf.ln bt_cache.ln >bt_sdma.lint
+	@echo "____________________________________________" >>bt_sdma.lint
+	lint $(LNTFLGS) $(DEFNS) $(DEBUG_FLAGS) $@.c bit3_perror.ln \
+            bt_devname.ln bt_buf.ln dmpbuf.ln bt_cache.ln >>bt_sdma.lint
+
+bt_qchk.lint:	bt_qchk.c $(HFILE) bit3_perror.ln bt_devname.ln
+	lint $(LNTFLGS) bt_qchk.c bit3_perror.ln bt_devname.ln >bt_qchk.lint
+	@echo "____________________________________________" >>bt_qchk.lint
+	lint $(LNTFLGS) $(DEBG_DFN) bt_qchk.c bit3_perror.ln bt_devname.ln >>bt_qchk.lint
+
+btparam.lint:	btparam.c $(HFILE) bt_devname.ln
+	lint $(LNTFLGS) btparam.c bt_devname.ln >btparam.lint
+	@echo "____________________________________________" >>btparam.lint
+	lint $(LNTFLGS) $(DEBG_DFN) btparam.c bt_devname.ln >>btparam.lint
+
+

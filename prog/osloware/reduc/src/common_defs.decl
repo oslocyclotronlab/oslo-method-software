@@ -1,0 +1,15 @@
+
+      real gaine,gainde,gainge,gainna
+      real shifte,shiftde,shiftge,shiftna,shifttge,shifttna
+      real range
+      integer m
+
+      common /partid/range(0:2047)
+      common /gainshift/gaine(0:63), shifte(0:63),
+     +                  gainde(0:63),shiftde(0:63),
+     +                  gainge(0:5), shiftge(0:5),
+     +                  gainna(0:31),shiftna(0:31),
+     +                               shifttge(0:5),
+     +                               shifttna(0:31)
+
+      common /event/m(0:11,0:15)	! The Event matrix

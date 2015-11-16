@@ -1,0 +1,198 @@
+
+
+
+ sssshhhhmmmmoooopppp((((2222))))                                                           sssshhhhmmmmoooopppp((((2222))))
+
+
+
+
+ NNNNAAAAMMMMEEEE
+      shmat, shmdt - shared memory operations
+
+ SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+      ####iiiinnnncccclllluuuuddddeeee <<<<ssssyyyyssss////sssshhhhmmmm....hhhh>>>>
+
+      cccchhhhaaaarrrr ****sssshhhhmmmmaaaatttt((((iiiinnnntttt sssshhhhmmmmiiiidddd,,,, vvvvooooiiiidddd ****sssshhhhmmmmaaaaddddddddrrrr,,,, iiiinnnntttt sssshhhhmmmmffffllllgggg))));;;;
+
+      iiiinnnntttt sssshhhhmmmmddddtttt((((vvvvooooiiiidddd ****sssshhhhmmmmaaaaddddddddrrrr))));;;;
+
+ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+      sssshhhhmmmmaaaatttt(((()))) attaches the shared memory segment associated with the shared
+      memory identifier specified by _s_h_m_i_d to the data segment of the
+      calling process.
+
+      SSSSeeeerrrriiiieeeessss 777700000000////888800000000 SSSSyyyysssstttteeeemmmmssss
+           If the shared memory segment is not already attached, _s_h_m_a_d_d_r
+           must be specified as zero and the segment is attached at a
+           location selected by the operating system.  That location is
+           identical in all processes accessing that shared memory object.
+
+           If the shared memory segment is already attached, a non-zero
+           value of _s_h_m_a_d_d_r is accepted, provided the specified address is
+           identical to the current attach address of the segment.
+
+      SSSSeeeerrrriiiieeeessss 333300000000////444400000000 SSSSyyyysssstttteeeemmmmssss
+           _s_h_m_a_d_d_r can be specified as a non-zero value as a machine-
+           dependent extension (see DEPENDENCIES below).  However, those
+           systems do not necessarily guarantee that a given shared memory
+           object appears at the same address in all processes that access
+           it, unless the user specifies an address.
+
+           The segment is attached for reading if (_s_h_m_f_l_g & SSSSHHHHMMMM____RRRRDDDDOOOONNNNLLLLYYYY) is
+           ``true''; otherwise it is attached for reading and writing.  It
+           is not possible to attach a segment for write only.
+
+      sssshhhhmmmmddddtttt(((()))) detaches from the calling process's data segment the shared
+      memory segment located at the address specified by _s_h_m_a_d_d_r.
+
+ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEE
+      Upon successful completion, the return value is as follows:
+
+           sssshhhhmmmmaaaatttt(((()))) returns the data segment start address of the attached
+           shared memory segment.
+
+           sssshhhhmmmmddddtttt(((()))) returns a value of 0; otherwise, a value of -1 is
+           returned and eeeerrrrrrrrnnnnoooo is set to indicate the error.
+
+ EEEERRRRRRRROOOORRRRSSSS
+      sssshhhhmmmmaaaatttt(((()))) fails and does not attach the shared memory segment if any of
+      the following conditions are encountered (see DEPENDENCIES):
+
+
+
+ Hewlett-Packard Company            - 1 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssshhhhmmmmoooopppp((((2222))))                                                           sssshhhhmmmmoooopppp((((2222))))
+
+
+
+
+           [EINVAL]       _s_h_m_i_d is not a valid shared memory identifier.
+
+           [EACCES]       Operation permission is denied to the calling
+                          process.
+
+           [ENOMEM]       The available data space is not large enough to
+                          accommodate the shared memory segment.
+
+           [EINVAL]       _s_h_m_a_d_d_r is not zero and the machine does not
+                          permit non-zero values or _s_h_m_a_d_d_r is not equal to
+                          the current attach location for the shared memory
+                          segment.
+
+           [EMFILE]       The number of shared memory segments attached to
+                          the calling process exceed the system-imposed
+                          limit.
+
+      sssshhhhmmmmddddtttt(((()))) fails and returns ----1111 if the following condition is
+      encountered:
+
+           [EINVAL]       _s_h_m_a_d_d_r is not the data segment start address of a
+                          shared memory segment.
+
+ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+      The following call to _s_h_m_a_t attaches the shared memory segment to the
+      process.  This example assumes the process has a valid _s_h_m_i_d, which
+      can be obtained by calling _s_h_m_g_e_t(2).
+
+           cccchhhhaaaarrrr ****sssshhhhmmmmppppttttrrrr,,,, ****sssshhhhmmmmaaaatttt(((())));;;;
+           sssshhhhmmmmppppttttrrrr ==== sssshhhhmmmmaaaatttt((((mmmmyyyysssshhhhmmmmiiiidddd,,,, ((((cccchhhhaaaarrrr ****))))0000,,,, 0000))));;;;
+
+      The following call to sssshhhhmmmmddddtttt(((()))) then detaches the shared memory segment.
+
+           sssshhhhmmmmddddtttt ((((sssshhhhmmmmppppttttrrrr))));;;;
+
+ DDDDEEEEPPPPEEEENNNNDDDDEEEENNNNCCCCIIIIEEEESSSS
+    SSSSeeeerrrriiiieeeessss 333300000000////444400000000
+      _s_h_m_a_d_d_r can be non-zero, and if it is, the segment is attached at the
+      address specified by one of the following criteria:
+
+      If _s_h_m_a_d_d_r is equal to zero, the segment is attached at the first
+      available address as selected by the system.  The selected value
+      varies for each process accessing that shared memory object.
+
+      If _s_h_m_a_d_d_r is not equal to zero and (_s_h_m_f_l_g & SSSSHHHHMMMM____RRRRNNNNDDDD) is ``true'',
+      the segment is attached at the address given by (_s_h_m_a_d_d_r - (_s_h_m_a_d_d_r %
+      SSSSHHHHMMMMLLLLBBBBAAAA)).  The character % is the C language modulus operator.
+
+      If _s_h_m_a_d_d_r is not equal to zero and (_s_h_m_f_l_g & SSSSHHHHMMMM____RRRRNNNNDDDD) is ``false'',
+      the segment is attached at the address given by _s_h_m_a_d_d_r.
+
+
+
+
+ Hewlett-Packard Company            - 2 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ sssshhhhmmmmoooopppp((((2222))))                                                           sssshhhhmmmmoooopppp((((2222))))
+
+
+
+
+      This form of sssshhhhmmmmaaaatttt(((()))) fails and does not attach the shared memory
+      segment if any of the following conditions are encountered:
+
+           [EACCES]       _s_h_m_i_d is the ID of a shared memory segment
+                          currently being used by the system to implement
+                          other features (see _g_r_a_p_h_i_c_s(7) and _i_o_m_a_p(7)).
+
+           [EINVAL]       _s_h_m_a_d_d_r is not equal to zero, and the value of
+                          (_s_h_m_a_d_d_r - (_s_h_m_a_d_d_r % SSSSHHHHMMMMLLLLBBBBAAAA)) is an illegal
+                          address.
+
+           [EINVAL]       _s_h_m_a_d_d_r is not equal to zero, (_s_h_m_f_l_g & SSSSHHHHMMMM____RRRRNNNNDDDD)
+                          is ``false'', and the value of _s_h_m_a_d_d_r is an
+                          illegal address.
+
+           [ENOMEM]       The calling process is locked (see _p_l_o_c_k(2)) and
+                          there is not sufficient lockable memory to support
+                          the process-related data structure overhead.
+
+    SSSSeeeerrrriiiieeeessss 777700000000////888800000000
+      sssshhhhmmmmaaaatttt(((()))) fails and returns -1 if the following is encountered:
+
+           [EINVAL]       The calling process is already attached to _s_h_m_i_d.
+
+ SSSSEEEEEEEE AAAALLLLSSSSOOOO
+      ipcs(1), exec(2), exit(2), fork(2), shmctl(2), shmget(2), stdipc(3C).
+
+ SSSSTTTTAAAANNNNDDDDAAAARRRRDDDDSSSS CCCCOOOONNNNFFFFOOOORRRRMMMMAAAANNNNCCCCEEEE
+      sssshhhhmmmmaaaatttt(((()))): SVID2 [Series 300/400 only], XPG2, XPG3, XPG4
+
+      sssshhhhmmmmddddtttt(((()))): SVID2, XPG2, XPG3, XPG4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Hewlett-Packard Company            - 3 -     HP-UX Release 9.0: August 1992
+
+
+

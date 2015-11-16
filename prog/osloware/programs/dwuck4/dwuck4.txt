@@ -1,0 +1,4 @@
+This version was ported from the VAX/VMS version. It is the J. Comfort
+extended version 25-Aug-1981, based on the U. Colorado version 01-Jul-1978.
+It was compiled on opal.nscl.msu.edu by Andreas Schiller.
+

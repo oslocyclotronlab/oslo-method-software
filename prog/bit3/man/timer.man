@@ -1,0 +1,198 @@
+
+
+
+ ggggeeeettttiiiittttiiiimmmmeeeerrrr((((2222))))                                                   ggggeeeettttiiiittttiiiimmmmeeeerrrr((((2222))))
+
+
+
+
+ NNNNAAAAMMMMEEEE
+      getitimer, setitimer - get/set value of interval timer
+
+ SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+      ####iiiinnnncccclllluuuuddddeeee <<<<ttttiiiimmmmeeee....hhhh>>>>
+
+      iiiinnnntttt ggggeeeettttiiiittttiiiimmmmeeeerrrr((((iiiinnnntttt wwwwhhhhiiiicccchhhh,,,, ssssttttrrrruuuucccctttt iiiittttiiiimmmmeeeerrrrvvvvaaaallll ****vvvvaaaalllluuuueeee))));;;;
+
+      iiiinnnntttt sssseeeettttiiiittttiiiimmmmeeeerrrr((((
+           iiiinnnntttt wwwwhhhhiiiicccchhhh,,,,
+           ccccoooonnnnsssstttt ssssttttrrrruuuucccctttt iiiittttiiiimmmmeeeerrrrvvvvaaaallll ****vvvvaaaalllluuuueeee,,,,
+           ssssttttrrrruuuucccctttt iiiittttiiiimmmmeeeerrrrvvvvaaaallll ****oooovvvvaaaalllluuuueeee
+      ))));;;;
+
+ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+      The system provides each process with three interval timers, defined
+      in <ttttiiiimmmmeeee....hhhh>.  ggggeeeettttiiiittttiiiimmmmeeeerrrr(((()))) returns the current value for the timer
+      specified in _w_h_i_c_h, whereas sssseeeettttiiiittttiiiimmmmeeeerrrr(((()))) call sets the value of a timer
+      (optionally returning the previous value of the timer).
+
+      A timer value is defined by the _i_t_i_m_e_r_v_a_l structure:
+
+           ssssttttrrrruuuucccctttt iiiittttiiiimmmmeeeerrrrvvvvaaaallll {{{{
+              ssssttttrrrruuuucccctttt ttttiiiimmmmeeeevvvvaaaallll   iiiitttt____iiiinnnntttteeeerrrrvvvvaaaallll;;;;    ////**** ttttiiiimmmmeeeerrrr iiiinnnntttteeeerrrrvvvvaaaallll ****////
+              ssssttttrrrruuuucccctttt ttttiiiimmmmeeeevvvvaaaallll   iiiitttt____vvvvaaaalllluuuueeee;;;;       ////**** ccccuuuurrrrrrrreeeennnntttt vvvvaaaalllluuuueeee ****////
+           }}}};;;;
+
+      If _i_t__v_a_l_u_e is non-zero, it indicates the time to the next timer
+      expiration.  If _i_t__i_n_t_e_r_v_a_l is non-zero, it specifies a value to be
+      used in reloading _i_t__v_a_l_u_e when the timer expires.  Setting _i_t__v_a_l_u_e
+      to 0 disables a timer.  Setting _i_t__i_n_t_e_r_v_a_l to 0 causes a timer to be
+      disabled after its next expiration (assuming _i_t__v_a_l_u_e is non-zero).
+
+      Time values smaller than the resolution of the system clock are
+      rounded up to this resolution.  The machine-dependent clock resolution
+      is 1/HHHHZZZZ seconds, where the constant HHHHZZZZ is defined in <ssssyyyyssss////ppppaaaarrrraaaammmm....hhhh>.
+      Time values larger than an implementation-specific maximum value are
+      rounded down to this maximum.  The maximum values for the three
+      interval timers are specified by the constants MMMMAAAAXXXX____AAAALLLLAAAARRRRMMMM, MMMMAAAAXXXX____VVVVTTTTAAAALLLLAAAARRRRMMMM,
+      and MMMMAAAAXXXX____PPPPRRRROOOOFFFF defined in <ssssyyyyssss////ppppaaaarrrraaaammmm....hhhh>.  On all implementations, these
+      values are guaranteed to be at least 31 days (in seconds).
+
+      The _w_h_i_c_h parameter specifies which timer to use.  The possible values
+      are IIIITTTTIIIIMMMMEEEERRRR____RRRREEEEAAAALLLL, IIIITTTTIIIIMMMMEEEERRRR____VVVVIIIIRRRRTTTTUUUUAAAALLLL, and IIIITTTTIIIIMMMMEEEERRRR____PPPPRRRROOOOFFFF.
+
+      The IIIITTTTIIIIMMMMEEEERRRR____RRRREEEEAAAALLLL timer decrements in real time.  A SSSSIIIIGGGGAAAALLLLRRRRMMMM signal is
+      delivered when this timer expires.
+
+      The IIIITTTTIIIIMMMMEEEERRRR____VVVVIIIIRRRRTTTTUUUUAAAALLLL timer decrements in process virtual time.  It runs
+      only when the process is executing.  A SSSSIIIIGGGGVVVVTTTTAAAALLLLRRRRMMMM signal is delivered
+      when it expires.
+
+
+
+ Hewlett-Packard Company            - 1 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ ggggeeeettttiiiittttiiiimmmmeeeerrrr((((2222))))                                                   ggggeeeettttiiiittttiiiimmmmeeeerrrr((((2222))))
+
+
+
+
+      The IIIITTTTIIIIMMMMEEEERRRR____PPPPRRRROOOOFFFF timer decrements both in process virtual time and when
+      the system is running on behalf of the process.  It is designed to be
+      used by interpreters in statistically profiling the execution of
+      interpreted programs.  Each time the IIIITTTTIIIIMMMMEEEERRRR____PPPPRRRROOOOFFFF timer expires, the
+      SSSSIIIIGGGGPPPPRRRROOOOFFFF signal is delivered.  Since this signal can interrupt in-
+      progress system calls, programs using this timer must be prepared to
+      restart interrupted system calls.
+
+      Interval timers are not inherited by a child process across a ffffoooorrrrkkkk(((()))),
+      but are inherited across an eeeexxxxeeeecccc(((()))).
+
+      Three macros for manipulating time values are defined in <ttttiiiimmmmeeee....hhhh>:
+
+           ttttiiiimmmmeeeerrrrcccclllleeeeaaaarrrr        Set a time value to zero.
+
+           ttttiiiimmmmeeeerrrriiiisssssssseeeetttt        Test if a time value is non-zero.
+
+           ttttiiiimmmmeeeerrrrccccmmmmpppp          Compare two time values.  (Beware that >>>>==== and
+                             <<<<==== do not work with the ttttiiiimmmmeeeerrrrccccmmmmpppp macro.)
+
+      The timer used with IIIITTTTIIIIMMMMEEEERRRR____RRRREEEEAAAALLLL is also used by aaaallllaaaarrrrmmmm(((()))) (see
+      _a_l_a_r_m(2)).  Thus successive calls to aaaallllaaaarrrrmmmm(((()))), ggggeeeettttiiiittttiiiimmmmeeeerrrr(((()))), and
+      sssseeeettttiiiittttiiiimmmmeeeerrrr(((()))) set and return the state of a single timer.  In addition,
+      a call to aaaallllaaaarrrrmmmm(((()))) sets the timer interval to zero.
+
+ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEE
+      If the calls succeed, a value of 0 is returned.  If an error occurs,
+      -1 is returned, and eeeerrrrrrrrnnnnoooo is set to indicate the error.
+
+ EEEERRRRRRRROOOORRRRSSSS
+      ggggeeeettttiiiittttiiiimmmmeeeerrrr(((()))) or sssseeeettttiiiittttiiiimmmmeeeerrrr(((()))) fail if any of the following conditions are
+      encountered:
+
+           [EFAULT]       The _v_a_l_u_e structure specified a bad address.
+                          Reliable detection of this error is implementation
+                          dependent.
+
+           [EINVAL]       A _v_a_l_u_e structure specified a microsecond value
+                          less that zero or greater than or equal to one
+                          million.
+
+           [EINVAL]       _w_h_i_c_h does not specify one of the three possible
+                          timers.
+
+ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+      The following call to sssseeeettttiiiittttiiiimmmmeeeerrrr(((()))) sets the real-time interval timer to
+      expire initially after 10 seconds and every 0.5 seconds thereafter:
+
+           ssssttttrrrruuuucccctttt iiiittttiiiimmmmeeeerrrrvvvvaaaallll rrrrttttttttiiiimmmmeeeerrrr;;;;
+           ssssttttrrrruuuucccctttt iiiittttiiiimmmmeeeerrrrvvvvaaaallll oooolllldddd____rrrrttttttttiiiimmmmeeeerrrr;;;;
+
+
+
+
+ Hewlett-Packard Company            - 2 -     HP-UX Release 9.0: August 1992
+
+
+
+
+
+
+ ggggeeeettttiiiittttiiiimmmmeeeerrrr((((2222))))                                                   ggggeeeettttiiiittttiiiimmmmeeeerrrr((((2222))))
+
+
+
+
+           rrrrttttttttiiiimmmmeeeerrrr....iiiitttt____vvvvaaaalllluuuueeee....ttttvvvv____sssseeeecccc     ==== 11110000;;;;
+           rrrrttttttttiiiimmmmeeeerrrr....iiiitttt____vvvvaaaalllluuuueeee....ttttvvvv____uuuusssseeeecccc    ==== 0000;;;;
+           rrrrttttttttiiiimmmmeeeerrrr....iiiitttt____iiiinnnntttteeeerrrrvvvvaaaallll....ttttvvvv____sssseeeecccc  ==== 0000;;;;
+           rrrrttttttttiiiimmmmeeeerrrr....iiiitttt____iiiinnnntttteeeerrrrvvvvaaaallll....ttttvvvv____uuuusssseeeecccc ==== 555500000000000000000000;;;;
+
+           sssseeeettttiiiittttiiiimmmmeeeerrrr ((((IIIITTTTIIIIMMMMEEEERRRR____RRRREEEEAAAALLLL,,,, &&&&rrrrttttttttiiiimmmmeeeerrrr,,,, &&&&oooolllldddd____rrrrttttttttiiiimmmmeeeerrrr))));;;;
+
+ AAAAUUUUTTTTHHHHOOOORRRR
+      ggggeeeettttiiiittttiiiimmmmeeeerrrr(((()))) was developed by the University of California, Berkeley.
+
+ SSSSEEEEEEEE AAAALLLLSSSSOOOO
+      alarm(2), exec(2), gettimeofday(2), signal(5).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Hewlett-Packard Company            - 3 -     HP-UX Release 9.0: August 1992
+
+
+

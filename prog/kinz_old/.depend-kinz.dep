@@ -1,0 +1,1 @@
+kinz.o: kinz.cpp ask_par.h ame2003_masses.h ziegler1985_tables.cppi

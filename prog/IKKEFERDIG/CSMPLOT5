@@ -1,0 +1,318 @@
+        PROGRAM CSMPLOT
+C       TO PLOT QUASIPARTICLE ENERGIES AS FUNCTION OF OM/OM0
+C       ON LINEPRINTER
+C       MODFIED TRAJE BY H.HUBEL
+
+
+        DIMENSION X(50),Y(128,50),Z(128,50),H(128),S(128)
+        DIMENSION I_PRINTER(121,81),UN(7),I_LETTER(30)
+        DIMENSION DISPL(128,50)
+        INTEGER STOM
+        DATA I_LETTER /'A','B','C','D','E','F','G','H',
+     1  'I','J','K','L','M','N','O','P',
+     2  'Q','R','S','T','U','V','W','X',
+     3  'Y','Z','-','+','=','@'/
+        OPEN (3,FILE='CSM:PLT',STATUS='OLD')
+        OPEN (20,FILE='CSMNEG:DATA')
+        OPEN (21,FILE='CSMPOS:DATA')
+
+C       READ INPUT DATA FROM FILE 'CSM:PLT'
+
+        READ(3,1122)NUCLEUS
+ 1122   FORMAT(2A5)
+
+        READ(3,200)
+        READ(3,200)
+        READ(3,200)
+
+        READ(3,101) A,IP,NL,NU
+ 101    FORMAT(3X,F10.1,9X,3I10)
+
+        READ(3,102)
+ 102    FORMAT(A2)
+
+        READ(3,103) EPS2,EPS4,AA,SO,A,HOM,GAM
+ 103    FORMAT(8X,F6.3,11X,F6.3,11X,F7.4,11X,F7.4,8X,
+     1   F4.0,21X,F10.8,11X,F8.3)
+
+        READ(3,200)
+        READ(3,200)
+
+        READ(3,200) IOM
+ 200    FORMAT(1X,I10)
+ 201    FORMAT(1X,F10.5)
+ 202    FORMAT(1X,10F12.3)
+ 100    FORMAT(F10.5)
+
+        DO 20 I=1,IOM
+        READ(3,201) X(I)
+        READ(3,200) L
+        READ(3,202) (H(II),II=1,L)
+        DO 19 II=1,L
+  19    Y(II,I)=H(II)
+        READ(3,200) K
+        READ(3,202) (S(II),II=1,K)
+        DO 18 II=1,K
+ 18     Z(II,I)=S(II)
+ 20     CONTINUE
+
+        READ(3,222)DEL,RLAM,IOL,IOU,STO
+ 222    FORMAT(2F10.5,2I10,F10.5)
+
+C       ----------------------------------------
+
+C   1   WRITE(6,111)
+C 111   FORMAT(1X,'$ EMAX= ')
+C       READ(6,*) EMAX
+C       IF(EMAX.LE.0.0) GO TO 1
+
+        EMAX = 0.3
+
+C       CALCULATES VALUES FOR Y-AXIS 
+
+        EMIN   = -EMAX
+        XX     =  EMAX / 3.
+        UN(1)  =  EMIN
+
+        DO  KK = 2,7
+        UN(KK) = UN(KK-1) + XX
+        ENDDO
+
+        SCALE  = EMAX - EMIN
+        UNIT   = 120. / SCALE
+        STEP   = STO * 1000
+
+C       FILL UP MATRIX I_PRINTER WITH BLANCS
+
+        DO   JJ = 1,81
+        DO   II = 1,121
+        IF (II.EQ.61.OR.II.EQ.121) THEN
+        I_PRINTER(II,JJ) = 1HI
+        ELSE
+        I_PRINTER(II,JJ) = 1H 
+        ENDIF
+        ENDDO
+        ENDDO
+
+
+C       FILL UP I_PRINTER(121,81) FOR NEGATIV PARITY LEVELES
+
+        I_BLANC  = 1H 
+        I_SIGN   = 1
+        DO I_DISPLAY = 1,2
+
+        DO II  = 1,IOM
+        DO JJ  = 1,K
+        DISPL (JJ,II) = I_SIGN*Z(JJ,II)
+        ENDDO
+        ENDDO
+
+        DO KK = 1,IOM
+        JJJ   = JJJ + STEP
+        IF (KK.EQ.1) JJJ = 1
+        MODE  = -1
+        II_START = K/2 + 1
+        DO II = II_START,K
+        MODE  = MODE + 2
+        IF (DISPL(II,KK).GT.EMAX.OR.DISPL(II,KK).LT.EMIN) GO TO 1111
+        III   = DISPL(II,KK) * UNIT + (I_SIGN * 0.5) + 61.
+        IF (MODE.GT.30) GO TO 1111
+        IF (I_PRINTER(III,JJJ).EQ.I_BLANC) THEN
+        I_PRINTER(III,JJJ) = I_LETTER(MODE)
+        ELSE
+        I_PRINTER(III,JJJ) = 1H*
+        ENDIF
+ 1111   CONTINUE
+        ENDDO
+        ENDDO
+
+        DO  KK = 1,IOM
+        JJJ = JJJ + STEP
+        IF (KK.EQ.1) JJJ = 1
+        MODE     = 0
+        II_START = K/2
+        DO   II  = II_START,1,-1
+        MODE     = MODE + 2
+        IF (DISPL(II,KK).LT.EMIN.OR.DISPL(II,KK).GT.EMAX) GO TO 1112
+        III      = DISPL(II,KK) * UNIT - (I_SIGN * 0.5) + 61.
+        IF (MODE.GT.30) GO TO 1112
+        IF (I_PRINTER(III,JJJ).EQ.I_BLANC) THEN
+        I_PRINTER(III,JJJ) = I_LETTER(MODE)
+        ELSE
+        I_PRINTER(III,JJJ) = 1H*
+        ENDIF
+ 1112   CONTINUE
+        ENDDO
+        ENDDO
+
+        I_SIGN   = -1
+        ENDDO
+
+C       PLOT HFBC-SCHEME FOR NEGATIV PARITY LEVELS
+
+        IF (IP.GT.0) THEN
+        WRITE (20,1000) 
+ 1000   FORMAT (1H1,1X,'N E U T R O N  T R A J E T O R I E S')
+        ELSE
+        WRITE (20,1010) 
+ 1010   FORMAT (1H1,1X,'P R O T O N  T R A J E T O R I E S')
+        ENDIF 
+
+
+        WRITE (20,1050) 
+ 1050   FORMAT (/,1X,'HFBC-SCHEME FOR NEGATIV PARITY LEVELS')
+
+        WRITE (20,1060) 
+ 1060   FORMAT (///,53(' '),' ENERGY IN ROTATING FRAME (EQP/OMEGA0)')
+
+        WRITE (20,1070) (UN(I),I=1,7)
+ 1070   FORMAT (1X,F10.2,6(15(' '),F5.2))
+
+        WRITE (20,1080)
+ 1080   FORMAT (1X,'OMEGA/OMEGA0',14(' '),'I',5(19(' '),'I'))
+
+        DO    II = 1,81
+        EGY = ((II - 1) / 800.) * 0.8
+
+        WRITE (20,1090) EGY,(I_PRINTER(IA,II),IA=1,121)
+ 1090   FORMAT (1X,F6.4,121A1)
+
+        ENDDO
+
+        WRITE (20,1080)
+        WRITE (20,1070) (UN(II),II=1,7)
+
+C       OUTPUT HFBC-PARAMETER
+
+        WRITE (20,1015)
+ 1015   FORMAT(////,' CRANCING MODEL CALCULATION WITH THE FOLLOWING',
+     1  'PARAMETERS :')
+
+        WRITE (20,1016)NUCLEUS
+ 1016   FORMAT (/,1X,'NUCLEUS :',2A5)
+
+        WRITE (20,1020) A,NL,NU 
+ 1020   FORMAT (/,' A =',F10.1,3X,'NL =',I5,3X,'NU=',I5)
+
+        WRITE (20,1030) EPS2,EPS4,AA,SO,HOM,GAM
+ 1030   FORMAT (/,' EPS2=',F6.3,3X,'EPS4 =',F6.3,3X,
+     1  'MUE =',F7.4,3X,'KAP =',F7.4,3X,'HOM/HOM0 =',
+     2  F10.8,3X,'GAM =',F8.3)
+
+        WRITE (20,1040) DEL,RLAM 
+ 1040   FORMAT (/,1X,'DEL =',F10.5,3X,'RLAM=',F10.5)
+
+C       FILL UP MATRIX I_PRINTER WITH BLANCS
+
+        DO   JJ = 1,81
+        DO   II = 1,121
+        IF (II.EQ.61.OR.II.EQ.121) THEN
+        I_PRINTER(II,JJ) = 1HI
+        ELSE
+        I_PRINTER(II,JJ) = 1H 
+        ENDIF
+        ENDDO
+        ENDDO
+
+        DO    II = 1,50
+        DO    JJ = 1,128
+        DISPL(JJ,II) = 0.0
+        ENDDO
+        ENDDO
+
+C       FILL UP I_PRINTER(121,81) FOR POSITIV PARITY LEVELS 
+
+        I_SIGN   = 1
+
+        DO    I_DISPLAY = 1,2
+
+        DO         II  = 1,IOM
+        DO         JJ  = 1,L
+        DISPL (JJ,II) = I_SIGN*Y(JJ,II)
+        ENDDO
+        ENDDO
+
+        DO    KK = 1,IOM
+        JJJ      = JJJ + STEP
+        IF (KK.EQ.1) JJJ = 1
+        MODE     = -1
+        II_START = L/2 + 1
+        DO    II = II_START,L
+        MODE     = MODE + 2
+        IF (DISPL(II,KK).GT.EMAX.OR.DISPL(II,KK).LT.EMIN) GOTO 2111
+        III      = DISPL(II,KK) * UNIT + (I_SIGN * 0.5) + 61.
+        IF (I_PRINTER(III,JJJ).EQ.I_BLANC) THEN
+        I_PRINTER(III,JJJ) = I_LETTER(MODE)
+        ELSE
+        I_PRINTER(III,JJJ) = 1H*
+        ENDIF
+ 2111   CONTINUE
+        ENDDO
+        ENDDO
+
+        DO    KK = 1,IOM
+        JJJ      = JJJ + STEP
+        IF (KK.EQ.1) JJJ = 1
+        MODE     = 0
+        II_START = L/2
+        DO   II  = II_START,1,-1
+        MODE     = MODE + 2
+        IF (DISPL(II,KK).LT.EMIN.OR.DISPL(II,KK).GT.EMAX) GOTO 2112
+        III      = DISPL(II,KK) * UNIT - (I_SIGN * 0.5) + 61.
+        IF (I_PRINTER(III,JJJ).EQ.I_BLANC) THEN
+        I_PRINTER(III,JJJ) = I_LETTER(MODE)
+        ELSE
+        I_PRINTER(III,JJJ) = 1H*
+        ENDIF
+ 2112   CONTINUE
+        ENDDO
+        ENDDO
+
+        I_SIGN   = -1
+        ENDDO
+
+C       PLOT HBFC-SCHEME FOR POSITIV PARTIY LEVELS
+
+        IF (IP.GT.0) THEN
+        WRITE (21,1000) 
+        ELSE     
+        WRITE (21,1010) 
+        ENDIF 
+
+        WRITE (21,2050) 
+ 2050   FORMAT (/,1X,'HFBC-SCHEME FOR POSITIV PARITY LEVELS')
+
+        WRITE (21,2060) 
+ 2060   FORMAT (///,53(' '),' ENERGY IN ROTATING FRAME (EQP/OMEGA0)')
+
+        WRITE (21,2070) (UN(I),I=1,7)
+ 2070   FORMAT (1X,F10.2,6(15(' '),F5.2))
+
+        WRITE (21,2080)
+ 2080   FORMAT (' OMEGA/OMEGA0',14(' '),'I',5(19(' '),'I'))
+
+        DO    II = 1,81
+        EGY = ((II - 1) / 800.) * 0.8
+
+        WRITE (21,2090) EGY,(I_PRINTER(IA,II),IA=1,121)
+ 2090   FORMAT (1X,F6.4,121A1)
+
+        ENDDO
+
+        WRITE (21,2080)
+
+        WRITE (21,2070) (UN(II),II=1,7)
+
+        WRITE (21,1015)
+
+        WRITE (21,1020) A,NL,NU 
+
+        WRITE (21,1030) EPS2,EPS4,AA,SO,HOM 
+
+        WRITE (21,1040) DEL,RLAM 
+
+        CLOSE (20)
+        CLOSE (21)
+        CLOSE(3)
+        STOP
+        END

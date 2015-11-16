@@ -1,0 +1,54 @@
+<HTML>
+<BODY BGCOLOR="#eeeeee">
+<TITLE>Offline sorting application</TITLE>
+<center>
+<H1><IMG SRC="offlogo.gif"></H1>
+<hr>
+<H2>Sorting of event data from tape</H2>
+<hr>
+</center>
+<P>
+<UL>
+<li>	<A HREF="#intro">Introduction</A>
+<li>	<A HREF="#menu">Offline Menues</A>
+<li>	<A HREF="#user-routine">Writing Sorting Routines</A>
+<li>	<A HREF="reference.html">Reference Manual</A>
+<li>	<A HREF="#probl">Known Problems</A>
+<li>	<A HREF="#tbd">To be done</A>
+<li>	<A HREF="#hist">History</A>
+<li>	<A HREF="#trbl">Troubleshooting</A>
+</UL>
+<P>
+<p>
+<hr>
+<H3><A NAME="intro">Introduction</A></H3>
+<p>
+<hr>
+<H3><A NAME="menu">Offline Menues</A></H3>
+<hr>
+<H3><A NAME="user-routine">Writing Sorting Routines</A></H3>
+
+The application routine must frequently be rewritten to fit a particular experiment. The recommended approach is to start with a existing routine as a template and modify this according to your needs. Observe that some variable definitions marked "system specific variables" is found in the first part of the routine. These should under no circumstances be changed !
+
+The routine is called for every event to be sorted. It will thus highly affect the efficiency of the sorting. Deeply nested loops and other time consuming pieces of code should be avoided. The routine must NEVER contain I/O statements (READ, WRITE, ....)
+<p>
+<p>
+<hr>
+<H3><A NAME="tbd">Things to be done</A></H3>
+<UL>
+<li>Try to remove shared memory segments for the spectra. Use shmctl() with cmd argument IPC_RMID
+<li>Run process in Real-Time class. Real-Time priorities are assigned by <KBD>priocntl</KBD>
+</UL>
+<ADDRESS>
+<mailto>Tore.Ramsoy@nrpa.no<BR></mailto>
+Tore Rams&oslash;y<BR>
+Norwegian Radiation Protection Authority
+</ADDRESS>
+<hr>
+<H3><A NAME="trbl">Troubleshooting</A></H3>
+
+For problems on opal.nscl.msu.edu:<BR>
+EMail to <a href="mailto:schiller@nscl.msu.edu">Andreas Schiller</a><BR>
+NSCL/MSU
+</HTML>
+

@@ -1,0 +1,371 @@
+      PROGRAM SPINDIS
+      EXTERNAL FUNC
+      DIMENSION YFIT(100)
+      DIMENSION X(100),Y(100),SIGMAY(100),
+     1A(5),DELTAA(5),SIGMAA(5),CH(1010),AH(5)
+      DIMENSION XI(20),FEED(20),SIG(20)
+      DIMENSION DIST(200,4),RESU(10,11)
+
+      WRITE(1,*)'       ******************************************'
+      WRITE(1,*)'       *                                        *'
+      WRITE(1,*)'       *    S P I N D I S T R I B U T I O N     *'
+      WRITE(1,*)'       *                                        *'
+      WRITE(1,*)'       *        PROGRAM TO CALCULATE THE        *'
+      WRITE(1,*)'       *    DISTRIBUTION OF SPINFEEDINGS AS A   *'
+      WRITE(1,*)'       *     FUNCTION OF EXCITATION-ENERGY.     *'
+      WRITE(1,*)'       *   DATA IS READ FROM FILE SPININ:DATA   *'
+      WRITE(1,*)'       *   THE DATA IS ARRANGED LIKE THIS WITH  *'
+      WRITE(1,*)'       *  SPIN, counts, uncert (9999=nonexist): *'
+      WRITE(1,*)'       *     0   9999   9999                    *'
+      WRITE(1,*)'       *     2   369      77                    *'
+      WRITE(1,*)'       *     4     .     .                      *'
+      WRITE(1,*)'       *     6     .     .                      *'
+      WRITE(1,*)'       *     0     0     0  (TO MARK NEXT DIST.)*'
+      WRITE(1,*)'       *     0   333     67                     *'
+      WRITE(1,*)'       *   9999  9999   9999 (TO MARK END)      *'
+      WRITE(1,*)'       *                                        *'
+      WRITE(1,*)'       *                                        *'
+      WRITE(1,*)'       *             26.1.1993/MG               *'
+      WRITE(1,*)'       ******************************************'
+
+      WRITE(1,7)
+  7   FORMAT(/'$Type RETURN')
+      CALL READI(1,I)
+
+C Gidder ikke programmere lesing av energier. DE STAAR HER:
+      RESU(1,1)=4.7
+      RESU(2,1)=17.3
+      RESU(3,1)=23.5
+      RESU(4,1)=29.6
+      RESU(5,1)=37.7
+
+
+C     READING PARAMETERS FROM DISK
+      IDIST=0
+      IRESU=0
+   1  ISTAT=0
+
+      OPEN(23,FILE='SPININ:DATA',STATUS='OLD',ERR=508)
+      DO FOR j=1,10
+        DO FOR i=1,20
+          X(i)=0
+          Y(i)=0
+          SIGMAY(i)=0
+        ENDDO
+        NPTS=0
+        ISTAT=0
+        DO FOR i=1,20
+          READ(23,*)XI(i),FEED(i),SIG(i)
+          DIST(i+IDIST,1)=XI(i)
+          DIST(i+IDIST,2)=FEED(i)
+          DIST(i+IDIST,3)=SIG(i)
+          IF(XI(i)+FEED(i)+SIG(i).EQ.0)ISTAT=1
+          IF(XI(i).EQ.9999)GO TO 9999
+          IF(ISTAT.EQ.1)GO TO 2
+C Just taking points with valid data
+          IF(FEED(i).NE.9999)THEN
+            NPTS=NPTS+1
+            X(NPTS)=XI(i)
+            Y(NPTS)=FEED(i)
+            SIGMAY(NPTS)=SIG(i)
+          ENDIF
+        ENDDO
+   2    CONTINUE
+        NRANGE=i-1
+        IDIST=IDIST+NRANGE
+        IF(NPTS.LT.5)THEN
+          WRITE(1,*)' Sorry, at least 5 data-points must be used'
+          GO TO 9999
+        ENDIF
+
+C       INITIAL STARTING VALUES
+        A(1)=10.
+        A(2)=5.0
+
+        WRITE(1,3)A(1)
+  3     FORMAT(/'$START VALUE A(1) = <',F7.3,'>:')
+        CALL READF(1,A(1))
+        WRITE(1,4)A(2)
+  4     FORMAT(/'$START VALUE A(2) = <',F7.3,'>:')
+        CALL READF(1,A(2))
+
+        MODE=1
+        WRITE(1,5)MODE
+  5     FORMAT(/'$Modus M (=-1,0,1) = <',I2,'>:')
+        CALL READI(1,MODE)
+
+        NA=2
+        WRITE(1,6)NA
+  6     FORMAT(/'$Number of free parameters NA= <',I2,'>:')
+        CALL READI(1,NA)
+
+        SIGMAA(1)=ABS(A(1)/5.)
+        DELTAA(1)=ABS(A(1)/5.)
+        SIGMAA(2)=ABS(A(2)/10.)
+        DELTAA(2)=ABS(A(2)/10.)
+
+C       PREPARATION FOR FIT
+        PROG=0.0000001
+        M=0
+        CHISQR=999999.
+        BEST=999999.
+        NBAD=0
+C
+C       STARTING FIT  *******************************************
+C
+        WRITE(1,80)
+  80    FORMAT(' LOOP    CHISQR        A(1)         A(2).....')
+        WRITE(1,81)M,CHISQR,(A(k),k=1,NA)
+ 505    CALL GRIDLS(X,Y,SIGMAY,NPTS,MODE,FUNC,A
+     1  ,DELTAA,SIGMAA,NA,YFIT,CHISQR)
+        M=M+1
+        WRITE(1,81)M,CHISQR,(A(k),k=1,NA)
+  81    FORMAT(1X,I3,6(1X,E11.5))
+        CH(M)=CHISQR
+        IF(M.LT.2) GO TO 505
+        VER=ABS(CH(M)-CH(M-1))/CH(M-1)
+        IF(CHISQR.LT.BEST)THEN
+          MBEST=M
+          BEST=CHISQR
+          AA1=A(1)
+          AA2=A(2)
+          SIGAA1=SIGMAA(1)
+          SIGAA2=SIGMAA(2)
+        ENDIF
+        IF(CH(M).GT.CH(M-1))NBAD=NBAD+1
+        IF(NBAD.GT.6)GO TO 506
+        IF(M.GT.1000)GO TO 506
+        IF(VER.GT.PROG) GO TO 505
+ 506    CONTINUE
+
+C     FIT IS FINISHED *********************************************
+
+        A(1)=AA1
+        SIGMAA(1)=SIGAA1
+        A(2)=AA2
+        SIGMAA(2)=SIGAA2
+
+        WRITE(1,88)MBEST,BEST
+  88    FORMAT(/' FINAL RESULT FROM LOOP',I4,' WITH CHI.=',F7.3)
+        WRITE(1,83)  A(1),SIGMAA(1)
+        WRITE(1,84)  A(2),SIGMAA(2)
+  83    FORMAT(//' A(1) ',E12.5,' +/- ',E12.5)
+  84    FORMAT(' A(2) ',E12.5,' +/- ',E12.5)
+
+        WRITE(1,*)' Spin    Counts     Uncert.         Fit'
+        CCH=0
+        DO FOR i=1,NRANGE
+          YYY=FUNC(XI(i),A)
+          WRITE(1,104)XI(i),FEED(i),SIG(i),YYY
+          DIST(IDIST-NRANGE+i,1)=XI(i)
+          DIST(IDIST-NRANGE+i,2)=FEED(i)
+          DIST(IDIST-NRANGE+i,3)=SIG(i)
+          DIST(IDIST-NRANGE+i,4)=YYY
+  104     FORMAT(F10.2,F10.3,F10.4,F10.3,3F6.1)
+          IF(FEED(i).NE.9999)CCH=CCH+((FEED(i)-YYY)/SIG(i))**2.
+        ENDDO
+        CCH=CCH/(NPTS-NA)
+        WRITE(1,103)CCH
+  103   FORMAT(' Chisqr. =',F10.3)
+        WRITE(1,105)AA1,AA2
+  105   FORMAT(' Fit-parameters A(i): ',2F7.3)
+        WRITE(1,106)SIGAA1,SIGAA2
+  106   FORMAT(' Uncertainties dA(i): ',2F7.4)
+
+C Calculating Iave og width, with uncertainties
+        SUMC=0
+        SUMH=0
+        AVEIC=0
+        AVEIH=0
+        AVEIC2=0
+        AVEIH2=0
+        DO FOR i=1,NRANGE
+          YYC=FUNC(XI(i),A)
+          AH(1)=A(1)+SIGMAA(1)
+          AH(2)=A(2)+SIGMAA(2)
+          YYH=FUNC(XI(i),AH)
+          SUMC=SUMC+YYC
+          SUMH=SUMH+YYH
+          AVEIC=AVEIC+XI(i)*YYC
+          AVEIH=AVEIH+XI(i)*YYH
+          AVEIC2=AVEIC2+XI(i)*XI(i)*YYC
+          AVEIH2=AVEIH2+XI(i)*XI(i)*YYH
+        ENDDO
+        AVEIC=AVEIC/SUMC
+        AVEIH=AVEIH/SUMH
+        dAVEIC=ABS(AVEIC-AVEIH)
+        AVEIC2=AVEIC2/SUMC
+        AVEIH2=AVEIH2/SUMH
+        WIDTHC=SQRT(AVEIC2-AVEIC*AVEIC)
+        WIDTHH=SQRT(AVEIH2-AVEIH*AVEIH)
+        dWIDTHC=ABS(WIDTHC-WIDTHH)
+
+        IRESU=IRESU+1
+        RESU(IRESU,2)=AA1
+        RESU(IRESU,3)=SIGAA1
+        RESU(IRESU,4)=AA2
+        RESU(IRESU,5)=SIGAA2
+        RESU(IRESU,6)=AVEIC
+        RESU(IRESU,7)=dAVEIC
+        RESU(IRESU,8)=WIDTHC
+        RESU(IRESU,9)=dWIDTHC
+        RESU(IRESU,10)=CCH
+        RESU(IRESU,11)=SUMC
+      ENDDO
+
+ 9999 CONTINUE
+
+C Listing results:
+      OPEN(22,FILE='TEST')
+      WRITE(22,9)
+ 9    FORMAT(1X,'SPIN      COUNTS     dCOUNTS    TEORI')
+      DO FOR i=1,IDIST
+        WRITE(22,11)(DIST(i,k),k=1,4)
+      ENDDO
+ 11   FORMAT(1X,4F8.2)
+
+      WRITE(22,10)
+ 10   FORMAT(1X,'Ex  A(1) dA(1) A(2) dA(2) I dI sig dsig X2 SUM...')
+      DO FOR i=1,IRESU
+        WRITE(22,12)(RESU(i,k),k=1,11)
+      ENDDO
+ 12   FORMAT(1X,11F8.2)
+
+      GO TO 7777
+ 508  WRITE(1,*) ' ERROR IN READING FILE SPININ:DATA'
+ 7777 CONTINUE
+      CLOSE(22)
+      CLOSE(23)
+      END
+
+
+      SUBROUTINE GRIDLS(X,Y,SIGMAY,NPTS,MODE,FUNC,A,DELTAA,
+     1SIGMAA,NA,YFIT,CHISQR)
+      DIMENSION X(100),Y(100),SIGMAY(100),A(5),DELTAA(5),
+     1SIGMAA(5),YFIT(100)
+      NTERMS=NA
+      NFREE=NPTS-NTERMS
+      FREE=NFREE
+      CHISQR=0.
+      IF(NFREE)10,10,20
+   20 DO 90 J=1,NTERMS
+C
+C  EVALUATE CHI SQUARE AT FIRST TWO SEARCH POINTS
+C
+      DO 22 I=1,NPTS
+      XX=X(I)
+   22 YFIT(I)=FUNC(XX,A)
+      CHISQ1=FCHISQ(Y,SIGMAY,NPTS,NFREE,MODE,YFIT)
+      FN=0.
+      DELTA=DELTAA(J)
+   41 A(J)=A(J)+DELTA
+      DO 43 I=1,NPTS
+      XX=X(I)
+   43 YFIT(I)=FUNC(XX,A)
+      CHISQ2=FCHISQ(Y,SIGMAY,NPTS,NFREE,MODE,YFIT)
+      IF(CHISQ1-CHISQ2) 51,41,61
+C
+C  REVERSE DIRECTION OF SEARCH IF CHI SQUARE IS INCREASING
+C
+   51 DELTA=-DELTA
+      A(J)=A(J)+DELTA
+      DO 54 I=1,NPTS
+      XX=X(I)
+   54 YFIT(I)=FUNC(XX,A)
+      SAVE=CHISQ1
+      CHISQ1=CHISQ2
+      CHISQ2=SAVE
+C
+C  INCREMENT A(J) UNTIL CHI SQUARE INCREASES
+C
+   61 FN=FN+1
+      A(J)=A(J)+DELTA
+      DO 64 I=1,NPTS
+      XX=X(I)
+   64 YFIT(I)=FUNC(XX,A)
+      CHISQ3=FCHISQ(Y,SIGMAY,NPTS,NFREE,MODE,YFIT)
+      IF(CHISQ3-CHISQ2) 71,81,81
+   71 CHISQ1=CHISQ2
+      CHISQ2=CHISQ3
+      GO TO 61
+C
+C  FIND MIN OF PARABOLA DEFINED BY LAST THREE POINTS
+C
+   81 DELTA=DELTA*(1./(1.+(CHISQ1-CHISQ2)/(CHISQ3-CHISQ2))+0.5)
+      A(J)=A(J)-DELTA
+      SIGMAA(J)=DELTAA(J)*SQRT(2./(FREE*(CHISQ3-2.*CHISQ2+CHISQ1)))
+   90 CONTINUE
+C
+C  EVALUATE FIT AND CHI SQUARE FOR FINAL PARAMETERS
+C
+      DO 92 I=1,NPTS
+      XX=X(I)
+   92 YFIT(I)=FUNC(XX,A)
+      CHISQR=FCHISQ(Y,SIGMAY,NPTS,NFREE,MODE,YFIT)
+  10 RETURN
+      END
+
+      FUNCTION FCHISQ(Y,SIGMAY,NPTS,NFREE,MODE,YFIT)
+      DIMENSION Y(100),SIGMAY(100),YFIT(100)
+      CHISQ=0.
+      IF(NFREE) 13,13,20
+   13 FCHISQ=0.
+      GO TO 40
+C
+C  ACCUMULATE CHI SQUARE
+C
+   20 DO 30 I=1,NPTS
+      IF(MODE)22,27,29
+   22 IF(Y(I))25,27,23
+   23 WEIGHT=1./Y(I)
+      GO TO 30
+   25 WEIGHT=1./(-Y(I))
+      GO TO 30
+   27 WEIGHT=1.
+      GO TO 30
+   29 WEIGHT=1./SIGMAY(I)**2
+   30 CHISQ=CHISQ+WEIGHT*(Y(I)-YFIT(I))**2
+C
+C  DIVIDE BY NUMBER OF DEGREES OF FREEDOM
+C
+      FREE=NFREE
+      FCHISQ=CHISQ/FREE
+   40 RETURN
+      END
+
+      FUNCTION FUNC(X,A)
+      REAL A(5)
+      FUNC=A(1)*(2.0*X+1.)*EXP(-(X*(X+1.))/(2.*A(2)*A(2)))
+      FUNC=FUNC*(36.+(16.*X) - X*X)
+
+
+      RETURN          
+      END
+
+       SUBROUTINE READI(IDEV,INTEG)
+       CHARACTER X*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)INTEG
+       RETURN
+       END
+
+       SUBROUTINE READF(IDEV,REELL)
+       CHARACTER X*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)REELL
+       RETURN
+       END
+
+       SUBROUTINE READA(IDEV,KAR)
+       CHARACTER X*50
+       CHARACTER KAR*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)KAR
+       RETURN
+       END

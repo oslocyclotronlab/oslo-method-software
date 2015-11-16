@@ -1,0 +1,29 @@
+#####################################
+#  REMAKE_ALL
+#
+# Use UNIX command sh REMAKE.ALL to execute
+#
+#This executable file recompile and reload all
+#component programs in Offline.
+#
+#####################################
+
+# Delete old object files if such excists
+make -f make.sorter clean
+
+# Rebuild the main sorting task
+make -f make.sorter sort
+make -f make.sorter install
+
+# Rebuild the spectrum dump and spectrum clear modules
+make -f make.histop dump
+make -f make.histop clear
+mv offline_specdump /Applications/sirius/bin/.
+mv offline_specclear /Applications/sirius/bin/.
+
+# Rebuild the graphical user interface
+make -f make.master gui
+make -f make.master install
+
+# Delete all objects files
+make -f make.sorter clean

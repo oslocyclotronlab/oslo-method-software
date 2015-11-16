@@ -1,0 +1,71 @@
+Oslo February 7th, 2008
+Install instructions for reduc on Mac OS X 10.4 or higher
+E-mail: magne.guttormsen@fys.uio.no
+
+1	Copy the /sirius folder to /Applications/sirius
+ 	(the reduc program is located at /Applications/sirius/reduc
+	however, you need the /bin and /include directories of sirius)
+
+2	Copy the X11 file Reduc+ to app-defaults directory:
+	sudo cp Reduc /usr/X11R6/lib/X11/app-defaults/Reduc
+	in order to obtain the appropriate X-environment (GUI fonts, colors etc)
+
+3	You need Open Motif:
+	openmotif3 ver.2.2.2-5 x11 Official Implementation of OSF/Motif (2.2 exp)
+	The window manager can be downloaded free from Fink
+
+4	You need to allocate shared memory:
+	4.1	Open terminal
+	4.2	Look what you have of shared memory:
+			magneg@fysmac-kjerne07 ~/Desktop> sysctl kern.sysv
+			kern.sysv.shmmax: 4194304
+			kern.sysv.shmmin: 1
+			kern.sysv.shmmni: 32
+			kern.sysv.shmseg: 8
+			kern.sysv.shmall: 1024
+			kern.sysv.semmni: 87381
+			kern.sysv.semmns: 87381
+			kern.sysv.semmnu: 87381
+			kern.sysv.semmsl: 87381
+			kern.sysv.semume: 10
+			kern.sysv: No such file or directory
+			magneg@fysmac-kjerne07 ~/Desktop>
+	4.3	Change default values for shared memory:
+			magneg@fysmac-kjerne07 ~> cd /etc
+			magneg@fysmac-kjerne07 /etc> sudo pico rc
+			The line that should be corrected, has line number ca 50 - 100
+			Here you find allocated 4 MB = 4194304 bytes:
+			sysctl -w kern.sysv.shmmax=4194304 kern.sysv.shmmin=1 kern.sysv.shmmni=32 kern.sysv.shmseg=8 kern.sysv.shmall=1024
+	      		This we change to 16 MB = 16777216 bytes:
+			sysctl -w kern.sysv.shmmax=16777216 kern.sysv.shmmin=1 kern.sysv.shmmni=64 kern.sysv.shmseg=50 kern.sysv.shmall=4096
+         		(Remember the relation: shmmax = 4096*shmall)
+	4.4	Restart the computer and pray that you have written correctly the values above, if not, 
+			your computer may never start again...
+	4.5	Test that you have typed correctly:
+			kern.sysv.shmmax: 16777216
+			kern.sysv.shmmin: 1
+			kern.sysv.shmmni: 64
+			kern.sysv.shmseg: 50
+			kern.sysv.shmall: 4096
+			kern.sysv.semmni: 87381
+			kern.sysv.semmns: 87381
+			kern.sysv.semmnu: 87381
+			kern.sysv.semmsl: 87381
+			kern.sysv.semume: 10
+			kern.sysv: No such file or directory
+			magneg@fysmac-kjerne07 ~> 
+
+5       Byte swapping between Intel and PowerPC CPUs:
+        If you have an Intel CPU, you should swap the event data bytes by
+        ((x&0xff000000)>>24)+((x&0x00ff0000)>>8)+((x&0x0000ff00)<<8)+((x&0x000000ff)<<24)
+        This is done by removing the commenting of 4 statements at the end of read_disc.c
+
+6	To recompile and build reduc+:
+	6.1	Go to /Applications/sirius/reduc/src
+	6.2	Type: sh REMAKE.ALL	
+
+7	To start reduc, do the following:
+	6.1	Open an xterm window
+	6.2	Use cd to enter the directory of your eventfiles, called file_0, file_1, file_2...
+	6.3	Type: reduc
+

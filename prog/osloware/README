@@ -1,0 +1,57 @@
+The Oslo Cyclotron Laboratory software package on opal.nscl.msu.edu contains 
+the following packages:
+
+A.) The Mama (Matrix manipulation) programs:
+
+To install all programs included in the Mama package, please execute:
+
+MakeMama
+MakeSpy
+MakeUpdate
+
+B.) The offline sorting programs:
+
+To install all programs included in the offline sorting package, please 
+execute:
+
+MakeOffline
+MakeReduc
+
+C.) The tape handling programs:
+
+To install all programs for copying from tape to tape/disc or for inspecting
+tapes, please execute:
+
+MakeMags
+
+D.) Other useful programs:
+
+To install a variety of other useful programs, please execute:
+
+MakeProgs
+
+------------------------------------------------------------------------------
+
+To install all programs of the Oslo Cyclotron Laboratory software package on
+opal.nscl.msu.edu, please execute:
+
+MakeAll
+
+In order to be able to access the binaries, please add the following path in
+your .cshrc file:
+
+/user/schiller/bin
+
+The following programs which are not developed at the Oslo Cyclotron 
+Laboratory, but which are used in connection with Oslo Cyclotron Laboratory
+programs have also been installed in this directory:
+
+pawX11
+paw++
+xmosaic2.4
+
+------------------------------------------------------------------------------
+
+In case of problems or questions, please contact:
+Andreas Schiller (schiller@nscl.msu.edu)
+

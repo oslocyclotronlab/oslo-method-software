@@ -1,0 +1,1202 @@
+       PROGRAM ALIGN
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C     THIS PROGRAM ALIGNS SPECTRA C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+       PARAMETER IUTPF=0,IRINP=3,IOUTP=1,IWRITE=5
+       DIMENSION SPEC(8192),ID(7),TARGETV(8)
+       INTEGER FILETYPE,XDIM,YDIM
+       CHARACTER INFIL*20
+       CHARACTER FILNAM*20,COMM*60,IDENT*20
+       CHARACTER APP(32)*2
+       COMMON/SPECT/ISPEC(8192),NOCH,CAL(5),NCAL
+       COMMON/PEAK/NOPEAK,PEAKS(400,4)
+       COMMON/FILE2DIM/MX(0:2047,0:31)
+       COMMON/CALIB/NUMB,TOPS(400,32,3),IPEAK(32),MAT(8192,32)
+       WRITE(1,*)'       ******************************************'
+       WRITE(1,*)'       *                                        *'
+       WRITE(1,*)'       *              A L I G N                 *'
+       WRITE(1,*)'       *                                        *'
+       WRITE(1,*)'       *        PROGRAM TO ALIGN PARTICLE-      *'
+       WRITE(1,*)'       *  TELESCOPES, TIME-SPECTRA, GE-SPECTRA, *'
+       WRITE(1,*)'       *        AND SO ON FROM EXPERIMENT       *'
+       WRITE(1,*)'       *             11.6.1989/MG               *'
+       WRITE(1,*)'       ******************************************'
+C
+C
+C                            INITIALIZATION
+C
+C
+       APP(1)='1'
+       APP(2)='2'
+       APP(3)='3'
+       APP(4)='4'
+       APP(5)='5'
+       APP(6)='6'
+       APP(7)='7'
+       APP(8)='8'
+       APP(9)='9'
+       APP(10)='10'
+       APP(11)='11'
+       APP(12)='12'
+       APP(13)='13'
+       APP(14)='14'
+       APP(15)='15'
+       APP(16)='16'
+       APP(17)='17'
+       APP(18)='18'
+       APP(19)='19'
+       APP(20)='20'
+       APP(21)='21'
+       APP(22)='22'
+       APP(23)='23'
+       APP(24)='24'
+       APP(25)='25'
+       APP(26)='26'
+       APP(27)='27'
+       APP(28)='28'
+       APP(29)='29'
+       APP(30)='30'
+       APP(31)='31'
+       APP(32)='32'
+C
+C            PARAMETER AND DATA INPUT
+C
+      IUT=1
+      WRITE(1,36)IUT
+   36 FORMAT(/'$ DUMP RESULTS ON LINE-PRINTER (YES/NO=1/0) ',
+     +  '<',I2,'>:')
+      CALL READI(1,IUT)
+      IF(IUT.EQ.1)THEN
+        IUT=2
+        OPEN(IUT,FILE='L-P',ACCESS='SEQUENTIAL',ERR=9999)
+      ELSE
+        IUT=0
+      ENDIF
+      WRITE(1,1)
+  1   FORMAT(/'$ IDENTIFICATION ,E.G. TAPE=7,FILE=3',
+     +'(< 21 CHARACTERS):')
+      CALL READA(1,IDENT)
+      DO FOR LOOP = 1,6
+        DO FOR I=1,8192
+          DO FOR J=1,32
+            MAT(I,J)=0
+          ENDDO
+        ENDDO
+
+        IF(LOOP.EQ.1)THEN
+          NSPEC=28
+          NOCH=4096
+          XDIM=2048
+          YDIM=8
+          FILETYPE=3
+          INFIL='(KJF-SWAP)DESP'
+          FWHM=15.0
+          NFILIN=1
+          DISC=40
+          KMAX=2
+          IPLOT=0
+          NCAL=2
+          VALUE1=70
+          VALUE2=0
+          TARGETV(1)=71.88
+          TARGETV(2)=74.98
+          TARGETV(3)=70.84
+          TARGETV(4)=69.82
+          TARGETV(5)=68.26
+          TARGETV(6)=71.88
+          TARGETV(7)=71.36
+          TARGETV(8)=69.82
+        ENDIF
+
+        IF(LOOP.EQ.2)THEN
+          NSPEC=28
+          NOCH=4096
+          XDIM=2048
+          YDIM=8
+          FILETYPE=3
+          INFIL='(KJF-SWAP)ESP'
+          FWHM=12.0
+          NFILIN=1
+          DISC=40
+          KMAX=2
+          IPLOT=0
+          NCAL=2
+          VALUE1=807
+          VALUE2=0
+          TARGETV(1)=805.54
+          TARGETV(2)=802.44
+          TARGETV(3)=806.58
+          TARGETV(4)=807.60
+          TARGETV(5)=809.16
+          TARGETV(6)=805.54
+          TARGETV(7)=806.06
+          TARGETV(8)=807.60
+        ENDIF
+
+        IF(LOOP.EQ.3)THEN
+          NSPEC=28
+          NOCH=4096
+          XDIM=2048
+          YDIM=8
+          FILETYPE=3
+          INFIL='(KJF-SWAP)EDESP'
+          FWHM=6.0
+          NFILIN=1
+          DISC=40
+          KMAX=2
+          IPLOT=0
+          NCAL=2
+          VALUE1=877.4
+          VALUE2=0
+          TARGET=877.4
+        ENDIF
+
+        IF(LOOP.EQ.4)THEN
+          NSPEC=28
+          NOCH=4096
+          XDIM=512
+          YDIM=32
+          FILETYPE=3
+          INFIL='(KJF-SWAP)TNASP'
+          FWHM=35.0
+          NFILIN=1
+          DISC=40
+          KMAX=2
+          IPLOT=0
+          NCAL=2
+          VALUE1=246
+          VALUE2=0
+          TARGET=246.0
+        ENDIF
+
+        IF(LOOP.EQ.5)THEN
+          NSPEC=28
+          NOCH=4096
+          XDIM=512
+          YDIM=6
+          FILETYPE=3
+          INFIL='(KJF-SWAP)TGESP'
+          FWHM=20.0
+          NFILIN=1
+          DISC=40
+          KMAX=2
+          IPLOT=0
+          NCAL=2
+          VALUE1=160
+          VALUE2=0
+          TARGET=160.0
+        ENDIF
+
+        IF(LOOP.EQ.6)THEN
+          NSPEC=28
+          NOCH=4096
+          XDIM=4095
+          YDIM=6
+          FILETYPE=3
+          INFIL='(KJF-SWAP)GESP'
+          FWHM=4.0
+          NFILIN=1
+          DISC=120
+          KMAX=1
+          IPLOT=0
+          NCAL=2
+          VALUE1= 234.6
+          VALUE2=1410.0
+C THESE TARGET-VALUES ARE SHIFT(CH0) AND DELTACH. (DCH), RESP.
+          TARGET=0
+          TARGET1=234.6
+          TARGET2=1175.4
+        ENDIF       
+
+C*******************************************************************
+C
+C  INPUT-PROCEDURE OF READING 1 OR 2 DIMENSIONAL SPECTRA
+C
+C*******************************************************************
+
+        IF(FILETYPE.EQ.1)THEN
+          SMX=NOCH
+          NSPEC=1
+          J=1
+          DO FOR I=1,8192
+            SPEC(I)=0.
+          ENDDO
+          FILNAM=INFIL
+          OPEN(IRINP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
+          CALL MININO(IRINP,IOUTP,NFILIN,SPEC,SMX,ICAL,CAL)
+          CLOSE(IRINP)
+          DO FOR I=1,8192
+            MAT(I,J)=SPEC(I)
+          ENDDO
+        ENDIF
+
+        IF(FILETYPE.EQ.2)THEN
+          SMX=NOCH
+          CALL LENGDE(INFIL,LIN)
+          DO FOR J=1,NSPEC
+            DO FOR I=1,8192
+              SPEC(I)=0.
+            ENDDO
+            FILNAM=INFIL(1:LIN)//APP(J)
+            OPEN(IRINP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
+            CALL MININO(IRINP,IOUTP,NFILIN,SPEC,SMX,ICAL,CAL)
+            CLOSE(IRINP)
+            DO FOR I=1,8192
+              MAT(I,J)=SPEC(I)
+            ENDDO
+          ENDDO
+        ENDIF
+
+        IF(FILETYPE.EQ.3)THEN
+          NOCH=XDIM
+          NSPEC=YDIM
+          FILNAM=INFIL
+          OPEN(IRINP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
+          CALL NORR2DIM(IRINP,COMM,XDIM-1,YDIM-1)
+          CLOSE(IRINP)
+          DO FOR I=0,2047
+            DO FOR J=0,31
+              MAT(I+1,J+1)=MX(I,J)
+            ENDDO
+          ENDDO
+        ENDIF
+                        
+C*****************************************************************
+C   
+C  INPUT-PROCEDURE FOR READING SPECTRA ENDED
+C
+C*****************************************************************
+
+C                                                       
+C STARTING THE CALCULATION AND OUTPUTS
+C
+
+        WRITE(  1,41)
+        WRITE(IUT,41)
+        CALL CLOCK(ID)
+        WRITE(  1,3)
+        WRITE(IUT,3)
+   3    FORMAT(' ================================================')
+        WRITE(  1,4)IDENT,FILNAM,(ID(J),J=7,2,-1)
+        WRITE(IUT,4)IDENT,FILNAM,(ID(J),J=7,2,-1)
+   4    FORMAT(1X,2A20,/,' DATE:',I4,2('-',I2),',',2(I2,':'),I2)
+        WRITE(  1,21)FWHM
+        WRITE(IUT,21)FWHM
+   21   FORMAT(' HALF-WIDTH IN SEARCH (CH):',F5.1)
+        WRITE(  1,3)
+        WRITE(IUT,3)
+  41    FORMAT(//)
+        WRITE(  1,7)
+        WRITE(IUT,7)
+   7    FORMAT(' SPEC  CENT      AREA     FWHM   TARGET    CORR  ')
+        WRITE(  1,5)
+        WRITE(IUT,5)
+        ISTREK=0
+        DO FOR J=1,NSPEC
+          IPEAK(J)=0
+          DO FOR I=1,400
+            DO FOR K=1,3
+              TOPS(I,J,K)=0
+            ENDDO
+          ENDDO
+
+C MAKING PEAKFIND
+          DO FOR I=1,NOCH
+            ISPEC(I)=MAT(I,J)
+          ENDDO
+          NUMB=J
+          CALL PEAKFI(FWHM,DISC,KMAX,IPLOT,IUTPF,APP(J))
+          VALUE=VALUE1
+          ITIME=1
+    6     ISTREK=ISTREK+1
+          IF(ISTREK.EQ.5)THEN
+            WRITE(  1,5)
+            WRITE(IUT,5)
+            ISTREK=1
+          ENDIF
+          CENT=0
+          AREA=0
+          FW  =0
+          DO FOR I=1,NOPEAK
+
+            MIN=VALUE-2*FWHM+0.5
+            MAX=VALUE+2*FWHM+0.5
+
+            IF(LOOP.EQ.3)THEN
+              MIN=800
+              MAX=950
+            ENDIF
+
+            IF(LOOP.EQ.6)THEN
+              MIN=1400
+              MAX=1420
+              IF(ITIME.EQ.1)THEN
+                IF(J.EQ.1)THEN
+                  MIN=230
+                  MAX=240
+                ELSE
+                  MIN=223
+                  MAX=233
+                ENDIF
+              ENDIF
+            ENDIF
+
+            IF(TOPS(I,J,1).GE.MIN.AND.TOPS(I,J,1).LE.MAX)THEN
+              IF(TOPS(I,J,2).GT.AREA)THEN
+                CENT=TOPS(I,J,1)
+                AREA=TOPS(I,J,2)
+                FW  =TOPS(I,J,3)
+              ENDIF
+            ENDIF
+          ENDDO
+
+    5     FORMAT(' ------------------------------------------------')
+          CORR=0.
+          IF(LOOP.EQ.1.OR.LOOP.EQ.2)THEN
+            TARGET=TARGETV(J)
+            IF(CENT.GT.0.)CORR=TARGET/CENT
+          ENDIF
+          IF(LOOP.EQ.3.OR.LOOP.EQ.4.OR.LOOP.EQ.5)THEN
+            IF(CENT.GT.0.)CORR=(TARGET-CENT)
+          ENDIF
+
+
+          WRITE(  1,40)J,CENT,AREA,FW,TARGET,CORR
+          WRITE(IUT,40)J,CENT,AREA,FW,TARGET,CORR
+   40     FORMAT(1X,I2,F8.1,F11.0,F8.1,F8.1,F11.5)
+          IF(VALUE2.NE.0.AND.ITIME.GT.0)THEN
+            ITIME=ITIME-1
+            CENT0=CENT
+            VALUE=VALUE2
+            GO TO 6
+          ENDIF
+          IF(LOOP.EQ.6.AND.CENT.GT.0.AND.CENT0.GT.0)THEN
+            SHIFT=0
+            GAIN=0
+            X=CENT-CENT0
+            IF(X.NE.0)THEN
+              GAIN=TARGET2/X
+              SHIFT=TARGET1-CENT0*GAIN
+            ENDIF
+
+
+            WRITE(  1,8)SHIFT,GAIN
+            WRITE(IUT,8)SHIFT,GAIN
+   8        FORMAT(' (Shift= ',F5.1,'  Gain= ',F7.5,')')
+          ENDIF
+        ENDDO
+        WRITE(  1,3)
+        WRITE(IUT,3)
+        IF(LOOP.LT.6)THEN
+          WRITE(1,*)' PRESS CR FOR MORE...'
+          READ(1,9)IDUMMY
+    9     FORMAT(I5)
+        ENDIF
+      ENDDO
+      GO TO 9998
+ 9999 WRITE(1,*)FILNAM,'.... NO FILE ACCESS'
+ 9998 IUT=1
+      CLOSE(IUT)
+      END
+
+
+        SUBROUTINE NORW(DEVICE,COMMEN,SPECTR,SIZE,PREC,ICAL,ACAL)
+
+C       ROUTINE FOR FILE-OUTPUT IN MININORDIC FORMAT
+C          DEVICE  = INTEGER OUTPUT DEVICE NUMBER
+C          COMMEN  = <61 CHARACTER COMMENT STRING TO HEADER
+C          SPECTR  = SPECTRUM ARRAY.NOTE! CONVERTED TO INTEGER
+C                       AT OUTPUT!!!
+C          SIZE    = SPECTRUM LENGTH
+C          PREC    = SPECTRUM PRECISION
+C          ICAL    = ORDER OF CALIBRATION CURVE (1=LINEAR)
+C          ACAL    = CALIBRATION CONSTANTS (keV/ch ETC...)
+
+        INTEGER DEVICE,PREC
+        CHARACTER COMMEN*60
+        DIMENSION SPECTR(1),ID(7),ACAL(1),LINE(10)
+        INTEGER SPECTR
+        FILE=0
+        IFILE=FILE+0.1
+        WRITE(DEVICE,100)IFILE
+  100   FORMAT('!FILE=',I3)
+        WRITE(DEVICE,110)
+  110   FORMAT('!KIND=SPECTRUM',/,'!BLOCK LENGTH=2048',/,
+     $'!LABORATORY=OSLO CYCLOTRON',/,'!EXPERIMENT=align')
+        WRITE(DEVICE,120)COMMEN
+  120   FORMAT('!COMMENT=',A50)
+        CALL CLOCK(ID)
+        WRITE(DEVICE,130)(ID(J),J=7,2,-1)
+  130   FORMAT('!TIME=DATE:',I4,2('-',I2),',',2(I2,':'),I2)
+        WRITE(DEVICE,140)ICAL,(ACAL(I),I=1,ICAL+1)
+  140   FORMAT('!CALIBRATION EkeV=',I2,',',3(E13.6,','))
+        NSIZE=SIZE-0.9
+        NNSIZE=NSIZE+1
+        WRITE(DEVICE,150)PREC,NSIZE,NSIZE
+  150   FORMAT('!PRECISION=',I2,/,'!DIMENSION=1,0:',I4,/,
+     $'!CHANNEL=(0:',I4,')')
+
+C       OUTPUT CHANNEL CONTENTS.
+        J=0
+        DO 10 I=1,NNSIZE
+        J=J+1
+        LINE(J)=SPECTR(I)+0.5
+        IF(J.LT.10)GOTO 10
+        WRITE(DEVICE,160)(LINE(K),K=1,10)
+  160   FORMAT(10(I6,','))
+        J=0
+   10   CONTINUE
+        IF(J.NE.0)WRITE(DEVICE,160)(LINE(K),K=1,J)
+        WRITE(DEVICE,170)
+  170   FORMAT('!IDEND='/)
+C       CALL OUTCH(DEVICE,25)
+
+        RETURN
+        END
+
+
+       SUBROUTINE MININO(DEVICE,IOUTP,EFIL,F,SMX,IA,A)
+
+C      3.16.1982 F.INGEBRETSEN
+C      "MINI-NORDIC" FORMAT INPUT PROGRAM. ASSUMES DATA
+C      WRITTEN IN <100CHAR/ LINES, AND CR/LF BETWEEN CHANNELS.
+C      READS DATA UP TO MAX. SPECTRUM ARRAY SIZE ANYWAY IF
+C      INPUT SPECTRUM IS TOO LONG. ACCEPTS ALSO 2-DIM. FROM
+C      CHANNEL 0,0 AND UP TO MAX ARRAY SIZE.
+
+C      FORMAL PARAMETERS IN CALL ARE:
+C         DEVICE   = INPUT MEDIUM DEVICE NUMBER
+C         IOUTP    = LIST DEVICE (ERROR MESSAGES ETC.)
+C         EFIL     = FILE NUMBER WANTED AT CALL. RETURNS WITH
+C                    FILE NUMBER FOUND IN !FILE - KEYWORD
+C         F        = SPECTRUM ARRAY
+C         SMX      = LENGTH OF SPECTRUM ARRAY.
+C      ****** VERSION WITH FLOATING SPECTRUM ******
+
+       INTEGER DEVICE
+       DIMENSION F(1),A(1)
+       CHARACTER KENW*4,KEYW(5)*4,IBUF*100,CHA*1
+       DATA KEYW/'!FIL','!DIM','!CHA','!IDE','!CAL'/
+       DATA IKEYW/5/
+
+C      BUFFER 'CLEAR' AND READ FROM UNIT 'DEVICE' (ONE LINE)
+       IRETSW=0
+    1  DO 4 I =1,100
+    4  IBUF(I:I)=' '
+       READ(DEVICE,500,END=800)IBUF
+  500  FORMAT(A100)
+       IF(IBUF(1:1).EQ.'!')GOTO 15
+
+C      NOT A KEYWORD LINE,DATA ITEM ASSUMED.
+C      PICK UP NUMBERS FROM IBUF:
+       I=1
+   11  CALL GETNUM(I,SIF,ISIF,CHA,IBUF)
+       IF(CHA.NE.',')GOTO 1
+       F(NCHAN)=SIF
+       NCHAN=NCHAN+1
+       IF(NCHAN.GT.NCMAX)RETURN
+       IF(I.LT.100)GOTO 11
+   15  CONTINUE
+C      KEYWORD DECODE AND PARAMETER PICKUP:
+C   15  WRITE(IOUTP,555)IBUF
+C  555  FORMAT(' ',A70)
+
+C      CHECK FIRST 4 CHARACTERS,DEFINES KEYWORD :
+       DO 20 J=1,IKEYW
+       IF(IBUF(1:4).EQ.KEYW(J))GOTO 30
+   20  CONTINUE
+
+C      IGNORED KEYWORDS IN THIS PROGRAM:
+       GOTO 1
+C      FIND '=' IN KEYWORD LINE:
+C      ASSUMES THAT '=' IS PRESENT BEFORE 25'TH CHARACTER.
+   30  DO 31 K=5,25
+       IF(IBUF(K:K).EQ.'=')GOTO 32
+   31  CONTINUE
+       WRITE(IOUTP,999)
+  999  FORMAT(' ***** Warning , "=" is not found in keyword ')
+       GOTO 1
+   32  K=K+1
+
+C      K POINTS AT FIRST PARAMETER CHARACTER. JUMP TO IDENTIFIED KEYW:
+       GOTO( 40, 50, 60, 70, 80),J
+C      GOTO(FIL,DIM,CHA,IDE,CAL),J
+
+C      !FILE KEYWORD:
+   40  CALL GETNUM(K,FIL,ISIF,CHA,IBUF)
+       IF(FIL.NE.EFIL)WRITE(IOUTP,101)FIL,EFIL
+  101  FORMAT(' FILE NUMBER ',F5.0,' READ, ',F5.0,'EXPECTED')
+       EFIL=FIL
+       GOTO 1
+
+C      !DIMENSION KEYWORD INPUT:
+   50  CALL GETNUM(K,SIZE,ISIF,CHA,IBUF)
+       IF(SIZE.EQ.1.)GOTO 51
+       WRITE(IOUTP,102)SIZE
+  102  FORMAT(' ***** Warning, spectrum dimension is ',F3.0)
+   51  CALL GETNUM(K,FCH,ISIF,CHA,IBUF)
+       CALL GETNUM(K,SCH,ISIF,CHA,IBUF)
+
+C      PICK UP 2-DIM DIMENSIONS IF PRESENT:
+       IF(SIZE.EQ.1.)GOTO 59
+       K=K+1
+       CALL GETNUM(K,FCH2,ISIF,CHA,IBUF)
+       CALL GETNUM(K,SCH2,ISIF,CHA,IBUF)
+       SCH=(SCH-FCH+1.)*(SCH2-FCH2+1.)-1.
+   59  IF(SCH+1..LE.SMX)GOTO 1
+
+C      TOO LARGE SPECTRUM INTO ARRAY F:
+C       WRITE(IOUTP,103)SCH,SMX
+C 103   FORMAT(' SPECTRUM SIZE ',F5.0,' IS LARGER THAN ',F5.0,/
+C    $' HIGHER CHANNELS ARE IGNORED AT INPUT')
+       GOTO 1
+
+C      !CHANNEL KEYWORD
+   60  K=K+1
+       CALL GETNUM(K,CH1,ISIF,CHA,IBUF)
+       NCHAN=CH1+1.1
+       CALL GETNUM(K,CH2,ISIF,CHA,IBUF)
+       IF(SIZE.EQ.2.)CH2=SCH
+       NCMAX=CH2+1.1
+       IF(CH2.GT.SMX)NCMAX=SMX+0.1
+       GOTO 1
+
+C      !IDEND KEYWORD:
+   70  READ(5,500,END=800)IBUF
+       GOTO 70
+  800  RETURN
+
+C      !CALIBRATION KEYWORD:
+   80  CALL GETNUM(K,DEGR,ISIF,CHA,IBUF)
+       IA=DEGR+0.1
+       DO 81 I=1,IA+1
+   81  CALL GETFLO(K,A(I),IBUF)
+       GOTO 1
+       END
+
+       SUBROUTINE GETNUM(I,SIF,ISIF,CHA,IBUF)
+
+C      SUBROUTINE FOR PICKING NUMBER FROM CHARACTER ARRAY IBUF
+C      I=FIRST CHARACTER,SIF=NUMBER (RETURNS AS FLOATING VALUE)
+C      CHA=TERMINATING CHARACTER. IGNORES UP TO 5 NON-SIGNIFICANT
+C      SPACES. AT EXIT, I POINTS AT CHARACTER FOLLOWING TERMINATOR!!
+
+       CHARACTER CHA*1,IBUF*100
+       SIF=0.
+       ISIF=0
+       FMUL=1.
+       IGNORE=0
+       NIGNOR=0
+    1  CHA=IBUF(I:I)
+       I=I+1
+       IF(CHA.LT.'0'.OR.CHA.GT.'9')GOTO 10
+
+C      CHARACTER IS A DIGIT, ACCUMULATE IT:
+       READ(CHA,199)J
+  199  FORMAT(I1)
+       IGNORE=1
+       SIF=SIF*10.+J
+       ISIF=ISIF+1
+       GOTO 1
+
+C      NO-DIGIT, CHECK FOR '-' ,'+' AND SPACE:
+   10  IF(CHA.NE.'-')GOTO 11
+       FMUL=-1.
+       GOTO 1
+   11  IF(CHA.EQ.'+')GOTO 1
+       IF(CHA.NE.' ')GOTO 15
+C      ACCEPT UP TO 5 NON-SIGNIFICANT SPACES
+       IF(IGNORE.NE.0)GOTO 15
+       NIGNOR=NIGNOR+1
+       IF(NIGNOR.LE.5)GOTO 1
+   15  SIF=SIF*FMUL
+       RETURN
+       END
+
+       SUBROUTINE GETFLO(K,A0,IBUF)
+
+C      PICK FLOATING FREE FORMAT NUMBER FROM INPUTSTRING:
+
+       CHARACTER IBUF*100,CHA*1
+       F2=0.
+       F4=0.
+
+C      TAKE SPECIAL CARE OF -.XXX... - FORMAT:
+       FMUL=1.
+       CALL GETNUM(K,F1,ISIF,CHA,IBUF)
+       IF(F1.EQ.0..AND.IBUF(K-2-ISIF:K-2-ISIF).EQ.'-')FMUL=-1.
+
+       IF(CHA.EQ.'.')THEN
+C      GET FRACTION:
+         CALL GETNUM(K,F2,ISIF,CHA,IBUF)
+         IF(ISIF.GT.0)F2=F2/10.**ISIF
+       ENDIF
+       IF(F1.LT.0.)F2=-F2
+       IF(CHA.EQ.'E')CALL GETNUM(K,F4,ISIF,CHA,IBUF)
+       I1=F4
+       A0=FMUL*(F1+F2)*10.**I1
+       RETURN
+       END
+
+       SUBROUTINE READI(IDEV,INTEG)
+       CHARACTER X*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)INTEG
+       RETURN
+       END
+
+       SUBROUTINE READF(IDEV,REELL)
+       CHARACTER X*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)REELL
+       RETURN
+       END
+
+       SUBROUTINE READA(IDEV,KAR)
+       CHARACTER X*50
+       CHARACTER KAR*50
+       READ(IDEV,1)X
+    1  FORMAT(50A)
+       IF(X.EQ.'')RETURN
+       READ(X,*)KAR
+       RETURN
+       END
+
+       
+       SUBROUTINE LENGDE(TEXT,LEN)
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C            CALCULATION OF THE LENGTH OF THE              C
+C            SPECTRUM, FOR USE IN DISPLAYING               C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+       CHARACTER TEXT*30
+       CHARACTER CH*1
+       DO FOR K=1,30
+         CH=TEXT(K:K)
+         IF(CH.EQ.' ')THEN
+           LEN=K-1
+           GO TO 20
+         ENDIF
+       ENDDO
+   20  RETURN
+       END
+
+
+        SUBROUTINE PEAKFI(FWHM,DISC,KMAX,IPLOT,IUT,RUN)
+C  PEAKFIND VERSION FOR DEC-10.20/47/77.F.I.GENERATES
+C  PEAK LIST WITH OPTIONAL PRINTERPLOT TO SELECTED
+C  DEVICE. CALLED FROM SPECTIO, WITH 8192 CHANNEL
+C  SPECTRUM IN COMMON.
+      CHARACTER RUN*2
+      DIMENSION SPEC(8192),F(200),F1(200)
+      DIMENSION PKS(200),JMARK(200),SOUTP(200)
+      INTEGER SOUTP,BLNK,STAR,EXX,BBC,SPEC,MEN,ZRO,ONE
+      DIMENSION XCHA(50),YCHA(50),WG(50),EF(5,5),C(5)
+      COMMON/SPECT/NSPEC(8192),NOCH,CE(5),NCAL
+      COMMON/PEAK/NOPEAK,PEAKS(400,4)
+      COMMON/CALIB/NUMB,TOPS(400,32,3),IPEAK(32),MAT(8192,32)
+      BBC=4HBBBB
+      BLNK=4H
+      STAR=4H****
+      IBCH=4HIIII
+      EXX=4HXXXX
+      MEN=-1
+      ZRO=0
+      ONE=1
+        C0=CE(1)
+        C1=CE(2)
+        C2=CE(3)
+        C3=CE(4)
+        C4=CE(5)
+C  MAKE THE CORRELATION SHAPE (GAUSSIAN IN THIS VERSION)
+C   CON1=2.*SQRT(ALOG(2.)/3.1415926)/0.6667/FWHM
+C   CON2=4.*ALOG(2.)/(0.6667*FWHM)**2
+      CON1=1.40908546/FWHM
+ 770  CON2=4.42677*CON1/FWHM
+      K=1.25*FWHM+0.5
+      NBCKGD=K+K
+      IF(NBCKGD.GT.10)NBCKGD=10
+      MINST=NBCKGD/4
+      IF(MINST.LT.2)MINST=2
+C  MINST=SMALLEST NUMBER OF BACKGROUND CHANNELS ON ONE SIDE OF PEAK
+      KK=2*K+1
+      DO 1 I=1,KK
+      F(I)=CON1*EXP(-CON2*(I-K-1)**2)
+    1 F1(I)=(1./KK-F(I))**2
+      DO 2 I=1,NOCH
+    2 SPEC(I)=ZRO
+      N0=0
+      CENT=0.
+      SUMINT=0.
+      PKS(1)=0.
+      KKK1=KK+1
+      KKK2=NOCH-KK
+      DO 10 I=KKK1,KKK2
+      SUM=0.
+      VAR=0.
+      IK1=I-K
+      IK2=I+K
+      SUM2=0.
+C  SUM2=CORRELATION FUNCTION
+      DO 12 J=IK1,IK2
+      TMP=NSPEC(J)
+      SUM=SUM+TMP
+      JIK1=J-I+K+1
+      VAR=VAR+F1(JIK1)*TMP
+   12 SUM2=SUM2+F(JIK1)*TMP
+      B=0
+      IF(VAR.GT.0.01)B=1.6*SQRT(VAR)
+      SUM2=SUM2-SUM/KK-B
+C  IS CORRELATION SIGNIFICANT
+      IF(SUM2.LE.0.)GO TO 725
+C  YES,WAS LAST A 0 OR -1
+      IF(SPEC(I-1).EQ.ONE)GO TO 720
+C  LAST WAS A 0 OR -1,INITIATE STORE OF THIS PEAK
+      PEAK=SUM2+B
+      IINIT=I
+      INX=1
+C  INX=ARRAY INDEX FOR PEAK, IINIT  =FIRST CHANNEL, PEAK TO BE MAX CH.
+ 720  SUM2=SUM2+B
+      INX=INX+1
+      PKS(INX)=SUM2
+      CENT=CENT+(I-1)*SUM2
+      SUMINT=SUMINT+SUM2
+      SPEC(I)=ONE
+      IF(SUM2.GT.PEAK)PEAK=SUM2
+      GO TO 10
+C  INSIGNIFICANT CORRELATION. WAS LAST A 1
+  725 IF(SPEC(I-1).NE.ONE)GO TO 10
+C  YES, PEAK IS JUST PASSED
+      INX=INX+1
+      PKS(INX)=0.
+      IFIN=I-1
+      N0=N0+1
+      PEAKS(N0,1)=CENT/SUMINT
+      CENT=0.
+      SUMINT=0.
+C  FIND WIDTH OF CORREL.N PEAK
+      PEAK=PEAK*0.5
+      KL=1
+      DO 46 J=2,INX
+      GO TO(47,48),KL
+   47 IF(PKS(J).LT.PEAK)GO TO 46
+      CH11=(J-1)+(PEAK-PKS(J-1))/(PKS(J)-PKS(J-1))
+      KL=2
+      GO TO 46
+   48 IF(PKS(J).GT.PEAK)GO TO 46
+      CH22=(J-1)+(PEAK-PKS(J-1))/(PKS(J)-PKS(J-1))
+      GO TO 50
+   46 CONTINUE
+C  STORE THE WIDTH
+   50 PEAKS(N0,2)=CH22-CH11
+C  IGNORE ONE-CHANNEL "SPIKES"
+        INTPK=PEAKS(N0,2)*100.
+        IF(INTPK.NE.100)GO TO 49
+        N0=N0-1
+        GO TO 10
+  49    IF(N0.LT.400)GO TO 11
+        IF(IUT.NE.0)WRITE(IUT,650)
+  650 FORMAT(18H PEAK ARRAY FILLED)
+      GO TO 13
+   11 MEXP=(KK+IINIT-IFIN-1)/2.+0.5
+      IF(MEXP.LE.0)GO TO 10
+C  THE INPUT WIDTH IS LARGER THAN THE CALCULATED,
+C  MAKE FORBIDDEN REGION FOR BACKGRD.
+      JJJ1=IINIT-MEXP
+      JJJ2=IINIT-1
+      DO 21 J=JJJ1,JJJ2
+      IF(SPEC(J).NE.ONE)SPEC(J)=MEN
+   21 CONTINUE
+      JJJ1=IFIN+1
+      JJJ2=IFIN+MEXP
+      DO 22 J=JJJ1,JJJ2
+      IF(SPEC(J).NE.ONE)SPEC(J)=MEN
+   22 CONTINUE
+   10 CONTINUE
+   13 IF(IUT.NE.0)WRITE(IUT,110)RUN,(CE(I),I=1,3)
+      KSIGF=0
+      NOBAC=0
+  110 FORMAT(/,' RUN: ',A2,
+     1,' CALIBR. COEFF.: ',3E12.5)
+      IF(IUT.NE.0)WRITE(IUT,108)FWHM,DISC,N0
+  108 FORMAT(' FWHM: ',F6.2,' CH.',
+     1' PEAKS LISTED IF AREA ERROR IS <',F4.0,' %',/,
+     2' TOTAL NUMBER OF PEAKS FOUND:',I4,' ,PEAKS ACCEPTED:',
+     3/,' N0.',4X,'CHANNEL',7X,'ENERGY',11X,'AREA',7X,
+     4'FWHM CHISQ LOWM HIGM LBGD HBGD ')
+      IMX=N0
+      PEAKS(N0+1,1)=100000.
+      MARKR=1
+      JMARK(1)=100000
+      N0=0
+      DO 40 II=1,IMX
+      CENT=PEAKS(II,1)
+      WIDTH=PEAKS(II,2)
+      IPK=CENT+0.5
+      IB=IPK+1
+  749 IF(SPEC(IB).EQ.ONE) GO TO 750
+      IINIT=IB
+      GO TO 751
+  750 IB=IB-1
+      GO TO 749
+  751 IB=IPK
+  752 IB=IB+1
+      IF(SPEC(IB).EQ.ONE) GO TO 752
+      IFIN=IB-1
+C  FIND AREA OF THE REAL PEAK
+      BCKGD=0.
+      MEXP=(KK+IINIT-IFIN-1)/2.+0.5
+      IF(MEXP.LT.0)MEXP=0
+      JJJ3=IINIT-MEXP
+      JJJ4=IFIN+MEXP
+      IF(NOBAC.EQ.1)GO TO 73
+      JJJ=IINIT-MEXP
+      LCASE=1
+      LBCGD=0
+      DO 51 J=1,NBCKGD
+   52 JJ=JJJ-J
+      IF(JJ.LE.0)GO TO 40
+      IF(SPEC(JJ).NE.ZRO)GO TO 60
+      XCHA(J)=JJ
+      YCHA(J)=NSPEC(JJ)
+      WG(J)=0.5
+      IF(YCHA(J).GE.10.)WG(J)=1./YCHA(J)
+      LBCGD=LBCGD+1
+      GO TO 51
+   60 IF(LBCGD.GE.MINST)GO TO 61
+      LCASE=2
+      JJJ=JJJ-1
+      GO TO 52
+   51 CONTINUE
+   61 JJJ=IFIN+MEXP
+      JLOW=JJ-1
+      JSTR=LBCGD
+      MCASE=1
+      MBCGD=0
+      DO 54 J=1,NBCKGD
+   55 JJ=JJJ+J
+      IF(JJ.GE.NOCH)GO TO 40
+      IF(SPEC(JJ).NE.ZRO)GO TO 70
+      JARR=J+JSTR
+      XCHA(JARR)=JJ
+      YCHA(JARR)=NSPEC(JJ)
+      WG(JARR)=0.5
+      IF(YCHA(JARR).GE.10.)WG(JARR)=1./YCHA(JARR)
+      MBCGD=MBCGD+1
+      GO TO 54
+   70 IF(MBCGD.GT.MINST)GO TO 71
+      MCASE=2
+      JJJ=JJJ+1
+      GO TO 55
+   54 CONTINUE
+   71 NPTS=LBCGD+MBCGD
+      JHIG=JJ-1
+      DO 72 J=1,NPTS
+   72 XCHA(J)=XCHA(J)-JJ
+      CALL FITS(XCHA,YCHA,WG,C,EF,KMAX,NPTS,CHI)
+   73 ARVAR=0.
+      PKVAR=0.
+      SUM=0.
+C  CHECK DOUBLETS AND THEIR INTEGRATION LIMITS
+      NOBAC=0
+      IF(II.EQ.1)GO TO 74
+      ICDIF=PEAKS(II-1,1)+0.5
+C  IS LOW LIMIT FOR PLOT BELOW LAST PEAK
+      IF(JLOW.GT.ICDIF)GO TO 74
+      ICDIF=(IPK-ICDIF)/2.-0.5
+      IDIF2=IPK-JJJ3+1
+C  CHECK DISTANCE BETWEEN ADJACENT PEAKS
+      IF(ICDIF.GE.IDIF2)GO TO 74
+      JJJ3=IPK+1-ICDIF
+   74 CONTINUE
+      ICDIF=PEAKS(II+1,1)+0.5
+      IF(JHIG.LE.ICDIF)GO TO 75
+      ICDIF=(ICDIF-IPK)/2.-0.5
+      IDIF2=JJJ4-1-IPK
+      IF(ICDIF.GE.IDIF2)GO TO 76
+      JJJ4=IPK+1+ICDIF
+   76 NOBAC=1
+   75 CONTINUE
+      DO 57 J=JJJ3,JJJ4
+      SPC=NSPEC(J)
+      BCKGD=0.
+      VARBCK=0.
+      FAC1=1.
+      DO 59 N=1,KMAX
+      FAC=FAC1
+      DO 58 K1=1,KMAX
+      VARBCK=VARBCK+EF(N,K1)*FAC
+   58 FAC=FAC*(J-JJ)
+      BCKGD=BCKGD+C(N)*FAC1
+   59 FAC1=FAC1*(J-JJ)
+      VARBCK=VARBCK*CHI
+      ARVAR=ARVAR+SPC+VARBCK
+      PKVAR=PKVAR+(SPC+VARBCK)*(J-CENT)**2
+   57 SUM=SUM+SPC-BCKGD
+      PEAR=0
+      IF(ARVAR.GT.0.01)PEAR=SQRT(ARVAR)
+      IF(SUM.EQ.0.)SUM=1.
+      IF(ABS(PEAR/SUM).LE.DISC/100.AND.SUM.GT.0.)GO TO 65
+      IF(KSIGF.EQ.1)GO TO 398
+      GO TO 40
+   65 N0=N0+1
+      PEPK=0
+      IF(PKVAR.GT.0.01)PEPK=SQRT(PKVAR)/SUM
+      EN=C0+CENT*(C1+CENT*(C2+CENT*(C3+CENT*C4)))
+      PEEN=(C1+2.*CENT*C2)*PEPK
+      JJ3=JJJ3-1
+      JJ4=JJJ4-1
+      JMARK(MARKR)=JJJ3
+      JMARK(MARKR+1)=JJJ4
+      MARKR=MARKR+2
+      JMARK(MARKR)=100000
+      KSIGF=1
+        PEAKS(N0,1)=CENT
+        PEAKS(N0,2)=PEPK
+        PEAKS(N0,3)=SUM
+        PEAKS(N0,4)=PEAR
+        DA=ABS(PEAR/SUM)
+        DSC=DISC/100.
+        INT1=SUM+0.5
+        INT2=PEAR+0.5
+
+      IF(DA.LT.DSC.AND.SUM.GT.0.AND.WIDTH.GT..1*FWHM)THEN
+        IPEAK(NUMB)=IPEAK(NUMB)+1
+        TOPS(IPEAK(NUMB),NUMB,1)=CENT
+        TOPS(IPEAK(NUMB),NUMB,2)=SUM
+        TOPS(IPEAK(NUMB),NUMB,3)=WIDTH
+        WRITE(IUT,109)
+     1  N0,CENT,PEPK,EN,PEEN,INT1,INT2,WIDTH
+     1  ,CHI,JJ3,JJ4,JLOW,JHIG
+  109   FORMAT(1X,I3,1X,F7.2,'(',F5.2,')',F8.1,'(',F4.1,')',I7,
+     1  '(',I6,')',1X,F6.2,F5.1,4I5,)
+      ENDIF
+
+  398 IF(IPLOT.NE.1)GO TO 416
+      IF(NOBAC.EQ.1)GO TO 417
+C  PLOT THIS PEAK AND THE BACKGROUND AREA
+  406 ITOT=0
+      KSIGF=0
+      JFIRST=LBCGD/2
+      DO 399 I=1,JFIRST
+      FAC=XCHA(I)
+      JLAST=LBCGD+1-I
+      XCHA(I)=XCHA(JLAST)
+  399 XCHA(JLAST)=FAC
+      JFIRST=JLOW+1
+      JLAST=JHIG+1
+      MAXCHA=NSPEC(JFIRST)
+      MINS=MAXCHA
+      DO 405 J=JFIRST,JLAST
+      IF(MAXCHA.LT.NSPEC(J))MAXCHA=NSPEC(J)
+      IF(MINS.GT.NSPEC(J))MINS=NSPEC(J)
+  405 CONTINUE
+      NOBAC=0
+C  GET HIGH TICK.GE.MAXCHA,I.E.=100,200,500,1000 ETC.
+      MSCALE=100
+      ITEST=200
+  400 IF(MAXCHA.LT.MSCALE)GO TO 402
+      FACT=2.
+      IF(MSCALE.NE.ITEST)GO TO 401
+      ITEST=ITEST*10
+      FACT=2.5
+  401 MSCALE=MSCALE*FACT+0.5
+      GO TO 400
+  402 IF(MINS.LT.200)MINS=0
+      LSCALE=(MINS/200)*200
+      MISCA=LSCALE+(MSCALE-LSCALE)/2
+      IF(IUT.NE.0)WRITE(IUT,450)LSCALE,MISCA,MSCALE
+  450 FORMAT(30X,I6,45X,I6,43X,I6/36H CHANN  ENERGY COUNT BCKG INTGR....
+     2I,
+     149(1H.),1HI,49(1H.),1HI)
+      IXIND=1
+      MARKR=1
+      DO 415 J=JFIRST,JLAST
+      JPRT=J-1
+      ICNT=NSPEC(J)
+      EN=C0+JPRT*(C1+JPRT*(C2+JPRT*(C3+JPRT*C4)))+0.005
+      FAC=1.
+      BCKGD=0.
+      DO 407 N=1,KMAX
+      BCKGD=BCKGD+C(N)*FAC
+  407 FAC=FAC*(J-JJ)
+      IBCKGD=BCKGD+0.5
+      ITOT=ITOT+ICNT-IBCKGD
+      FAC1=100./(MSCALE-LSCALE)
+      FAC=(ICNT-LSCALE)*FAC1+5.5
+      JSTR=FAC
+      IF(JSTR.LT.1)JSTR=1
+      IF(JSTR.GT.105)JSTR=105
+C  ZERO THE OUTPUT ARRAY
+      DO 408 I=1,105
+  408 SOUTP(I)=BLNK
+      SOUTP(JSTR)=STAR
+      ISTR=(IBCKGD-LSCALE)*FAC1+5.5
+      IF(ISTR.LT.1)ISTR=1
+      IF(ISTR.GT.105)ISTR=105
+      SOUTP(ISTR)=IBCH
+      IJ=XCHA(IXIND)+JJ+0.5
+      IF(J.NE.IJ)GO TO 409
+      IXIND=IXIND+1
+      SOUTP(ISTR)=BBC
+  409 IF(J.EQ.JMARK(MARKR))GO TO 410
+      GO TO 412
+  410 IADD=1
+      IF(JSTR.GE.90)IADD=-1
+      ISTR=JSTR
+      MARKR=MARKR+1
+      DO 411 I=1,5
+      ISTR=ISTR+IADD
+  411 SOUTP(ISTR)=EXX
+  412 IF(IUT.NE.0)
+     1WRITE(IUT,451)JPRT,EN,ICNT,IBCKGD,ITOT,(SOUTP(I),I=1,
+     2105)
+  451 FORMAT(1H ,I5,F8.2,I6,I5,I6,105A1)
+  415 CONTINUE
+      JMARK(1)=100000
+        IF(IUT.NE.0)WRITE(IUT,108)
+  416 MARKR=1
+  417 CONTINUE
+   40 CONTINUE
+        NOPEAK=N0
+        RETURN
+      END
+
+       SUBROUTINE FITS(X,Y,W,C,E,KMAX,NPTS,CHI)
+C  GENERAL SUBROUTINE FOR POLYNOMIAL FIT
+C  ENTER WITH X AND Y VALUES, WEIGHT, NO. OF WANTED PARAMETERS
+C  IN KMAX, AND NO. OF POINTS (.LE.50) IN NPTS.  RETURNS WITH COVAR
+C  MATRIX IN EF,PARAMETERS IN C AND NORMALLIZED CHISQUARED IN CHI
+      DIMENSION X(50),Y(50),W(50),C(5),EF(5,5),E(5,5),RS(5)
+      SUM1=0.
+      DO 2 K=1,KMAX
+      DO 1 K1=1,KMAX
+    1 E(K,K1)=0.
+    2 RS(K)=0.
+      DO 5 J=1,NPTS
+      FAC1=W(J)
+      DO 4 K=1,KMAX
+      FAC=FAC1
+      DO 3 K1=1,KMAX
+      E(K,K1)=E(K,K1)+FAC
+    3 FAC=FAC*X(J)
+      RS(K)=RS(K)+FAC1*Y(J)
+    4 FAC1=FAC1*X(J)
+    5 SUM1=SUM1+W(J)*Y(J)*Y(J)
+      DO 6 K=1,KMAX
+      DO 6 K1=1,K
+      EF(K,K1)=E(K,K1)
+    6 EF(K1,K)=EF(K,K1)
+      CALL MATINV(E,KMAX)
+      SUM2=0.
+      DO 8 K=1,KMAX
+      SUM=0.
+      DO 7 K1=1,KMAX
+    7 SUM=SUM+E(K,K1)*RS(K1)
+      C(K)=SUM
+    8 SUM2=SUM*RS(K)+SUM2
+      SUM3=0.
+      DO 9 K=1,KMAX
+      DO 9 K1=1,KMAX
+    9 SUM3=SUM3+C(K)*C(K1)*EF(K,K1)
+      NDIV=NPTS-KMAX
+      IF(NDIV.LE.0)NDIV=1
+      CHI=(SUM1-2.*SUM2+SUM3)/NDIV
+      RETURN
+      END
+
+       SUBROUTINE MATINV(A,N)
+C  MATRIX INVERSION BY GAUSS-JORDAN ELIMINATION
+      DIMENSION A(5,5),B(5),C(5),LZ(5)
+      DO 10 J=1,N
+   10 LZ(J)=J
+      DO 20 I=1,N
+      K=I
+      Y=A(I,I)
+      L=I-1
+      LP=I+1
+      IF(N-LP)14,11,11
+   11 DO 13 J=LP,N
+      W=A(I,J)
+      IF(ABS(W)-ABS(Y))13,13,12
+   12 K=J
+      Y=W
+   13 CONTINUE
+   14 DO 15 J=1,N
+      C(J)=A(J,K)
+      A(J,K)=A(J,I)
+      A(J,I)=-C(J)/Y
+      A(I,J)=A(I,J)/Y
+   15 B(J)=A(I,J)
+      A(I,I)=1./Y
+      J=LZ(I)
+      LZ(I)=LZ(K)
+      LZ(K)=J
+      DO 19 K=1,N
+      IF(I-K)16,19,16
+   16 DO 18 J=1,N
+      IF(I-J)17,18,17
+   17 A(K,J)=A(K,J)-B(J)*C(K)
+   18 CONTINUE
+   19 CONTINUE
+   20 CONTINUE
+      DO 200 I=1,N
+      IF(I-LZ(I))100,200,100
+  100 K=I+1
+      DO 500 J=K,N
+      IF(I-LZ(J))500,600,500
+  600 M=LZ(I)
+      LZ(I)=LZ(J)
+      LZ(J)=M
+      DO 700 L=1,N
+      C(L)=A(I,L)
+      A(I,L)=A(J,L)
+  700 A(J,L)=C(L)
+  500 CONTINUE
+  200 CONTINUE
+      RETURN
+      END
+
+
+
+%==============================================================%
+      SUBROUTINE norr2dim(device,comment,xdim,ydim)
+%==============================================================%
+%     PURPOSE : Read a two-dimensional spectrum matrix from    %
+%               disk.                                          %
+%     INPUT via parameter  : device  : INTEGER                 %
+%                               = filenumber                   %
+%                            comment : CHARACTER               %
+%                               = comment in spectrum file     %
+%                            xdim    : INTEGER                 %
+%                               = x-dimension of matrix        %
+%                            ydim    : INTEGER                 %
+%                               = y-dimension of matrix        %
+%     OUTPUT via parameter : NONE                              %
+%                                                              %
+%     INPUT via common     : COMMON /file2dim/                 %
+%                               = spectrum matrix              %
+%     OUPTUT via common    : NONE                              %
+%==============================================================%
+
+      CHARACTER text*80,comment*60
+      INTEGER device,xdim,ydim,mx
+      COMMON /file2dim/mx(0:2047,0:31)
+
+
+C --  Read file header
+      DO FOR I=1,10
+        READ(device,100)text
+        WRITE(1,100)text
+ 100  FORMAT(A80)
+      ENDDO
+
+C --  Read matrix
+      READ(device,*)((mx(i,j),i=0,xdim),j=0,ydim)
+C  200  FORMAT(6I8)
+
+      RETURN
+      END          ! End-Of-Subroutine norr2dim

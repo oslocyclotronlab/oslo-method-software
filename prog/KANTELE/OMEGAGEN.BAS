@@ -1,0 +1,114 @@
+100 REM   OMEGAGEN.BAS         SEPTEMBER 14, 1992          J. KANTELE
+
+110 COLOR 14: CLS
+
+120 PRINT "****************************************************************"
+
+130 PRINT
+
+140 PRINT " PROGRAM TO CALCULATE ELECTRONIC FACTORS OMEGA K, L1, AND L2 "
+
+150 PRINT " FOR E0 TRANSITIONS AT ENERGIES E >> THE ORBITAL ELECTRON BINDING "
+
+160 PRINT " ENERGIES. THE CODE IS BASED ON THE GENERAL FORMULAE OF [Ch56]."
+
+170 PRINT " THE RESULTS ARE APPROXIMATE, IN PARTICULAR FOR L1 AND L2 SHELLS,"
+
+180 PRINT " AND FOR HIGH-ENERGY TRANSITIONS."
+
+190 PRINT " THE FORMULAE USED ARE SIMPLIFIED VERSIONS OF THE ORIGINAL ONES."
+
+200 PRINT
+
+210 PRINT "****************************************************************"
+
+220 PRINT
+
+230 INPUT " ATOMIC NUMBER, Z = ", Z
+
+240 FOR I = 1 TO 6
+
+250 READ Z(I), C(I)
+
+260 DATA 9,1.047,11,1.036,18,1.065,20,.952,23,1.035,34,1.033
+
+270 IF Z = Z(I) THEN C = C(I): GOTO 300
+
+280 NEXT I
+
+290 C = 1
+
+300 A = C * EXP(1.4594 + .21579 * LOG(Z) + .24867 * LOG(Z) ^ 2 - .02225 * LOG(Z) ^ 3)
+
+310 PRINT
+
+320 INPUT " ELECTRIC MONOPOLE TRANSITION ENERGY (keV), E = ", E
+
+330 PRINT
+
+340 K = E / 511
+
+350 R = 1.2 * .002596 * A ^ (1 / 3)
+
+360 A1 = 1 / 137.036
+
+370 W = K + 1
+
+380 P = SQR(W ^ 2 - 1)
+
+390 G1 = SQR(1 - (A1 * Z) ^ 2)
+
+400 G2 = EXP(.692961 + 2.5156E-05 * Z - 4.96794E-05 * Z ^ 2 - 2.94266E-09 * Z ^ 3)
+
+410 X = G1: Y = A1 * Z * W / P
+
+420 G3 = EXP((.5 + X) * LOG((1 + X) ^ 2 + Y ^ 2) - 2 * Y * ATN(Y / (1 + X)) - 2 * (1 + X) + LOG(2 * 3.1416) + (1 + X) / (6 * ((1 + X) ^ 2 + Y ^ 2)) - LOG(X ^ 2 + Y ^ 2))
+
+430 F = 2 * (1 + G1) * (2 * P * R) ^ (2 * (G1 - 1)) * EXP(3.141592 * A1 * Z * W / P) / G2 ^ 2 * G3
+
+440 REM
+
+450 OK = A1 ^ 2 / 36 * (1 + G1) / G2 * P * (W + G1) / A1 / Z * (2 * A1 * Z * R) ^ (2 * G1 + 2) * F * 7.776E+20
+
+460 Q = SQR(2 * (1 + G1))
+
+470 KL = 2 * (Q + 1) / (Q + 2) * Q ^ (2 * G1 + 2) / (2 * G1 + 1)
+
+480 L12 = (2 + Q) * (Q - 1) * (W + G1) / ((2 - Q) * (Q + 1) * (W - G1))
+
+490 OL1 = OK / KL
+
+500 OL2 = OL1 / L12
+
+510 OD = OK / (OL1 + OL2): OB1 = 1 / L12
+
+520 PRINT USING " OMEGA-K   = ##.##^^^^ 1/s"; OK
+
+530 PRINT
+
+540 PRINT USING " OMEGA-L1  = ##.##^^^^ 1/s"; OL1
+
+550 PRINT
+
+560 PRINT USING " OMEGA-L2  = ##.##^^^^ 1/s"; OL2
+
+570 PRINT
+
+580 PRINT USING " K/L1/L2   = ##.##/1/##.##^^^^"; KL, OB1
+
+590 PRINT
+
+600 PRINT USING " K/(L1+L2) = ##.##/1"; OD
+
+610 PRINT
+
+620 COLOR 12: PRINT " TO QUIT, JUST HIT CTRL-C ": COLOR 14
+
+630 RESTORE
+
+640 GOTO 200
+
+650 END
+
+
+

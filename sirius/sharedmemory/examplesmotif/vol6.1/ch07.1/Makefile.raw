@@ -1,0 +1,7 @@
+PROGRAMS=action_area action_list help_text map_dlg modify_btn
+CFLAGS= -O -s -D_NO_PROTO
+LIBS= -lXm -lXt -lX11
+
+all: $(PROGRAMS)
+
+.c: ; $(CC) $(CFLAGS) $@.c $(LIBS) -o $@

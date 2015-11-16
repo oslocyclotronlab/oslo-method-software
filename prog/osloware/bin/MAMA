@@ -1,0 +1,2 @@
+#!/bin/tcsh
+xterm -bg black -fg green -cr red -fn fixed -e /user/schiller/bin/mama

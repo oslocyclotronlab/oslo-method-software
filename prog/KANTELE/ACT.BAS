@@ -1,0 +1,89 @@
+100 REM    ACT.BAS          SEPTEMBER 14, 1990          J. KANTELE
+
+110 COLOR 15, 1: CLS
+
+120 PRINT "*****************************************************************"
+
+130 PRINT
+
+140 PRINT " PROGRAM TO CALCULATE THE ACTIVITY PRODUCED IN AN IRRADIATION, "
+
+150 PRINT " ACCORDING TO THE THIN-TARGET APPROXIMATION. KEEP CAPS-LOCK ON."
+
+160 PRINT
+
+170 PRINT "*****************************************************************"
+
+180 PRINT
+
+190 INPUT " TARGET THICKNESS (mg/cm^2) = ", A
+
+200 PRINT
+
+210 INPUT " MASS-NUMBERS OF TARGET AND PRODUCT ATOMS, M1, M2 = ", B, P
+
+220 PRINT
+
+230 INPUT " CROSS SECTION (mb) = ", C
+
+240 PRINT
+
+250 INPUT " HALF-LIFE (sec) = ", D
+
+260 PRINT
+
+270 INPUT " IRRADIATION TIME (sec) = ", F
+
+280 PRINT
+
+290 A1 = A / B * (6.022E+20) * C * (1E-27) * (1 - EXP(-LOG(2) / D * F))
+
+300 INPUT " FLUX IN nA OR 1/cm^2sec (I OR F) ", A$
+
+310 IF A$ = "I" THEN 320 ELSE 350
+
+320 PRINT
+
+330 INPUT " BEAM CURRENT (IN nA) = ", G
+
+340 GOTO 410
+
+350 IF A$ = "F" THEN 360 ELSE 280
+
+360 PRINT
+
+370 INPUT " FLUX (in 1/cm^2sec) = ", H
+
+380 PRINT
+
+390 ACT = A1 * H
+
+400 GOTO 430
+
+410 PRINT
+
+420 ACT = A1 * G * (6.24E+09)
+
+430 AM = ACT / 37000!
+
+440 COLOR 14: PRINT USING " ACTIVITY = ##.###^^^^ dps (Bq) = ##.###^^^^ microCi "; ACT; AM
+
+450 PRINT
+
+460 LET M = (ACT) * D * P / LOG(2) / (6.022E+23)
+
+470 PRINT USING " MASS OF ACTIVITY PRODUCED = ##.###^^^^ g"; M
+
+480 COLOR 15: PRINT
+
+490 PRINT "*****************************************************************"
+
+500 PRINT
+
+510 INPUT " DO YOU WANT TO CONTINUE? (1 = YES, 2 = N0)  YOUR CHOICE = ", N
+
+520 ON N GOTO 160, 530
+
+530 END
+
+
