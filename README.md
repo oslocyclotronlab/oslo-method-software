@@ -1,4 +1,4 @@
-# oslo-method-software
+# Oslo software
 
 
 README-file for OsloSoftware
@@ -112,13 +112,13 @@ export TERM=xterm-color
 
 PS1='$USER@\H:\W>'
 
-# For ROOT, not installed by Fink
+## For ROOT, not installed by Fink
 export ROOTSYS=/Applications/root
 export PATH=$ROOTSYS/bin:$PATH
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
 export LDYLD_LIBRARY_PATH=$ROOTSYS/lib:$DYLD_LIBRARY_PATH
 
-# For Fink
+## For Fink
 test -r /sw/bin/init.sh && . /sw/bin/init.sh
 
 *****************************************************************************
