@@ -42,35 +42,55 @@ Nucl. Instrum. Methods Phys. Res. A 255, 518 (1987).
 
 *****************************************************************************
 
-In order to do the Oslo method, you need to run the mama-commands:
+In order to do the Oslo method, you need to run the following MAMA commands:
+
 Read in the raw particle-gamma matrix with the command:
->re 
+
+re 
+
 Make response matrix with the command:
->rm 
+
+rm 
+
 Unfold the particle-gamma matrix:
->un 
+
+un 
+
 Run the first-generation procedure on the unfolded particle-gamma matrix
 to get the distribution of primary gamma rays for each excitation energy:
->fg 
+
+fg 
 
 To remove negative counts:
-after >un and >fg, you should use the following commands:
+after 'un' and 'fg', you should use the following commands:
+
 Fill negative counts from neighbours:
->fn 
+
+fn 
+
 Replace (remaining) negative counts with zeros:
->rn 
+
+rn 
 
 Then write out the first-generation matrix:
->wr 
+
+wr 
+
 and call it fg (or some other name you find convenient)
 
 For the further analysis, you need programs found in the /prog directory:
-rhosigchi.f 	Find Rho and T from a least-square fit to the matrix fg
-d2rho.f     	Find Rho(Sn) from D0 or D1 values
-rhobin.f    	Find Rho(Sn) from global systematics (e.g. Egidy&Bucurescu)
-counting.c  	Normalize the level density function Rho(Ex)
-normalization.c Normalize the gamma-ray strength function f(Egamma)
-radex.f		Find the gamma-ray strength function from P/Rho
+
+rhosigchi.f 	-- Find Rho and T from a least-square fit to the matrix fg
+
+d2rho.f     	-- Find Rho(Sn) from D0 or D1 values
+
+rhobin.f    	-- Find Rho(Sn) from global systematics (e.g. Egidy&Bucurescu)
+
+counting.c  	-- Normalize the level density function Rho(Ex)
+
+normalization.c -- Normalize the gamma-ray strength function f(Egamma)
+
+radex.f		-- Find the gamma-ray strength function from P/Rho
 
 (There are several other programs in /prog and /mama that you do not need.
 Some of them are out-dated or do not work…)
@@ -102,15 +122,25 @@ After the three folders are downloaded and unzipped,
 you write in a terminal window:
 
 > cd mama
+
 > make very-clean
+
 > make all
+
 > make install
 
+
+
 > cd ..
+
 > cd prog
+
 > make very-clean
+
 > make all
+
 > make install
+
 
 All executables are now installed in /prog/bin
 
