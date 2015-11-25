@@ -20,7 +20,8 @@ E-mail: magne.guttormsen@fys.uio.no                  Oslo, September 27. 2014
 
 OsloSoftware is copylefted free software: you can redistribute it and/or 
 modify it under the terms of the GNU General Public License as published by 
-the Free Software Foundation, see http://www.gnu.org.This program is distributed in the hope that it will be useful, 
+the Free Software Foundation, see http://www.gnu.org.
+This program is distributed in the hope that it will be useful, 
 but WITHOUT ANY WARRANTY; without even the implied warranty of 
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PUR-POSE. 
 See the GNU General Public License for more details. 
@@ -28,26 +29,40 @@ For your reports and publications,
 you should refer to the following publications:
 
 1. The Oslo method
-A. Schiller, L. Bergholt, M. Guttormsen, E. Melby, J. Rekstad,and S. Siem, Nucl. Instrum. Methods Phys. Res. A 447 494 (2000).2. The unfolding procedure:M. Guttormsen, T.S. Tveter, L. Bergholt, F. Ingebretsen, andJ. Rekstad, Nucl. Instrum. Methods Phys. Res. A 374, 371 (1996).
+A. Schiller, L. Bergholt, M. Guttormsen, E. Melby, J. Rekstad,
+and S. Siem, Nucl. Instrum. Methods Phys. Res. A 447 494 (2000).
 
-3. The first generation gamma-ray spectra procedure:M. Guttormsen, T. Ramsøy, and J. Rekstad, 
+2. The unfolding procedure:
+M. Guttormsen, T.S. Tveter, L. Bergholt, F. Ingebretsen, and
+J. Rekstad, Nucl. Instrum. Methods Phys. Res. A 374, 371 (1996).
+
+3. The first generation gamma-ray spectra procedure:
+M. Guttormsen, T. Ramsøy, and J. Rekstad, 
 Nucl. Instrum. Methods Phys. Res. A 255, 518 (1987).
 
 *****************************************************************************
 
 In order to do the Oslo method, you need to run the mama-commands:
+Read in the raw particle-gamma matrix with the command:
+>re 
+Make response matrix with the command:
+>rm 
+Unfold the particle-gamma matrix:
+>un 
+Run the first-generation procedure on the unfolded particle-gamma matrix
+to get the distribution of primary gamma rays for each excitation energy:
+>fg 
 
-re Read in the raw particle-gamma matrix
-rm Make response matrix
-un Unfold the particle-gamma matrix
-fg Run the first-generation procedure on the unfolded particle-gamma matrix
+To remove negative counts:
+after >un and >fg, you should use the following commands:
+Fill negative counts from neighbours:
+>fn 
+Replace (remaining) negative counts with zeros:
+>rn 
 
-after un and fg, you should use the commands:
-
-fn Fill negative counts from neighbours 
-rn Replace (remaining) negative counts with zeros
-
-Then write (wr command) the first-generation matrix and call it fg
+Then write out the first-generation matrix:
+>wr 
+and call it fg (or some other name you find convenient)
 
 For the further analysis, you need programs found in the /prog directory:
 rhosigchi.f 	Find Rho and T from a least-square fit to the matrix fg
@@ -58,7 +73,7 @@ normalization.c Normalize the gamma-ray strength function f(Egamma)
 radex.f		Find the gamma-ray strength function from P/Rho
 
 (There are several other programs in /prog and /mama that you do not need.
-Some of them are out-dated or does not work…)
+Some of them are out-dated or do not work…)
 
 *****************************************************************************
 
@@ -86,20 +101,20 @@ and you should not compile anything inside the sirius folder)
 After the three folders are downloaded and unzipped, 
 you write in a terminal window:
 
-cd mama
-make very-clean
-make all
-make install
+> cd mama
+> make very-clean
+> make all
+> make install
 
-cd ..
-cd prog
-make very-clean
-make all
-make install
+> cd ..
+> cd prog
+> make very-clean
+> make all
+> make install
 
 All executables are now installed in /prog/bin
 
-You need a .bashrc file telling where the programs are located. 
+You need a .bashrc or .bash_profile file telling where the programs are located. 
 It could look like this:
 
 *****************************************************************************
