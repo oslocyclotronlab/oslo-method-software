@@ -667,6 +667,11 @@ C Writting spectra to mama matrices
       WRITE(6,42)outfile
  42   FORMAT('Unnormalized T and dT     written to mama file:    ',A11)
 
+      OPEN(23,FILE='input.rsg',ACCESS='SEQUENTIAL',ERR=888)
+      WRITE(23,*)Eg_min,Ex_min,Ex_max,mass
+      CLOSE(23)
+888   CONTINUE
+
       STOP
  99   WRITE(6,*)'Could not open file for results and spectra'
       STOP
