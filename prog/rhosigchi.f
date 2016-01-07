@@ -29,7 +29,7 @@ C Stuff for the rhosig iteration
       DIMENSION Fi(0:511),Ff(0:511)
       WRITE(6,*)' ________________________________________'
       WRITE(6,*)'|                                        |'
-      WRITE(6,*)'|         R H O S I G C H I  1.5.1       |'
+      WRITE(6,*)'|         R H O S I G C H I  1.5.2       |'
       WRITE(6,*)'|                                        |'
       WRITE(6,*)'|  Program to calculate level density    |'
       WRITE(6,*)'| Rho, and gamma strength function Sig   |'
@@ -50,6 +50,7 @@ C Stuff for the rhosig iteration
       WRITE(6,*)'|  Modified 13 Feb 2015: One ch shift,   |'
       WRITE(6,*)'|  ch ig < 0, cut igmax                  |'
       WRITE(6,*)'|  Modified 31 Aug 2015: No normalization|'
+      WRITE(6,*)'|  Modified 15 Dec 2015: input > 10**-06 |'
       WRITE(6,*)'|________________________________________|'
 C Things that should be done in the future:
 C Fitting with error weighting
@@ -63,6 +64,7 @@ C Initializing parameter values
       dE_p = 150.             ! Particle resolution
       dE_g1MeV = 60.          ! NaI resolution at 1 MeV
       dE_g8MeV = 300.         ! NaI resolution at 8 MeV
+      eps      = 0.000001     ! Lowest counts in fg matrix
 
 C Initializing some vectors and matrices
       DO i=0,511
@@ -128,7 +130,13 @@ C Compressing (or stretching) along X and Y - axis
          Ff(i)=0.
       ENDDO
 
-      DO j=0,YDIM-1                                     ! X-axis
+
+      DO j=0,YDIM-1
+         DO i=0,XDIM-1
+            If(rMAT(IDEST,i,j).LT.eps) rMAT(IDEST,i,j) = eps
+         ENDDO
+      ENDDO
+      DO j=0,YDIM-1
          Sum=0.
          DO i=0,XDIM-1
             Fi(i)=rMAT(IDEST,i,j)                       ! Fi(i) and Ff(i) real type

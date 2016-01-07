@@ -15,6 +15,7 @@ FILE	*fp;
 char	line[1024],cdum[128];
 int		i, dimx, dimy, dim, Nch = 0, L1, L2, dim_sigext;
 float	rho[MAXDIM], spincut[MAXDIM], sigpaw[MAXDIM], sigext[MAXDIM];
+float   sig[MAXDIM],dsig[MAXDIM];
 float	trans[MAXDIM], transext[MAXDIM], strength[MAXDIM];
 int		ell;
 float	Int = 0., Fac = 0., Eg, dum;
@@ -43,7 +44,7 @@ int main()
 	printf("\n");
 	printf("  ______________________________________________________________ \r\n");
 	printf(" |                                                              |\r\n");
-	printf(" |               N O R M A L I Z A T I O N  1.5.2               |\r\n");
+	printf(" |               N O R M A L I Z A T I O N  1.5.3               |\r\n");
 	printf(" |                                                              |\r\n");
 	printf(" |  Program to normalize the gamma-ray strength function f(Eg)  |\r\n");
 	printf(" |         to the total average radiation width Gamma           |\r\n");
@@ -60,6 +61,7 @@ int main()
 	printf(" | Created : 14 Nov 2006                                        |\r\n");
 	printf(" | Modified: 26 Mar 2014                                        |\r\n");
     printf(" | Modified: 28 Aug 2015 replace ? and deleting kumac files     |\r\n");
+    printf(" | Modified: 15 Dec 2015 larger dim for root vec. + corr. table |\r\n");
 	printf(" |______________________________________________________________|\r\n");
 	printf("                                                                 \r\n");
 	
@@ -210,6 +212,14 @@ int main()
 	}
 	fclose(fp);
 	dim = i/2;
+    
+    /* *************************** */
+    /* Making output list in table */
+    /* *************************** */
+    for(i = 0; i < dim; i++){
+        sig[i] = sigpaw[i];
+        dsig[i]= sigpaw[i+dim];
+    }
 	
 	/* **************************************************** */
 	/* Finding L1 and L2 limits for region with data points */
@@ -243,33 +253,9 @@ int main()
 	/* ************************ */
 	printf("\n No Ex(keV) Rho(1/MeV)  2*Spincut**2  Eg(keV)    Sigext      Sigpaw      dSigpaw  \n");
 	for(i = 0 ; i < Nch; i++){
-		printf("%3d  %6.1f %10.3e %8.2f %12.1f %12.3e %12.3e (%10.3e)\n",i,a0+a1*(float)i,rho[i],spincut[i],a0+a1*(float)i, sigext[i],sigpaw[i],sigpaw[i+dim]);
+		printf("%3d  %6.1f %10.3e %8.2f %12.1f %12.3e %12.3e (%10.3e)\n",i,a0+a1*(float)i,rho[i],spincut[i],a0+a1*(float)i, sigext[i],sig[i],dsig[i]);
 	}
         
-/*    printf("\n No Ex(keV) Rho(1/MeV)  2*Spincut**2  Eg(keV)    Sigext      Sigpaw      dSigpaw  \n");
-	for(i = 0 ; i < Nch; i++){
-        ex=a0+a1*(float)i;
-		printf("%3d  %6.1f %10.3e %8.2f %12.1f %12.3e %12.3e (%10.3e)\n",i,ex,rho_ex(ex),sig_ex(ex),ex, T_eg(ex),sigpaw[i],sigpaw[i+dim]);
-	}
-
-    
-    ex=a0 + a1*11.5 ;
-    printf("ex= %f   rho = %e\n",ex,rho_ex(ex ) );
-    printf("ex= %f   sig= %e\n",ex,sig_ex(ex ) );
-    printf("eg= %f   T_eg = %e\n",ex,T_eg(ex ) );
-    
-    ex=-368.1 ;
-    printf("ex= %f   rho = %e\n",ex,rho_ex(ex ) );
-    printf("ex= %f   sig= %e\n",ex,sig_ex(ex ) );
-    printf("eg= %f   T_eg = %e\n",ex,T_eg(ex ) );
-    
-    ex=5488 ;
-    printf("ex= %f   rho = %e\n",ex,rho_ex(ex ) );
-    printf("ex= %f   sig= %e\n",ex,sig_ex(ex ) );
-    printf("eg= %f   T_eg = %e\n",ex,T_eg(ex ) );
-    
-    exit(0);
-*/
     
 	/* *************************************** */
 	/* Calculating integral, fasten seat-belts */
@@ -523,7 +509,6 @@ float rho_ex(float ex)
     rhox = rho[i1] + (rho[i2] - rho[i1])*((ex - ex1)/(ex2-ex1));
     if (rhox < 0.)rhox = 0.;
     
-//    printf("i1= %d, i2 = %d, rho(i1)= %e, rho(i2) = %e, ex1= %f, ex2= %f,ex = %f\n",i1,i2,rho[i1],rho[i2],ex1,ex2,ex);
     return rhox;
 }
 
@@ -613,7 +598,7 @@ int makeroot1(){
 		fprintf(fp,"	TCanvas *c1 = new TCanvas(\"c1\",\"Gamma-ray strength function\",600,600);\n");	
 		fprintf(fp,"	TH2F *h = new TH2F(\"h\",\" \",10,0.0,%8.3f,10,%9.3e,%9.3e);\n",Emax+0.5,Tmin,Tmax);
 		fprintf(fp,"	ifstream strengthfile(\"strength.nrm\");\n");
-		fprintf(fp,"	float strength[%d],strengtherr[%d],energy[%d],energyerr[%d],trans[%d];\n",dim+1,dim+1,dim+1,dim+1,dim+1);
+		fprintf(fp,"	float strength[%d],strengtherr[%d],energy[%d],energyerr[%d],trans[%d];\n",Nch+1,Nch+1,Nch+1,Nch+1,Nch+1);
 		fprintf(fp,"	int i = 0;\n");
 		fprintf(fp,"   float a0 = %8.4f;\n",a0/1000.); 
 		fprintf(fp,"   float a1 = %8.4f;\n",a1/1000.);

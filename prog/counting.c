@@ -1101,13 +1101,16 @@ int makeroot3(){
 	fprintf(fp,"   TH2F *h = new TH2F(\"h\",\" \",10,%f,%8.3f,50,%9.3e,%9.3e);\n",Emin,Emax,Tmin,Tmax);
 	fprintf(fp,"   ifstream sigfile(\"sigpaw.cnt\");\n");
 	fprintf(fp,"   float sig[%d],sigerr[%d];\n",dim+2,dim+2);
-	fprintf(fp,"   float energy[%d],energyerr[%d];\n",Hmax+50,Hmax+50);
+	fprintf(fp,"   float energy[%d],energyerr[%d];\n",Hmax+2,Hmax+2);
+    fprintf(fp,"   float extL[%d],extH[%d];\n",Hmax+2,Hmax+2);
 	fprintf(fp,"   int i;\n");
 	fprintf(fp,"   float a0 =%8.4f;\n",a0/1000.);
 	fprintf(fp,"   float a1 =%8.4f;\n",a1/1000.);
-	fprintf(fp,"   for(i = 0; i < %d; i++){\n",Hmax+50);
+	fprintf(fp,"   for(i = 0; i < %d; i++){\n",Hmax+2);
 	fprintf(fp,"   	energy[i] = a0 + (a1*i);\n");
 	fprintf(fp,"   	energyerr[i] = 0.0;\n");
+    fprintf(fp,"   	extL[i] = 0.0;\n");
+    fprintf(fp,"   	extH[i] = 0.0;\n");
 	fprintf(fp,"   }\n");
 	fprintf(fp,"   float x, y;\n");
 	fprintf(fp,"   i = 0;\n");
@@ -1120,7 +1123,6 @@ int makeroot3(){
 	fprintf(fp,"   	i++;\n");
 	fprintf(fp,"   }\n");
 	fprintf(fp,"   ifstream extendfile(\"extendLH.cnt\");\n");
-	fprintf(fp,"   float extL[%d],extH[%d];\n",Hmax+2,Hmax+2);
 	fprintf(fp,"   i = 0;\n");
 	fprintf(fp,"   while(extendfile){\n");
 	fprintf(fp,"   	extendfile >> x >> y ;\n");
