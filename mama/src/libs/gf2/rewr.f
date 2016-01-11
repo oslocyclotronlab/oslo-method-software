@@ -900,7 +900,7 @@ C Calculating the length of a string of characters
       CALL getenv(BASE, BASEENV)
       CALL LENGDE(BASEENV,LB)
       if(LB.eq.0.and.base.eq.'UIO_APPLICATIONS') then
-         BASEENV="/Applications"
+         BASEENV="/home/jorgenem/tools"
          CALL LENGDE(BASEENV,LB)
       end if
       FULL = BASEENV(1:LB)//'/'//TAIL
