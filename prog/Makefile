@@ -71,13 +71,16 @@ rewr $(RWLIB):
 
 clean: 
 	make -C rewr clean
-	make -C kinz clean
+#	make -C kinz clean
 	$(RM) *.o core *[~%]
 
 very-clean: clean
 	make -C rewr very-clean
-	make -C kinz very-clean
-	$(RM) $(C_TARGETS) $(F_TARGETS)
+#	make -C kinz very-clean
+	$(RM) $(C_TARGETS) $(F_TARGETS) bin/$(TARGET)
+	for target in $(TARGET) ; \
+		do rm -f $(UIO_APPLICATIONS)/prog/bin/$$target ; \
+	done
 
 .PHONY: kinz rewr
 

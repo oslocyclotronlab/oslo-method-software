@@ -43,6 +43,9 @@ clean:
 very-clean:
 	$(RM) *.o core *[~%] $(TARGET) $(ARCHIVES)
 	$(MAKE) -C spylibs/spyfiles very-clean
+	for target in $(TARGET) ; \
+		do rm -f ../../prog/bin/$$target ; \
+	done
 
 install:
 	for program in $(TARGET) ; \
