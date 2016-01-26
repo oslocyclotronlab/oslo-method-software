@@ -17,7 +17,7 @@ endif
           RM = rm -f
 
  INSTALL_BIN = install -m 0755
- INSTALL_DIR = /Applications/prog
+ INSTALL_DIR = $(UIO_APPLICATIONS)/prog
 
 ifeq ($(BASEDIR),)
 $(error This file must be included from another 'Makefile' with BASEDIR set)
