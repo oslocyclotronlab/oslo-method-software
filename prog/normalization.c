@@ -60,8 +60,8 @@ int main()
 	printf(" | E-mail  : magne.guttormsen@fys.uio.no                        |\r\n");
 	printf(" | Created : 14 Nov 2006                                        |\r\n");
 	printf(" | Modified: 26 Mar 2014                                        |\r\n");
-    printf(" | Modified: 28 Aug 2015 replace ? and deleting kumac files     |\r\n");
-    printf(" | Modified: 15 Dec 2015 larger dim for root vec. + corr. table |\r\n");
+    	printf(" | Modified: 28 Aug 2015 replace ? and deleting kumac files     |\r\n");
+    	printf(" | Modified: 15 Dec 2015 larger dim for root vec. + corr. table |\r\n");
 	printf(" |______________________________________________________________|\r\n");
 	printf("                                                                 \r\n");
 	
