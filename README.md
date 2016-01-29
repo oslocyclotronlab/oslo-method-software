@@ -1,5 +1,5 @@
 
-README-file for OsloSoftware
+# README-file for OsloSoftware
 
 *****************************************************************************
 
@@ -43,15 +43,15 @@ Nucl. Instrum. Methods Phys. Res. A 255, 518 (1987).
 
 In order to do the Oslo method, you need to run the mama-commands:
 
-re Read in the raw particle-gamma matrix
-rm Make response matrix
-un Unfold the particle-gamma matrix
-fg Run the first-generation procedure on the unfolded particle-gamma matrix
+	re Read in the raw particle-gamma matrix
+	rm Make response matrix
+	un Unfold the particle-gamma matrix
+	fg Run the first-generation procedure on the unfolded particle-gamma matrix
 
 after un and fg, you should use the commands:
 
-fn Fill negative counts from neighbours 
-rn Replace (remaining) negative counts with zeros
+	fn # Fill negative counts from neighbours 
+	rn # Replace (remaining) negative counts with zeros
 
 Then write (wr command) the first-generation matrix and call it fg
 
@@ -68,53 +68,52 @@ Some of them are out-dated or does not work…)
 
 *****************************************************************************
 
-Installation:
+# Installation:
 
 You need a Mac or a Unix/Linux computer with installed:
-gfortran
-gcc
-g++
+	gfortran
+	gcc
+	g++
 
 You would also benefit from downloading root from CERN
 
-The three folders:
-/mama
-/prog
-/sirius
+Then, clone this repository (or download and unpack the zip file) into the folder where you want the software to be installed. Let us say it is 
 
-have to be located at the same level. For Mac, place them
-inside the /Applications folder.
-(The sirius folder just keeps some include-files that mama needs,
-and you should not compile anything inside the sirius folder)
+	/path-to-software/oslo-method-software/
 
-*****************************************************************************
+This folder should now contain the three subfolders mama/, prog/ and sirius/, among other things.
 
-After the three folders are downloaded and unzipped, 
-you write in a terminal window:
+You must then add this path to your system environment variables in the following way:
 
-cd mama
-make very-clean
-make all
-make install
+Edit your /home/user/.bash_profile file (or something equivalent, if you prefer and know what you are doing) and add the two lines
 
-cd ..
-cd prog
-make very-clean
-make all
-make install
+	export UIO_APPLICATIONS=/path-to-software/oslo-method-software
+	PATH=$PATH:$UIO_APPLICATIONS/prog/bin
 
-All executables are now installed in /prog/bin
+You must of course replace the installation path with your own.
 
-You need a .bashrc or .profile file telling where the programs are located. 
-It could look like this:
+Then, navigate in a terminal to your installation directory, and execute the following commands:
 
-*****************************************************************************
+	cd mama
+	make very-clean
+	make all
+	make install
+	
+	cd ..
+	cd prog
+	make very-clean
+	make all
+	make install
 
-export UIO_APPLICATIONS=<applications_base_path> 	# Replace with the path where you want mama to be installed.
-													# For MacOSX users this can be /Applications
-PATH=$PATH:$UIO_APPLICATIONS/prog/bin
+All executables are now installed in /path-to-software/oslo-method-software/prog/bin, but they should also be in your $PATH so you can run them from anywhere by typing e.g.
+	
+	mama
+
+This should open the mama prompt, as well as a graphical window.
 
 *****************************************************************************
+
+# Ensuring ROOT support
 
 To get ROOT working the environment variable ROOTSYS needs to be defined. If you have ROOT installed, you should already have this, 
 since it is set automatically by the script /path-to-root/bin/thisroot.sh, which you should be calling in some startup script, e.g. in your
@@ -122,59 +121,61 @@ since it is set automatically by the script /path-to-root/bin/thisroot.sh, which
 
 You can test whether you have the correct setup by typing
 
-echo $ROOTSYS
+	echo $ROOTSYS
 
 in a terminal. If it prints the path to your ROOT directory, you are all set. If not, open your /home/user/.profile file in a text editor and add the line 
 
-. /path-to-root/bin/thisroot.sh # for sh shell user, e.g. bash users (if you are unsure which shell you are running, use this)
+	. /path-to-root/bin/thisroot.sh # for sh shell user, e.g. bash users (if you are unsure which shell you are running, use this)
 
 or
 
-source /path-to-root/bin/thisroot.csh # for csh shell users
+	source /path-to-root/bin/thisroot.csh # for csh shell users
 
 to the end of it.
 
-**************************
+## ROOT for Mac
 
 For MacOSX users, you might need the following to get ROOT working:
 
-export LC_ALL="C" 
-export LANG="en_US" 
-export TERM=xterm-color
+	export LC_ALL="C" 
+	export LANG="en_US" 
+	export TERM=xterm-color
+	
+	PS1='$USER@\H:\W>'
 
-PS1='$USER@\H:\W>'
+For ROOT, not installed by Fink
+	export ROOTSYS=/Applications/root
+	export PATH=$ROOTSYS/bin:$PATH
+	export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
+	export LDYLD_LIBRARY_PATH=$ROOTSYS/lib:$DYLD_LIBRARY_PATH
 
-# For ROOT, not installed by Fink
-export ROOTSYS=/Applications/root
-export PATH=$ROOTSYS/bin:$PATH
-export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
-export LDYLD_LIBRARY_PATH=$ROOTSYS/lib:$DYLD_LIBRARY_PATH
-
-# For Fink
-test -r /sw/bin/init.sh && . /sw/bin/init.sh
+For Fink
+	test -r /sw/bin/init.sh && . /sw/bin/init.sh
 
 
 *****************************
+
+# Fixing a font problem
 
 For Ubuntu (and possibly other GNU/Linux) users, there might be a font problem.
 This manifests itself when you open mama as a complaint about something called X_OpenFont. 
 
 The solution is to install the apt package
 
-xfonts-100dpi
+	xfonts-100dpi
 
 (i.e. do
-sudo apt-get install xfonts-100dpi
+	sudo apt-get install xfonts-100dpi
 in an Ubuntu terminal)
 
 and then run the following terminal commands: 
-
-cd /usr/share/fonts/X11/100dpi/
-sudo mkfontdir
-xset fp+ /usr/share/fonts/X11/100dpi
-
+	
+	cd /usr/share/fonts/X11/100dpi/
+	sudo mkfontdir
+	xset fp+ /usr/share/fonts/X11/100dpi
+	
 To add the path permanently, add
-FontPath /usr/share/fonts/X11/100dpi
+	FontPath /usr/share/fonts/X11/100dpi
 to ~/.xinitrc
 
 
@@ -183,5 +184,5 @@ to ~/.xinitrc
 
 Enjoy, Magne
 
-(Modfied by Fabio Zeiser and Jørgen E. Midtbø to be more generally installable than just on MacOSX.)
+(The package and README was modified in January 2016 by Fabio Zeiser and Jørgen E. Midtbø to be more generally installable than just on MacOSX.)
 
