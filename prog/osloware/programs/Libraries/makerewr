@@ -1,3 +1,0 @@
-f77 -c -O3 -C -e rewr.f
-ar rv rewr.a rewr.o
-rm -f rewr.o core

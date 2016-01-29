@@ -44,7 +44,7 @@ very-clean:
 	$(RM) *.o core *[~%] $(TARGET) $(ARCHIVES)
 	$(MAKE) -C spylibs/spyfiles very-clean
 	for target in $(TARGET) ; \
-		do rm -f ../../prog/bin/$$target ; \
+		do rm -f $(INSTALL_DIR)/bin/$$target ; \
 	done
 
 install:

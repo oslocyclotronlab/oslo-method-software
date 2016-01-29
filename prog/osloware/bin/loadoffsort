@@ -1,8 +1,0 @@
-#!/bin/sh
-unset LD_BIND_NOW
-cd /user/schiller/osloware/offline/src
-make -f Makefile all
-/usr/bin/echo '\n\n --- FINISHED - check for error messages \07'
-/usr/bin/echo '\nHit CR to continue ...'
-read stdin
-exit 0
