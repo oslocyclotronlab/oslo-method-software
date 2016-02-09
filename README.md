@@ -15,6 +15,10 @@ E-mail: magne.guttormsen@fys.uio.no                  Oslo, September 27. 2014
                                                      Oslo, October   23. 2015
                                                      Oslo, November  11. 2015
                                                      Oslo, December  15. 2015
+
+For questions or issues with installation, you may also contact Jørgen E. Midtbø,
+j.e.midtbo@fys.uio.no.
+
 *****************************************************************************
 
 OsloSoftware is copylefted free software: you can redistribute it and/or 
@@ -75,7 +79,7 @@ You need a Mac or a Unix/Linux computer with installed:
 	gcc
 	g++
 
-You would also benefit from downloading root from CERN
+You would also benefit from downloading ROOT from CERN (see below)
 
 Then, clone this repository (or download and unpack the zip file) into the folder where you want the software to be installed. Let us say it is 
 
@@ -114,6 +118,8 @@ This should open the mama prompt, as well as a graphical window.
 *****************************************************************************
 
 # Ensuring ROOT support
+
+It is recommended to use ROOT 5, *not* ROOT 6, as there are some backward compatibility issues.
 
 To get ROOT working the environment variable ROOTSYS needs to be defined. If you have ROOT installed, you should already have this, 
 since it is set automatically by the script /path-to-root/bin/thisroot.sh, which you should be calling in some startup script, e.g. in your
