@@ -1,6 +1,0 @@
-#!/bin/tcsh
-cd /user/schiller/osloware/programs
-make -f Makefile all
-cd /user/schiller/osloware/programs/dwuck4
-make -f Makefile dwuck4
-exit 0

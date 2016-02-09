@@ -8,6 +8,8 @@ include $(BASEDIR)/Makeconf
 
 TARGET = mama
 
+MKDIR_P = mkdir -p
+
 ARCHIVES = gf2.a minig_x.a
 OBJ = gf2.o
 
@@ -43,7 +45,14 @@ very-clean:
 	$(RM) *.o core *[~%] $(TARGET) $(ARCHIVES)
 	$(MAKE) -C libs/gf2     very-clean
 	$(MAKE) -C libs/minig_x very-clean
+	for target in $(TARGET) ; \
+		do rm -f $(UIO_APPLICATIONS)/prog/bin/$$target ; \
+	done
+
+
+
 install:
+	${MKDIR_P} $(INSTALL_DIR)/bin
 	for program in $(TARGET) ; \
 		do $(INSTALL_BIN) $$program $(INSTALL_DIR)/bin/$$program; \
 	done

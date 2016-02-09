@@ -1,3 +1,0 @@
-#!/bin/sh
-set LD_BIND_NOW=1
-/user/schiller/bin/reduc_sorter

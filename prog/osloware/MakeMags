@@ -1,4 +1,0 @@
-#!/bin/tcsh
-cd /user/schiller/osloware/magprogs
-make -f Makefile all
-exit 0

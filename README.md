@@ -1,9 +1,5 @@
-# Oslo software
- 
 
-
-
-README-file for OsloSoftware
+# README-file for OsloSoftware
 
 *****************************************************************************
 
@@ -18,6 +14,11 @@ E-mail: magne.guttormsen@fys.uio.no                  Oslo, September 27. 2014
                                                      Oslo, June      26. 2015
                                                      Oslo, October   23. 2015
                                                      Oslo, November  11. 2015
+                                                     Oslo, December  15. 2015
+
+For questions or issues with installation, you may also contact Jørgen E. Midtbø,
+j.e.midtbo@fys.uio.no.
+
 *****************************************************************************
 
 OsloSoftware is copylefted free software: you can redistribute it and/or 
@@ -44,131 +45,150 @@ Nucl. Instrum. Methods Phys. Res. A 255, 518 (1987).
 
 *****************************************************************************
 
-In order to do the Oslo method, you need to run the following MAMA commands:
+In order to do the Oslo method, you need to run the mama-commands:
 
-Read in the raw particle-gamma matrix with the command:
+	re Read in the raw particle-gamma matrix
+	rm Make response matrix
+	un Unfold the particle-gamma matrix
+	fg Run the first-generation procedure on the unfolded particle-gamma matrix
 
-re 
+after un and fg, you should use the commands:
 
-Make response matrix with the command:
+	fn # Fill negative counts from neighbours 
+	rn # Replace (remaining) negative counts with zeros
 
-rm 
-
-Unfold the particle-gamma matrix:
-
-un 
-
-Run the first-generation procedure on the unfolded particle-gamma matrix
-to get the distribution of primary gamma rays for each excitation energy:
-
-fg 
-
-To remove negative counts:
-after 'un' and 'fg', you should use the following commands:
-
-Fill negative counts from neighbours:
-
-fn 
-
-Replace (remaining) negative counts with zeros:
-
-rn 
-
-Then write out the first-generation matrix:
-
-wr 
-
-and call it fg (or some other name you find convenient)
+Then write (wr command) the first-generation matrix and call it fg
 
 For the further analysis, you need programs found in the /prog directory:
-
-rhosigchi.f 	-- Find Rho and T from a least-square fit to the matrix fg
-
-d2rho.f     	-- Find Rho(Sn) from D0 or D1 values
-
-rhobin.f    	-- Find Rho(Sn) from global systematics (e.g. Egidy&Bucurescu)
-
-counting.c  	-- Normalize the level density function Rho(Ex)
-
-normalization.c -- Normalize the gamma-ray strength function f(Egamma)
-
-radex.f		-- Find the gamma-ray strength function from P/Rho
+rhosigchi.f 	Find Rho and T from a least-square fit to the matrix fg
+d2rho.f     	Find Rho(Sn) from D0 or D1 values
+rhobin.f    	Find Rho(Sn) from global systematics (e.g. Egidy&Bucurescu)
+counting.c  	Normalize the level density function Rho(Ex)
+normalization.c Normalize the gamma-ray strength function f(Egamma)
+radex.f		Find the gamma-ray strength function from P/Rho
 
 (There are several other programs in /prog and /mama that you do not need.
-Some of them are out-dated or do not work…)
+Some of them are out-dated or does not work…)
 
 *****************************************************************************
 
-Installation:
+# Installation:
 
 You need a Mac or a Unix/Linux computer with installed:
-gfortran
-gcc
-g++
+	gfortran
+	gcc
+	g++
 
-You would also benefit from downloading root from CERN
+You would also benefit from downloading ROOT from CERN (see below)
 
-The three folders:
-/mama
-/prog
-/sirius
+Then, clone this repository (or download and unpack the zip file) into the folder where you want the software to be installed. Let us say it is 
 
-have to be located at the same level. For Mac, place them
-inside the /Applications folder.
-(The sirius folder just keeps some include-files that mama needs,
-and you should not compile anything inside the sirius folder)
+	/path-to-software/oslo-method-software/
 
-*****************************************************************************
+This folder should now contain the three subfolders mama/, prog/ and sirius/, among other things.
 
-After the three folders are downloaded and unzipped, 
-you write in a terminal window:
+You must then add this path to your system environment variables in the following way:
 
-> cd mama
+Edit your /home/user/.bash_profile file (or something equivalent, if you prefer and know what you are doing) and add the two lines
 
-> make very-clean
+	export UIO_APPLICATIONS=/path-to-software/oslo-method-software
+	PATH=$PATH:$UIO_APPLICATIONS/prog/bin
 
-> make all
+You must of course replace the installation path with your own.
 
-> make install
+Then, navigate in a terminal to your installation directory, and execute the following commands:
 
+	cd mama
+	make very-clean
+	make all
+	make install
+	
+	cd ..
+	cd prog
+	make very-clean
+	make all
+	make install
 
+All executables are now installed in /path-to-software/oslo-method-software/prog/bin, but they should also be in your $PATH so you can run them from anywhere by typing e.g.
+	
+	mama
 
-> cd ..
-
-> cd prog
-
-> make very-clean
-
-> make all
-
-> make install
-
-
-All executables are now installed in /prog/bin
-
-You need a .bashrc or .bash_profile file telling where the programs are located. 
-It could look like this:
+This should open the mama prompt, as well as a graphical window.
 
 *****************************************************************************
 
-PATH=$PATH:/Applications/prog/bin
+# Ensuring ROOT support
 
-export LC_ALL="C"
-export LANG="en_US"
-export TERM=xterm-color
+It is recommended to use ROOT 5, *not* ROOT 6, as there are some backward compatibility issues.
 
-PS1='$USER@\H:\W>'
+To get ROOT working the environment variable ROOTSYS needs to be defined. If you have ROOT installed, you should already have this, 
+since it is set automatically by the script /path-to-root/bin/thisroot.sh, which you should be calling in some startup script, e.g. in your
+/home/user/.profile file.
 
-## For ROOT, not installed by Fink
-export ROOTSYS=/Applications/root
-export PATH=$ROOTSYS/bin:$PATH
-export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
-export LDYLD_LIBRARY_PATH=$ROOTSYS/lib:$DYLD_LIBRARY_PATH
+You can test whether you have the correct setup by typing
 
-## For Fink
-test -r /sw/bin/init.sh && . /sw/bin/init.sh
+	echo $ROOTSYS
 
-*****************************************************************************
+in a terminal. If it prints the path to your ROOT directory, you are all set. If not, open your /home/user/.profile file in a text editor and add the line 
+
+	. /path-to-root/bin/thisroot.sh # for sh shell user, e.g. bash users (if you are unsure which shell you are running, use this)
+
+or
+
+	source /path-to-root/bin/thisroot.csh # for csh shell users
+
+to the end of it.
+
+## ROOT for Mac
+
+For MacOSX users, you might need the following to get ROOT working:
+
+	export LC_ALL="C" 
+	export LANG="en_US" 
+	export TERM=xterm-color
+	
+	PS1='$USER@\H:\W>'
+
+For ROOT, not installed by Fink
+	export ROOTSYS=/Applications/root
+	export PATH=$ROOTSYS/bin:$PATH
+	export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
+	export LDYLD_LIBRARY_PATH=$ROOTSYS/lib:$DYLD_LIBRARY_PATH
+
+For Fink
+	test -r /sw/bin/init.sh && . /sw/bin/init.sh
+
+
+*****************************
+
+# Fixing a font problem
+
+For Ubuntu (and possibly other GNU/Linux) users, there might be a font problem.
+This manifests itself when you open mama as a complaint about something called X_OpenFont. 
+
+The solution is to install the apt package
+
+	xfonts-100dpi
+
+(i.e. do
+	sudo apt-get install xfonts-100dpi
+in an Ubuntu terminal)
+
+and then run the following terminal commands: 
+	
+	cd /usr/share/fonts/X11/100dpi/
+	sudo mkfontdir
+	xset fp+ /usr/share/fonts/X11/100dpi
+	
+To add the path permanently, add
+	FontPath /usr/share/fonts/X11/100dpi
+to ~/.xinitrc
+
+
+
+
 
 Enjoy, Magne
+
+(The package and README was modified in January 2016 by Fabio Zeiser and Jørgen E. Midtbø to be more generally installable than just on MacOSX.)
 
