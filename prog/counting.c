@@ -58,7 +58,7 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                    C O U N T I N G   1.7.3                   |\r\n");
+    printf(" |                    C O U N T I N G   1.7.4                   |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |Program to normalize experimental nuclear level density (NLD) |\r\n");
     printf(" |  to NLD from known low energy levels and NLD extracted from  |\r\n");
@@ -938,6 +938,7 @@ int makeroot1(){
         fprintf(fp,"   rhoBn->Draw(\"P\");\n");
         fprintf(fp,"   TLegend *leg = new TLegend(0.15,0.70,0.6,0.85);\n");
         fprintf(fp,"   leg.SetBorderSize(0);\n");
+        fprintf(fp,"   leg.SetFillColor(0);\n");
         fprintf(fp,"   leg->AddEntry(rhoexp,\" Oslo data \",\"P\");\n");
         fprintf(fp,"   leg->AddEntry(level,\" Known levels \",\"L\");\n");
         fprintf(fp,"   leg->AddEntry(fermicalc,\" CT or FG model \",\"L\");	\n");
