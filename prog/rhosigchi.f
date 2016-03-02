@@ -23,13 +23,13 @@ C Stuff for the rhosig iteration
       REAL egmax(0:511)
       INTEGER igmax
       INTEGER time,nunc,degrees,deg,jmax,ix,ig,iu,iemr,step,in0
-      INTEGER ism,istart,istop,ll,j
-      REAL xfit(1:512),yfit(1:512),y0,y1,y2,x0,x1,x2,x3,x4,d0,d1,d2,d3
-      REAL tmp(0:511),coef(3)
-      DIMENSION Fi(0:511),Ff(0:511)
+      INTEGER ism,istart,istop,ll,i,j
+      REAL*8 xfit(1:512),yfit(1:512),y0,y1,y2,x0,x1,x2,x3,x4,d0,d1,d2,d3 !REAL->REAL*8
+      REAL*8 tmp(0:511),coef(3)                                          !Corrected 11 feb 2016
+      DIMENSION Fi(0:511),Ff(0:511) 
       WRITE(6,*)' ________________________________________'
       WRITE(6,*)'|                                        |'
-      WRITE(6,*)'|         R H O S I G C H I  1.5.2       |'
+      WRITE(6,*)'|         R H O S I G C H I  1.5.3       |'
       WRITE(6,*)'|                                        |'
       WRITE(6,*)'|  Program to calculate level density    |'
       WRITE(6,*)'| Rho, and gamma strength function Sig   |'
@@ -51,6 +51,8 @@ C Stuff for the rhosig iteration
       WRITE(6,*)'|  ch ig < 0, cut igmax                  |'
       WRITE(6,*)'|  Modified 31 Aug 2015: No normalization|'
       WRITE(6,*)'|  Modified 15 Dec 2015: input > 10**-06 |'
+      WRITE(6,*)'|  Modified 11 Feb 2016: new Ydim, Xdim  |'
+      WRITE(6,*)'|  REAL->REAL*8 precision, smooth 300 keV|'
       WRITE(6,*)'|________________________________________|'
 C Things that should be done in the future:
 C Fitting with error weighting
@@ -130,7 +132,6 @@ C Compressing (or stretching) along X and Y - axis
          Ff(i)=0.
       ENDDO
 
-
       DO j=0,YDIM-1
          DO i=0,XDIM-1
             If(rMAT(IDEST,i,j).LT.eps) rMAT(IDEST,i,j) = eps
@@ -142,7 +143,7 @@ C Compressing (or stretching) along X and Y - axis
             Fi(i)=rMAT(IDEST,i,j)                       ! Fi(i) and Ff(i) real type
             Sum=Sum+Fi(i)
          ENDDO
-         IF(Sum.NE.0)THEN
+         IF(Sum.NE.0.)THEN
             CALL ELASTIC(Fi,Ff,aEg0,aEg1,a0,a1,512,512) ! Modifies spectrum to give  
             DO i=0,XDIM-1                               ! calibration a0 and a1
                Fg(i,j)=Ff(i)
@@ -162,7 +163,7 @@ C Compressing (or stretching) along X and Y - axis
             Fi(j)=Fg(i,j)
             Sum=Sum+Fi(j)
          ENDDO
-         IF(Sum.NE.0)THEN
+         IF(Sum.NE.0.)THEN
             CALL ELASTIC(Fi,Ff,aEx0,aEx1,a0,a1,512,512)
             DO j=0,YDIM-1
                Fg(i,j)=Ff(j)
@@ -172,8 +173,14 @@ C Compressing (or stretching) along X and Y - axis
       ENDDO
 
 C Replacing negative counts with 0 and finding dimension of Fg matrix
-      XDIM=INT(FLOAT(XDIM)*ABS(aEg1/a1)+0.5) + iu0
-      YDIM=INT(FLOAT(YDIM)*ABS(aEx1/a1)+0.5)
+C      XDIM=INT(FLOAT(XDIM)*ABS(aEg1/a1)+0.5) + iu0
+c      YDIM=INT(FLOAT(YDIM)*ABS(aEx1/a1)+0.5)
+c      YDIM=INT((ABS((FLOAT(YDIM) * aEx1 + aEx0 - a0))/ABS(a1)) + 0.5)
+c      XDIM=YDIM + iu0
+      XDIM=INT((ABS((FLOAT(XDIM) * aEg1 + aEg0 - a0))/ABS(a1)) + 0.5) + iu0
+      YDIM=INT((ABS((FLOAT(YDIM) * aEx1 + aEx0 - a0))/ABS(a1)) + 0.5)
+
+c           write(6,*)xdim,ydim
       imax=10
       DO j=0,YDIM
          DO i=0,XDIM
@@ -181,6 +188,7 @@ C Replacing negative counts with 0 and finding dimension of Fg matrix
             IF(Fg(i,j).LE.0.)Fg(i,j)=0             !Delete negative numbers
          ENDDO
       ENDDO
+
       imax=MIN(imax,XDIM)
       Eg_limit = a0+a1*imax
 
@@ -213,6 +221,7 @@ C Input lower limit for gammas used in the extraction
          WRITE(6,'(A29)')'Warning, Ex_min<Eg_min not allowed, reset'
          Ex_min=Eg_min
       ENDIF
+
       jmax=INT(((Ex_max-a0)/a1)+0.5)
       jmax =MIN(jmax,YDIM)
       Ex_max=a0+a1*jmax
@@ -231,6 +240,10 @@ C Input lower limit for gammas used in the extraction
       iemr=INT(((Emr-a0)/a1)+0.5)
       Emr=a0+a1*iemr
 
+
+      imax = jmax + iu0
+
+
       Eg_max=egmax(imax)
       IF(Eg_max.GT.Eg_limit)Eg_max = Eg_limit
       DO ix=jmin,jmax
@@ -244,10 +257,10 @@ C Calculating number of points in the matrix to be fitted
       DO ix=jmin,jmax
         degrees = degrees + (igmax(ix) - igmin)
       ENDDO
-      write(6,*)'Number of data points',degrees
+      write(6,*)'Number of data points   ',degrees
 C Minus number of data points in the fit functions (rho and sigma)
       degrees=degrees-(jmax-jmin+1) - (igmax(jmax)-igmin+1)
-      write(6,*)'DOF, data points - rho - sig',degrees
+      write(6,*)'DOF, data points-rho-sig',degrees
 
       WRITE(6,14)a0,a1,imax+1,jmax+1,Ex_min,Ex_max,a0,Emr,Eg_min,Eg_max
  14   FORMAT('Common calibration is a0=',F7.2,'keV and a1=',F7.2,'keV/ch',
@@ -313,22 +326,22 @@ C of 3 MeV. This is new for version 1.2 of rhosigchi. Smoothing is performed
 C on the tmp() array.
          DO ig=igmin,igmax(ix)
             tmp(ig)=MAX(2.,sFg(ig,ix))  ! no errors less than 2 counts
-            IF(Fg(ig,ix).GT.0)THEN
+            IF(Fg(ig,ix).GT.0.)THEN
                 xx=ABS(tmp(ig)/Fg(ig,ix))
                 IF(xx.LT.0.10)tmp(ig)=0.10*Fg(ig,ix) ! no errors less than 10 percent (25.01.2007)
             ENDIF
          ENDDO
-         ism=NINT(1500./a1)               ! +/-ism defines fit-region in channels
+         ism=NINT(300./a1)! +/-ism defines channel fit-region. Corrected 1500->300 11 feb 2016
 C The smoothing procedure of Andreas starts, fasten seatbelts...
          DO ig=igmin,igmax(ix)
             istart=ig-ism
             istop=ig+ism
             ll=0
             IF(istart.LT.igmin)istart=igmin
-            IF(istop.GT.ix)istop=ix
+            IF(istop.GT.igmax(ix))istop=igmax(ix) !corrected 11 feb 2016
             DO j=istart,istop
                ll=ll+1
-               xfit(ll)=float(j)
+               xfit(ll)=FLOAT(j)
                yfit(ll)=tmp(j)
             ENDDO
             IF(ll.GT.3)THEN
@@ -358,7 +371,7 @@ C The smoothing procedure of Andreas starts, fasten seatbelts...
                   coef(1)=d1/d0
                   coef(2)=d2/d0
                   coef(3)=d3/d0
-                  sFg(ig,ix)=coef(1)*float(ig)**2.+coef(2)*float(ig)+coef(3)
+                  sFg(ig,ix)=coef(1)*FLOAT(ig)**2.+coef(2)*FLOAT(ig)+coef(3)
                ENDIF
             ENDIF
          ENDDO
@@ -513,7 +526,7 @@ C Begin calculating relative errors
          Sum2=0.
          in0=0
          DO iu=0,jmax-igmin+iu0
-            IF(Rho(nit,iu).GT.0.AND.sRho(iu).GT.0)THEN
+            IF(Rho(nit,iu).GT.0.AND.sRho(iu).GT.0.)THEN
                rRho(iu)=SQRT(sRho(iu)/FLOAT(i))/Rho(nit,iu)
                in0=in0+1
             ELSE
@@ -676,7 +689,7 @@ C Writting spectra to mama matrices
  42   FORMAT('Unnormalized T and dT     written to mama file:    ',A11)
 
       OPEN(23,FILE='input.rsg',ACCESS='SEQUENTIAL',ERR=888)
-      WRITE(23,*)Eg_min,Ex_min,Ex_max,mass
+      WRITE(23,*)Eg_min,Ex_min,Ex_max ! deleted writing mass, corrected 11 feb 2016
       CLOSE(23)
 888   CONTINUE
 
@@ -692,7 +705,7 @@ C Gamma-Multiplicity as function of Ex (in keV)
       b=0.0467/100.
       c=-0.128868E-05/100.
       gM=0.
-      IF(Ex.GT.0.AND.Ex.LT.10000.)gM=a+b*Ex+c*Ex*Ex
+      IF(Ex.GT.0..AND.Ex.LT.10000.)gM=a+b*Ex+c*Ex*Ex
       IF(Ex.GE.10000.)gM=a+b*10000.+c*10000.*10000.
       IF(gM.LT.0.)gM=0.
       RETURN
@@ -710,7 +723,7 @@ C August 1994, Oslo Cyclotron Laboratory, Magne Guttormsen
       INTEGER Di,Df
       DIMENSION Fi(0:Di-1),Ff(0:Df-1)
 C Testing
-      IF(A1i.EQ.0.OR.A1f.EQ.0)RETURN
+      IF(A1i.EQ.0..OR.A1f.EQ.0.)RETURN
 C Zeroing final spectrum
       DO i=0,Df-1
          Ff(i)=0.  
@@ -728,7 +741,7 @@ C the channel(s). The loop goes through all the
 C channels i of the initial spectrum
       IF(ABS(A1i/A1f).LT.2)THEN
          DO i=0,Di-1
-            IF(Fi(i).EQ.0)GO TO 97
+            IF(Fi(i).EQ.0.)GO TO 97
             EiL=A0i+A1i*(i-0.5)      !Step 1.0 chs left and right
             EiH=A0i+A1i*(i+0.5)
             CHf1=(EiL-A0f)/A1f       !CHf1 and CHf2 define limits where
@@ -776,7 +789,7 @@ C   x          x           0         x           x
          alpha=h/(b/2.)  !slope of triangle tails
 
          DO i=0,Di-1
-            IF(Fi(i).EQ.0)GO TO 98
+            IF(Fi(i).EQ.0.)GO TO 98
             EiL=A0i+A1i*(i-1.)      !Step 1.0 chs left and right
             EiH=A0i+A1i*(i+1.)
             CHf1=(EiL-A0f)/A1f      !CHf1 and CHf2 define limits where
@@ -798,7 +811,7 @@ C   x          x           0         x           x
                   w=h-alpha*(j-(CHfL+(b/2.)))     !down going slope
                ENDIF
                IF(w.LT.-0.1)WRITE(6,*)'Warning, weight w < 0 : ',w
-               IF(w.LT.0)w=0.
+               IF(w.LT.0.)w=0.
                IF(j.GE.0.AND.j.LE.Df-1)Ff(j)=Ff(j)+w*Fi(i)
             ENDDO
  98         CONTINUE
@@ -838,7 +851,7 @@ C Calculating two matrices 'nom' and 'denom'
             fun3(ix)=0.
             DO ig=igmin,igmax(ix)
                iu=ix-ig+iu0
-                 IF(iu.LT.0.)  write(6,*)'Warning iu is negative, ix, ig, iu = ',ix,ig,iu
+                 IF(iu.LT.0)  write(6,*)'Warning iu is negative, ix, ig, iu = ',ix,ig,iu
                fun1(ix)=fun1(ix)+Sig(it-1,ig)*Rho(it-1,iu)
                IF(sFgN(ig,ix).GT.0.)THEN
                   fun2(ix)=fun2(ix)+(Sig(it-1,ig)*Rho(it-1,iu)/sFgN(ig,ix))**2.
