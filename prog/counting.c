@@ -12,39 +12,39 @@
 #define MAXDIM        8192 			/* Max dimension of Ex or Eg spectra */
 #define MAXENERGY     100.0			/* Max energy Ex or Eg (MeV)  */
 
-char line[1024];
-char cdum1[128], cdum2[128], cdum3[128];
+char  line[1024];
+char  cdum[128];
 float rho[MAXDIM], drho[MAXDIM], levenergy[MAXLEV],rholev[MAXDIM];
 float sig[MAXDIM], dsig[MAXDIM], nsig[MAXDIM], ndsig[MAXDIM], nsigL[MAXDIM], nsigH[MAXDIM];
-int dimRhox, dimRhoy, dimSigx, dimSigy, diml, dim, H, sigdim, dimmax;
+int   dimRhox, dimRhoy, dimSigx, dimSigy, diml, dim, H, sigdim, dimmax;
 float a0, a1, emin, emax, ex, eg;
 float Anorm=1., alpha=0.;                 /* Normalization constants */
 float eps = 1.e-20, x;
 float eps_0 = 0.000;
 float c1, c2, e1, e2;
-int Lm, Hm;
-FILE *fp;
-int i,j,l;
+int   Lm, Hm;
+FILE  *fp;
+int   i,j,l;
 /* Defining defaults values, taken from 162Dy */
 float Amass = 164., Delta = 1.847, Bn = 8.197, rho0 = 3630000., drho0 = 363000.;
-int L1 = 10, L2 = 15, H1 = 49, H2 = 56;
-int TL1 = 10, TL2 = 15, TH1 = 49, TH2 = 56, Tfirst = 10, Tlast = 56;
-int isig = 1, itemp = 2, imodel = 1, ansL=0, ansH=0;
-int i0, i1, i2, FGmax;
+int   L1 = 10, L2 = 15, H1 = 49, H2 = 56;
+int   TL1 = 10, TL2 = 15, TH1 = 49, TH2 = 56, Tfirst = 10, Tlast = 56;
+int   isig = 1, itemp = 2, imodel = 1, ansL=0, ansH=0;
+int   i0, i1, i2, FGmax;
 float a, T, E1, E0, C1 = -1.296, eta, rhox, sig2, spcu; /* C1 not used anymore */
 float aRobin = 16.824, E1Robin = 0.505;
 float TRobin = 0.5, E0Robin = 0.0;
 float abestL = -1000.,bbestL = -1000.,abestH = -1000.,bbestH = -1000.;
 
-int searchAalpha();
-int makeroot1();
-int makeroot2();
-int makeroot3();
-void rhofg(float Amass, float ex, float a, float T, float E1, float E0, int isig, int itemp, int imodel);
+int   searchAalpha();
+int   makeroot1();
+int   makeroot2();
+int   makeroot3();
+void  rhofg(float Amass, float ex, float a, float T, float E1, float E0, int isig, int itemp, int imodel);
 float corrL();
 float corrH();
-int extendL();
-int extendH();
+int   extendL();
+int   extendH();
 
 static void fgets_ignore(char *s, int size, FILE *stream)
 {
@@ -58,7 +58,7 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                    C O U N T I N G   1.7.2                   |\r\n");
+    printf(" |                    C O U N T I N G   1.7.3                   |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |Program to normalize experimental nuclear level density (NLD) |\r\n");
     printf(" |  to NLD from known low energy levels and NLD extracted from  |\r\n");
@@ -88,6 +88,7 @@ int main()
     printf(" | Modified: 01 Jun 2015 allow modifying ExL and ExH of sigext  |\r\n");
     printf(" | Modified: 28 Aug 2015 ? replaced by \" for root scripts      |\r\n");
     printf(" | and deleting kumac output files                              |\r\n");
+    printf(" | Modified: 15 Feb 2016 Cosmetics                              |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
 	
@@ -137,10 +138,10 @@ int main()
         fgets_ignore(line,sizeof(line),fp);
         fgets_ignore(line,sizeof(line),fp);
         fgets_ignore(line,sizeof(line),fp);
-        sscanf(line,"%13s %7s %f %s %f",cdum1, cdum2, &a0, cdum3, &a1);
+        sscanf(line,"%13s %7s %f %s %f",cdum, cdum, &a0, cdum, &a1);
         fgets_ignore(line,sizeof(line),fp);
         fgets_ignore(line,sizeof(line),fp);
-        sscanf(line,"%s %d %s %d",cdum1, &dimRhox, cdum2, &dimRhoy);
+        sscanf(line,"%s %d %s %d",cdum, &dimRhox, cdum, &dimRhoy);
         fgets_ignore(line,sizeof(line),fp);
         fclose(fp);
     }
@@ -163,10 +164,10 @@ int main()
         fgets_ignore(line,sizeof(line),fp);
         fgets_ignore(line,sizeof(line),fp);
         fgets_ignore(line,sizeof(line),fp);
-        sscanf(line,"%13s %7s %f %s %f",cdum1, cdum2, &a0, cdum3, &a1);
+        sscanf(line,"%13s %7s %f %s %f",cdum, cdum, &a0, cdum, &a1);
         fgets_ignore(line,sizeof(line),fp);
         fgets_ignore(line,sizeof(line),fp);
-        sscanf(line,"%s %d %s %d",cdum1, &dimSigx, cdum2, &dimSigy);
+        sscanf(line,"%s %d %s %d",cdum, &dimSigx, cdum, &dimSigy);
         fgets_ignore(line,sizeof(line),fp);
         fclose(fp);
     }
@@ -570,26 +571,6 @@ int main()
     printf("Higher fit limit H2 for high energy region of T(Eg) <%3d>:",TH2);
     fgets_ignore(line,sizeof(line),stdin);
     sscanf(line,"%d", &TH2);
-
-    /* **************************************************** */
-    /* Storing default values for the next run in input.cnt */
-    /* **************************************************** */
-    fp = fopen("input.cnt", "w");
-    if(fp == NULL){
-        printf("Could not open file input.cnt \n");
-        exit(0);
-    }
-    else {
-        fprintf(fp, " %f %f %f %f %f \n", Amass, Delta, Bn, rho0, drho0);
-        fprintf(fp, " %d %d %d %d \n", L1, L2, H1, H2);
-        fprintf(fp, " %d %d %d %d \n", TL1, TL2, TH1, TH2);
-        fprintf(fp, " %d %f %f \n", isig, aRobin, E1Robin);
-        fprintf(fp, " %d %f %f \n", itemp, TRobin, E0Robin);
-        fprintf(fp, " %d \n", imodel);
-        fprintf(fp, " %d %f %f \n", ansL, abestL, bbestL);
-        fprintf(fp, " %d %f %f \n", ansH, abestH, bbestH);
-    }
-    fclose(fp);
 	
     /* ************************************************************* */
     /* All inputs are now in place                                   */
@@ -713,7 +694,6 @@ int main()
     fclose(fp);
     printf("File sigpaw.cnt (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",2*dim+1,a0,a1);
 	
-
     /* ****************************************** */
     /* Extending sigpaw.cnt to Eg = 0 and Eg = Bn */
     /* Called sigextpaw.cnt                       */
@@ -789,7 +769,7 @@ int main()
     }
     fclose(fp);	
     printf("File spincut.cnt (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",3*dim,a0,a1);
-
+    
     /* **************************************************** */
     /* Storing default values for the next run in input.cnt */
     /* **************************************************** */
@@ -1132,7 +1112,7 @@ int makeroot3(){
 	fprintf(fp,"   }\n"); 
 	fprintf(fp,"   TGraph *extLgraph = new TGraph(%d,energy,extL);\n",Hmax+1);
 	fprintf(fp,"   TGraph *extHgraph = new TGraph(%d,energy,extH);\n",Hmax+1);
-        fprintf(fp,"   TGraphErrors *sigexp = new TGraphErrors(%d,energy,sig,energyerr,sigerr);\n",dim+1);
+    fprintf(fp,"   TGraphErrors *sigexp = new TGraphErrors(%d,energy,sig,energyerr,sigerr);\n",dim+1);
 	fprintf(fp,"   c1.SetLogy();\n");
 	fprintf(fp,"   c1.SetLeftMargin(0.14);\n");
 	fprintf(fp,"   h.GetXaxis().CenterTitle();\n");
@@ -1166,7 +1146,6 @@ int makeroot3(){
     printf("File sigext.cpp written to disk. Run root to plot sigextpaw.cnt.\n");
     return 0;
 }
-
 
 int searchAalpha(){
     float rhoL;
@@ -1263,8 +1242,6 @@ float corrH(){
     return corrbest;
 }
 
-
-
 int extendL()
 {
     int i, j, k, steps = 1000;
@@ -1340,7 +1317,6 @@ int extendL()
     }
     return 0;
 }
-
 
 int extendH()
 {
