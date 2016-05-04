@@ -19,6 +19,12 @@ E-mail: magne.guttormsen@fys.uio.no                  Oslo, September 27. 2014
 For questions or issues with installation, you may also contact Jørgen E. Midtbø,
 j.e.midtbo@fys.uio.no.
 
+
+
+Enjoy, Magne
+
+(The package and README was modified in January 2016 by Fabio Zeiser and Jørgen E. Midtbø to be more generally installable than just on MacOSX.)
+
 *****************************************************************************
 
 OsloSoftware is copylefted free software: you can redistribute it and/or 
@@ -31,16 +37,16 @@ See the GNU General Public License for more details.
 For your reports and publications, 
 you should refer to the following publications:
 
-1. The Oslo method
-A. Schiller, L. Bergholt, M. Guttormsen, E. Melby, J. Rekstad,
+1. The Oslo method  
+A. Schiller, L. Bergholt, M. Guttormsen, E. Melby, J. Rekstad,  
 and S. Siem, Nucl. Instrum. Methods Phys. Res. A 447 494 (2000).
 
-2. The unfolding procedure:
-M. Guttormsen, T.S. Tveter, L. Bergholt, F. Ingebretsen, and
+2. The unfolding procedure:  
+M. Guttormsen, T.S. Tveter, L. Bergholt, F. Ingebretsen, and  
 J. Rekstad, Nucl. Instrum. Methods Phys. Res. A 374, 371 (1996).
 
-3. The first generation gamma-ray spectra procedure:
-M. Guttormsen, T. Ramsøy, and J. Rekstad, 
+3. The first generation gamma-ray spectra procedure:  
+M. Guttormsen, T. Ramsøy, and J. Rekstad,   
 Nucl. Instrum. Methods Phys. Res. A 255, 518 (1987).
 
 *****************************************************************************
@@ -59,27 +65,28 @@ after un and fg, you should use the commands:
 
 Then write (wr command) the first-generation matrix and call it fg
 
-For the further analysis, you need programs found in the /prog directory:
-rhosigchi.f 	Find Rho and T from a least-square fit to the matrix fg
-d2rho.f     	Find Rho(Sn) from D0 or D1 values
-rhobin.f    	Find Rho(Sn) from global systematics (e.g. Egidy&Bucurescu)
-counting.c  	Normalize the level density function Rho(Ex)
-normalization.c Normalize the gamma-ray strength function f(Egamma)
-radex.f		Find the gamma-ray strength function from P/Rho
+For the further analysis, you need programs found in the /prog directory:  
+rhosigchi.f 	Find Rho and T from a least-square fit to the matrix fg  
+d2rho.f     	Find Rho(Sn) from D0 or D1 values  
+rhobin.f    	Find Rho(Sn) from global systematics (e.g. Egidy&Bucurescu)  
+counting.c  	Normalize the level density function Rho(Ex)  
+normalization.c Normalize the gamma-ray strength function f(Egamma)  
+radex.f		Find the gamma-ray strength function from P/Rho  
 
 (There are several other programs in /prog and /mama that you do not need.
-Some of them are out-dated or does not work…)
+Some of them are out-dated or do not work…)
 
 *****************************************************************************
 
 # Installation:
 
-You need a Mac or a Unix/Linux computer with installed:
-	gfortran
-	gcc
-	g++
+You need a Mac or a Unix/Linux computer with the following software installed:  
+	gfortran  
+	gcc  
+	g++  
+	(On linux (Ubuntu) you will also need the packages libx11-dev, libxt-dev, libreadline-dev, libncurses-dev)
 
-You would also benefit from downloading ROOT from CERN (see below)
+You would also benefit from downloading ROOT from CERN (see below).
 
 Then, clone this repository (or download and unpack the zip file) into the folder where you want the software to be installed. Let us say it is 
 
@@ -149,7 +156,7 @@ For MacOSX users, you might need the following to get ROOT working:
 	
 	PS1='$USER@\H:\W>'
 
-For ROOT, not installed by Fink
+For ROOT, not installed by Fink  
 	export ROOTSYS=/Applications/root
 	export PATH=$ROOTSYS/bin:$PATH
 	export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
@@ -186,9 +193,6 @@ to ~/.xinitrc
 
 
 
+*****************************
 
-
-Enjoy, Magne
-
-(The package and README was modified in January 2016 by Fabio Zeiser and Jørgen E. Midtbø to be more generally installable than just on MacOSX.)
 
