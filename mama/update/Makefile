@@ -43,6 +43,8 @@ clean:
 very-clean:
 	$(RM) *.o core *[~%] $(TARGET) $(ARCHIVES)
 	$(MAKE) -C uplibs/upfiles very-clean
+
+remove:
 	for target in $(TARGET) ; \
 		do rm -f $(INSTALL_DIR)/bin/$$target ; \
 	done
