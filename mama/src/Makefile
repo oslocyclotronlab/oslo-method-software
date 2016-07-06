@@ -45,10 +45,11 @@ very-clean:
 	$(RM) *.o core *[~%] $(TARGET) $(ARCHIVES)
 	$(MAKE) -C libs/gf2     very-clean
 	$(MAKE) -C libs/minig_x very-clean
+
+remove:
 	for target in $(TARGET) ; \
 		do rm -f $(UIO_APPLICATIONS)/prog/bin/$$target ; \
 	done
-
 
 
 install:
