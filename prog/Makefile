@@ -15,15 +15,15 @@
 TARGET  = shiva2paw waiting funcfit gameff autofit onemev mama2pc vigs isotrop \
           zigzag legendre decay range thetaangle xmeasure rhosigchi scatter \
           kin readlog hex rocket neutron neutroneb thermo euler gbf gbfbranch \
-          toro fgtheo splinetest egidy sea spline2mama normalization normalization6  \
+          toro fgtheo splinetest egidy sea spline2mama normalization  \
           f_model rotor nilsson  normrhof cm2lab grazing \
           spincut rutherford fmodel tave binomial binomialc siriangle sfec alfnasort \
-          alfnamatrix webrho webstrf fitone micro robin counting counting6 gammex d2rho combi \
+          alfnamatrix webrho webstrf fitone micro robin counting gammex d2rho combi \
           pet elise extendspin radex scissors
 # mtcp mag2mag mag2disc disc2mag
 
-C_SOURCES = shiva2paw.c waiting.c kin.c hex.c rocket.c normalization.c normalization6.c \
-    binomialc.c micro.c counting.c counting6.c gammex.c d2rho.c combi.c scissors.c\
+C_SOURCES = shiva2paw.c waiting.c kin.c hex.c rocket.c normalization.c \
+    binomialc.c micro.c counting.c gammex.c d2rho.c combi.c scissors.c\
     extendspin.c
 # mtcp.c mag2mag.c mag2disc.c disc2mag.c
 C_TARGETS = $(C_SOURCES:%.c=%)
