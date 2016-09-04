@@ -8,7 +8,7 @@
       DOUBLE PRECISION S,dS
       WRITE(6,*)'    __________________________________________'
       WRITE(6,*)'   |                                          |'
-      WRITE(6,*)'   |                 ROBIN 1.7                |'
+      WRITE(6,*)'   |                 ROBIN 1.8                |'
       WRITE(6,*)'   |                                          |'
       WRITE(6,*)'   |  Program to calculate the level density  |'
       WRITE(6,*)'   |         and spin cut-off parameter       |'
@@ -26,6 +26,8 @@
       WRITE(6,*)'   |            Created: 13 Jun 2005          |'
       WRITE(6,*)'   |           Modified: 14 Sep 2012          |'
       WRITE(6,*)'   |           Modified: 25 Mar 2013          |'
+      WRITE(6,*)'   | Modified: 16 Aug 2016:                   |'
+      WRITE(6,*)'   | Opt(2) proposes better a and E1 values   |'
       WRITE(6,*)'   |__________________________________________|'
 
       
@@ -195,7 +197,35 @@ C VALUES FROM E&B2009
           E1 = -0.381 + 0.5   *Pa_prime
         ENDIF
 
-        WRITE(6,*)'You may choose another a and/or E1 than proposed by E&B:'
+        IF(isig.EQ.2)THEN  ! New 16. aug 2016
+                WRITE(6,*)'In the T. von Egidy paper NPA A481, 189 (1988), they used the'
+                WRITE(6,*)'Gilbert and Cameron formula (G&C) Can. J. Phys 43(1965) 1446'
+                WRITE(6,*)'with U = E-C1-Epair, C1 = -6.6A**(-0.32)MeV, a= 0.21A**(0.87) MeV**(-1),'
+                WRITE(6,*)'and Dp and Dn from mass differences. The same procedure was used by us'
+                WRITE(6,*)'in Guttormsen et al, PRC 68, 064306 (2003).'
+                WRITE(6,*)'Below we calculate these values for you. You may use them'
+                WRITE(6,*)'or the default a and E1 values from E&B 2009.'
+
+                pair_n = Pn(i)/1000.
+                pair_p = Pp(i)/1000.
+                a_gc = 0.21*A0**( 0.87)
+                C1_gc=-6.6 *A0**(-0.32)
+                IF(ieo.EQ.0)pair_gc = pair_n + pair_p
+                IF(ieo.EQ.1)pair_gc = 0      + pair_p
+                IF(ieo.EQ.2)pair_gc = pair_n + 0
+                IF(ieo.EQ.3)pair_gc = 0      + 0
+                E1_gc = pair_gc + C1_gc
+                WRITE(6,80)pair_n, pair_p
+ 80             FORMAT('Mass difference pairing, neutron =',F7.3,' ,proton =',F7.3,' MeV')
+                WRITE(6,81)pair_gc, C1_gc
+ 81             FORMAT('Pairing for this nucleus =',F7.3,' and C1 =',f7.3' MeV')
+                WRITE(6,82)a_gc, E1_gc
+ 82             FORMAT('a =',F7.3,' MeV**(-1) and energy shift E1 =',F7.3,' MeV')
+                WRITE(6,*)' '
+        ENDIF
+
+
+        WRITE(6,*)'You may choose another a and/or E1 than proposed by E&B2009:'
         WRITE(6,25)aa
  25     FORMAT('Level density parameter a    <',F7.3,'>:',$)
         CALL READF(5,aa)
