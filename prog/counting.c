@@ -11,17 +11,17 @@
 #define MAXLEV        10000			/* Max number of known levels */
 #define MAXDIM        8192 			/* Max dimension of Ex or Eg spectra */
 #define MAXENERGY     100.0			/* Max energy Ex or Eg (MeV)  */
-
+ 
 char  line[1024];
 char  cdum[128];
 float rho[MAXDIM], drho[MAXDIM], levenergy[MAXLEV],rholev[MAXDIM];
 float sig[MAXDIM], dsig[MAXDIM], nsig[MAXDIM], ndsig[MAXDIM], nsigL[MAXDIM], nsigH[MAXDIM];
-int   dimRhox, dimRhoy, dimSigx, dimSigy, diml, dim, H, sigdim, dimmax;
+int   dimRhox, dimRhoy, dimSigx, dimSigy, diml, dim, H, sigdimBn, dimmax;
 float a0, a1, emin, emax, ex, eg;
 float Anorm=1., alpha=0.;                 /* Normalization constants */
 float eps = 1.e-20, x;
 float eps_0 = 0.000;
-float c1, c2, e1, e2;
+float c1, c2, e1, e2; 
 int   Lm, Hm;
 FILE  *fp;
 int   i,j,l;
@@ -46,6 +46,13 @@ float corrH();
 int   extendL();
 int   extendH();
 
+
+float a0_x, a1_x, a2_x;
+float a0_y, a1_y, a2_y;
+int   dim_x, dim_y;
+float fg[512][512];
+
+
 static void fgets_ignore(char *s, int size, FILE *stream)
 {
     // suppress braindead and presumtuous glibc 'security' warning
@@ -58,7 +65,7 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                    C O U N T I N G   1.7.4                   |\r\n");
+    printf(" |                    C O U N T I N G   1.7.6                   |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |Program to normalize experimental nuclear level density (NLD) |\r\n");
     printf(" |  to NLD from known low energy levels and NLD extracted from  |\r\n");
@@ -89,6 +96,8 @@ int main()
     printf(" | Modified: 28 Aug 2015 ? replaced by \" for root scripts      |\r\n");
     printf(" | and deleting kumac output files                              |\r\n");
     printf(" | Modified: 15 Feb 2016 Cosmetics                              |\r\n");
+    printf(" | Modified: 19 Jul 2016 Extension of gSF starts at TL2         |\r\n");
+    printf(" | and down and at TH1 and up in g-energy. NLD from H1 and up   |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
 	
@@ -417,7 +426,12 @@ int main()
     printf("\nthe CT spin cut-off formula is a constant, which is rather unphysical. In the following,");
     printf("\noption (1) might be the most appropriate for the CT-model (instead of (3)).");
     printf("\n");
-    printf("\nYou may choose between 4 spin cut-off formulas:");
+    printf("\nYou may choose between 4 spin cut-off formulas.");
+    printf("\nThe chosen formula is written to the spincut.cnt file,");
+    printf("\nwhich will be automatically read by the normalization program.");
+    printf("\nBe sure that the spin cut-off parameter at Sn sigma(Sn) is the same as the");
+    printf("\none you used for the d2rho program in order to estimate rho(Sn).");
+    printf("\n\nPlease, choose your spin cut-off formula:");
     printf("\n1 The rigid moment of inertia formula (RMI) (E&B2006)");
     printf("\n2 The Gilbert and Cameron formula (G&C) Can. J. Phys 43(1965) 1446");
     printf("\n3 The constant temperature (CT) formula (E&B2009) and NPA 481 (1988) 189");
@@ -572,6 +586,26 @@ int main()
     fgets_ignore(line,sizeof(line),stdin);
     sscanf(line,"%d", &TH2);
 	
+    /* **************************************************** */
+    /* Storing default values for the next run in input.cnt */
+    /* **************************************************** */
+    fp = fopen("input.cnt", "w");
+    if(fp == NULL){
+        printf("Could not open file input.cnt \n");
+        exit(0);
+    }
+    else {
+        fprintf(fp, " %f %f %f %f %f \n", Amass, Delta, Bn, rho0, drho0);
+        fprintf(fp, " %d %d %d %d \n", L1, L2, H1, H2);
+        fprintf(fp, " %d %d %d %d \n", TL1, TL2, TH1, TH2);
+        fprintf(fp, " %d %f %f \n", isig, aRobin, E1Robin);
+        fprintf(fp, " %d %f %f \n", itemp, TRobin, E0Robin);
+        fprintf(fp, " %d \n", imodel);
+        fprintf(fp, " %d %f %f \n", ansL, abestL, bbestL);
+        fprintf(fp, " %d %f %f \n", ansH, abestH, bbestH);
+    }
+    fclose(fp);
+	
     /* ************************************************************* */
     /* All inputs are now in place                                   */
     /* Now calculating the Fermi gas formula for the case (1) or (2) */
@@ -625,7 +659,7 @@ int main()
 
     /* ************************************************************* */
     /* Writing level density to high excitation energy. Above H2     */
-    /* the Fermi gas expression is used.                             */
+    /* the FG or CT expression is used.                              */
     /* ************************************************************* */
     fp = fopen("rhotmopaw.cnt", "w+");
     if(fp == NULL){
@@ -635,9 +669,9 @@ int main()
     else {
         for (i = 0; i <= FGmax; i++){
             ex = (a0+a1*(float)i)/1000.;
-            if(i <= H2) fprintf(fp, " %14.7e \n", Anorm*exp(alpha*ex)*rho[i]);
+            if(i < H1) fprintf(fp, " %14.7e \n", Anorm*exp(alpha*ex)*rho[i]); //Changed from H2 to H1, 19 Jul 2016
             rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel);
-            if(i >  H2) fprintf(fp, " %14.7e \n", eta*rhox);
+            if(i >=  H1) fprintf(fp, " %14.7e \n", eta*rhox);
         }
     }
     fclose(fp);
@@ -694,11 +728,13 @@ int main()
     fclose(fp);
     printf("File sigpaw.cnt (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",2*dim+1,a0,a1);
 	
+
     /* ****************************************** */
     /* Extending sigpaw.cnt to Eg = 0 and Eg = Bn */
     /* Called sigextpaw.cnt                       */
     /* ****************************************** */
-    sigdim = (((Bn + 0.5 - (a0/1000.))/(a1/1000.))+0.5);
+    sigdimBn = (((Bn + 0.5 - (a0/1000.))/(a1/1000.))+0.5);
+    if(sigdimBn < dim)sigdimBn = dim;
     extendL();
     extendH();
     fp = fopen("sigextpaw.cnt", "w+");
@@ -707,18 +743,18 @@ int main()
         exit(0);
     }
     else {
-        for (i = 0; i <= TL1; i++){
+        for (i = 0; i < TL2+1; i++){
             fprintf(fp, " %14.7e \n", nsigL[i]);
         }
-        for (i = TL1+1; i < TH2 ; i++){
+        for (i = TL2+1; i < TH1 ; i++){
             fprintf(fp, " %14.7e \n", nsig[i]);
         }
-        for (i = TH2; i <= sigdim; i++){
+        for (i = TH1; i <= sigdimBn; i++){       // taken from lower value TH1 and upwards in gamma energy (previously from TH2) Changed 19 Jul 2016
             fprintf(fp, " %14.7e \n", nsigH[i]);
         }
     }
     fclose(fp);
-    printf("\nFile sigpawext.cnt (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",sigdim,a0,a1);
+    printf("\nFile sigpawext.cnt (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",sigdimBn,a0,a1);
 	
     fp = fopen("extendLH.cnt", "w+");
     if(fp == NULL){
@@ -726,12 +762,12 @@ int main()
         exit(0);
     }
     else {
-        for (i = 0; i <= sigdim; i++){
+        for (i = 0; i <= sigdimBn; i++){
             fprintf(fp, " %14.7e  %14.7e \n", nsigL[i],nsigH[i] );
         }
     }
     fclose(fp);
-    printf("File extendLH.cnt (0:%d) (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",sigdim,sigdim,a0,a1);
+    printf("File extendLH.cnt (0:%d) (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",sigdimBn,sigdimBn,a0,a1);
 	
 
     /* ********************************************* */
@@ -770,6 +806,50 @@ int main()
     fclose(fp);	
     printf("File spincut.cnt (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",3*dim,a0,a1);
     
+    
+    
+    
+    
+    
+    
+    
+    
+    /* ***************************************************** */
+    /* Reading matrix fg.rsg with calibration and dimensions */
+    /* ***************************************************** */
+    printf("Reading file fg.rsg\n");
+    fp = fopen("fg.rsg", "r");
+    if(fp == NULL){
+        printf("No fg.rsg file found in your directory\n");
+        exit(0);
+    }
+    else {
+        fgets_ignore(line,sizeof(line),fp);
+        fgets_ignore(line,sizeof(line),fp);
+        fgets_ignore(line,sizeof(line),fp);
+        fgets_ignore(line,sizeof(line),fp);
+        fgets_ignore(line,sizeof(line),fp);
+        fgets_ignore(line,sizeof(line),fp);
+        fgets_ignore(line,sizeof(line),fp);
+        sscanf(line,"%13s %7s %f %1s %f %1s %f %1s %f %1s %f %1s %f",cdum,cdum,&a0_x,cdum,&a1_x,cdum,&a2_x,cdum,&a0_y,cdum,&a1_y,cdum,&a2_y);
+        fgets_ignore(line,sizeof(line),fp);
+        fgets_ignore(line,sizeof(line),fp);
+        sscanf(line,"%s %d %3s %d",cdum, &dim_x, cdum, &dim_y);
+        fgets_ignore(line,sizeof(line),fp);
+    }
+    printf("Matrix fg.rsg has dimension (0 : %d, 0 : %d) and calibrations: \n",dim_x,dim_y);
+    printf("x-axis: (a0, a1, a2) = (%f, %f, %f)\n",a0_x,a1_x,a2_x);
+    printf("y-axis: (a0, a1, a2) = (%f, %f, %f)\n",a0_y,a1_y,a2_y);
+
+    for(j = 0; j <= dim_y; j++){
+        for(i = 0; i <= dim_x; i++){
+            fscanf(fp,"%f", &fg[i][j]);
+        }
+    }
+    fclose(fp);
+    
+    
+
     /* **************************************************** */
     /* Storing default values for the next run in input.cnt */
     /* **************************************************** */
@@ -1027,16 +1107,20 @@ int makeroot2(){
 
 int makeroot3(){
     float Emin, Emax, half, exx, ex0, lower, eL1, eL2, eH1, eH2, cL1, cL2, cH1, cH2, T0, Tmin, Tmax;
-    int Hmin, Hmax, dH;
-    Emax = Bn + 0.5;
+    int Hmin, Hmax;
+    //    Emax = Bn + 0.5;
     Hmax = (((Bn + 1.5 - (a0/1000.))/(a1/1000.))+0.5); // 1500 above the Bn
-    Emax = (a0/1000.) + (a1/1000.) * Hmax;
+    //    Emax = (a0/1000.) + (a1/1000.) * Hmax;
+    Emax = 1.0 + (a0/1000.) + (a1/1000.) * dim ; // 1 MeV above the most upper data point
+    
+    if(sigdimBn < dim)sigdimBn=dim;
+    
     Emin = a0/1000.;
+    if(sigdimBn > Hmax)Hmax=sigdimBn;
     if(Emin > 0.)Emin = 0.;
     Hmin = TH1 - (TH2 - TH1);
     if(Hmin <  Hmax/2.)Hmin =Hmax/2.;
     if(Hmin > TH1) Hmin = TH1;
-    dH   = Hmax - Hmin +1;
     Tmin = 1000000.;
     for (i = 0; i <= dim; i++){
         eg = (a0+a1*(float)i)/1000.;
@@ -1082,53 +1166,53 @@ int makeroot3(){
 	fprintf(fp,"   TH2F *h = new TH2F(\"h\",\" \",10,%f,%8.3f,50,%9.3e,%9.3e);\n",Emin,Emax,Tmin,Tmax);
 	fprintf(fp,"   ifstream sigfile(\"sigpaw.cnt\");\n");
 	fprintf(fp,"   float sig[%d],sigerr[%d];\n",dim+2,dim+2);
-	fprintf(fp,"   float energy[%d],energyerr[%d];\n",Hmax+2,Hmax+2);
-    fprintf(fp,"   float extL[%d],extH[%d];\n",Hmax+2,Hmax+2);
+        fprintf(fp,"   float energy[%d],energyerr[%d];\n",sigdimBn+1,sigdimBn+1);
+        fprintf(fp,"   float extL[%d],extH[%d];\n",sigdimBn+2,sigdimBn+2);
 	fprintf(fp,"   int i;\n");
 	fprintf(fp,"   float a0 =%8.4f;\n",a0/1000.);
 	fprintf(fp,"   float a1 =%8.4f;\n",a1/1000.);
-	fprintf(fp,"   for(i = 0; i < %d; i++){\n",Hmax+2);
-	fprintf(fp,"   	energy[i] = a0 + (a1*i);\n");
-	fprintf(fp,"   	energyerr[i] = 0.0;\n");
-    fprintf(fp,"   	extL[i] = 0.0;\n");
-    fprintf(fp,"   	extH[i] = 0.0;\n");
-	fprintf(fp,"   }\n");
-	fprintf(fp,"   float x, y;\n");
-	fprintf(fp,"   i = 0;\n");
-	fprintf(fp,"   while(sigfile){\n");
-	fprintf(fp,"   	sigfile >> x;\n");
-	fprintf(fp,"   	if(i<%d){\n",dim+1);
-	fprintf(fp,"   		sig[i]=x;\n");
-	fprintf(fp,"   	}\n");
-	fprintf(fp,"   	else{sigerr[i-%d]=x;}\n",dim+1);
-	fprintf(fp,"   	i++;\n");
-	fprintf(fp,"   }\n");
-	fprintf(fp,"   ifstream extendfile(\"extendLH.cnt\");\n");
-	fprintf(fp,"   i = 0;\n");
-	fprintf(fp,"   while(extendfile){\n");
-	fprintf(fp,"   	extendfile >> x >> y ;\n");
-	fprintf(fp,"   	extL[i]=x;\n");
-	fprintf(fp,"   	extH[i]=y;\n");
-	fprintf(fp,"   	i++;\n");
-	fprintf(fp,"   }\n"); 
-	fprintf(fp,"   TGraph *extLgraph = new TGraph(%d,energy,extL);\n",Hmax+1);
-	fprintf(fp,"   TGraph *extHgraph = new TGraph(%d,energy,extH);\n",Hmax+1);
-    fprintf(fp,"   TGraphErrors *sigexp = new TGraphErrors(%d,energy,sig,energyerr,sigerr);\n",dim+1);
-	fprintf(fp,"   c1->SetLogy();\n");
-	fprintf(fp,"   c1->SetLeftMargin(0.14);\n");
-	fprintf(fp,"   h->GetXaxis()->CenterTitle();\n");
-	fprintf(fp,"   h->GetXaxis()->SetTitle(\"#gamma-ray energy E_{#gamma} (MeV)\");\n");
-	fprintf(fp,"   h->GetYaxis()->CenterTitle();\n");
-	fprintf(fp,"   h->GetYaxis()->SetTitleOffset(1.4);\n");
-	fprintf(fp,"   h->GetYaxis()->SetTitle(\"Transmission coeff. (arb. units)\");\n");
-	fprintf(fp,"   h->Draw();\n");
+        fprintf(fp,"   for(i = 0; i < %d; i++){\n",sigdimBn+1);
+        fprintf(fp,"   	energy[i] = a0 + (a1*i);\n");
+        fprintf(fp,"   	energyerr[i] = 0.0;\n");
+        fprintf(fp,"   	extL[i] = 0.0;\n");
+        fprintf(fp,"   	extH[i] = 0.0;\n");
+        fprintf(fp,"   }\n");
+        fprintf(fp,"   float x, y;\n");
+        fprintf(fp,"   i = 0;\n");
+        fprintf(fp,"   while(sigfile){\n");
+        fprintf(fp,"   	sigfile >> x;\n");
+        fprintf(fp,"   	if(i<%d){\n",dim+1);
+        fprintf(fp,"   		sig[i]=x;\n");
+        fprintf(fp,"   	}\n");
+        fprintf(fp,"   	else{sigerr[i-%d]=x;}\n",dim+1);
+        fprintf(fp,"   	i++;\n");
+        fprintf(fp,"   }\n");
+        fprintf(fp,"   ifstream extendfile(\"extendLH.cnt\");\n");
+        fprintf(fp,"   i = 0;\n");
+        fprintf(fp,"   while(extendfile){\n");
+        fprintf(fp,"   	extendfile >> x >> y ;\n");
+        fprintf(fp,"   	extL[i]=x;\n");
+        fprintf(fp,"   	extH[i]=y;\n");
+        fprintf(fp,"   	i++;\n");
+        fprintf(fp,"   }\n");
+        fprintf(fp,"   TGraph *extLgraph = new TGraph(%d,energy,extL);\n",sigdimBn+1);
+        fprintf(fp,"   TGraph *extHgraph = new TGraph(%d,energy,extH);\n",sigdimBn+1);
+        fprintf(fp,"   TGraphErrors *sigexp = new TGraphErrors(%d,energy,sig,energyerr,sigerr);\n",dim+1);
+        fprintf(fp,"   c1->SetLogy();\n");
+        fprintf(fp,"   c1->SetLeftMargin(0.14);\n");
+        fprintf(fp,"   h->GetXaxis()->CenterTitle();\n");
+        fprintf(fp,"   h->GetXaxis()->SetTitle(\"#gamma-ray energy E_{#gamma} (MeV)\");\n");
+        fprintf(fp,"   h->GetYaxis()->CenterTitle();\n");
+        fprintf(fp,"   h->GetYaxis()->SetTitleOffset(1.4);\n");
+        fprintf(fp,"   h->GetYaxis()->SetTitle(\"Transmission coeff. (arb. units)\");\n");
+        fprintf(fp,"   h->Draw();\n");
 	fprintf(fp,"   sigexp->SetMarkerStyle(21);\n");
 	fprintf(fp,"   sigexp->SetMarkerSize(0.8);\n");
 	fprintf(fp,"   sigexp->Draw(\"P\");\n");
-	fprintf(fp,"   extLgraph->SetLineStyle(1);\n");
-	fprintf(fp,"   extLgraph->DrawGraph(%d,&extLgraph->GetX()[0],&extLgraph->GetY()[0],\"L\");\n", TL2+1);
-	fprintf(fp,"   extHgraph->SetLineStyle(1);\n");
-	fprintf(fp,"   extHgraph->DrawGraph(%d,&extHgraph->GetX()[%d],&extHgraph->GetY()[%d],\"L\");\n",Hmax-TH1+1,TH1,TH1);
+        fprintf(fp,"   extLgraph->SetLineStyle(1);\n");
+        fprintf(fp,"   extLgraph->DrawGraph(%d,&extLgraph->GetX()[0],&extLgraph->GetY()[0],\"L\");\n", TL2+1);
+        fprintf(fp,"   extHgraph->SetLineStyle(1);\n");
+        fprintf(fp,"   extHgraph->DrawGraph(%d,&extHgraph->GetX()[%d],&extHgraph->GetY()[%d],\"L\");\n",sigdimBn-TH1+1,TH1,TH1);
 	fprintf(fp,"   TArrow *arrow1 = new TArrow(%9.3e,%9.3e,%9.3e,%9.3e,0.02,\">\");\n",eL1,cL1*pow(10.,ex0/10.),eL1,cL1); 
 	fprintf(fp,"   arrow1->Draw();\n");
 	fprintf(fp,"   TArrow *arrow2 = new TArrow(%9.3e,%9.3e,%9.3e,%9.3e,0.02,\">\");\n",eL2,cL2*pow(10.,ex0/10.),eL2,cL2);
@@ -1311,7 +1395,7 @@ int extendL()
         abestL  = abest;
         bbestL  = bbest;
     }
-    for (i = 0; i <= sigdim; i++){
+    for (i = 0; i <= sigdimBn; i++){
         x = (a0+a1*(float)i)/1000.;
         nsigL[i] = exp(abestL * x + bbestL);
         /*		printf("i = %d  x = %f  nsigL = %14.7e \n", i, x, nsigL[i]);*/
@@ -1388,7 +1472,7 @@ int extendH()
         abestH  = abest;
         bbestH  = bbest;
     }
-    for (i = 0; i <= sigdim; i++){
+    for (i = 0; i <= sigdimBn; i++){
         x = (a0+a1*(float)i)/1000.;
         nsigH[i] = exp(abestH * x + bbestH);
         /*		printf("i = %d  x = %f  nsigH = %14.7e \n", i, x, nsigH[i]);*/
