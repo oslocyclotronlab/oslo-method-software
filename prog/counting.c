@@ -31,21 +31,25 @@ int   L1 = 10, L2 = 15, H1 = 49, H2 = 56;
 int   TL1 = 10, TL2 = 15, TH1 = 49, TH2 = 56, Tfirst = 10, Tlast = 56;
 int   isig = 1, itemp = 2, imodel = 1, ansL=0, ansH=0;
 int   i0, i1, i2, FGmax;
-float a, T, E1, E0, C1 = -1.296, eta, rhox, sig2, spcu; /* C1 not used anymore */
+float a, T, E1, E0, C1 = -1.296, eta, rhox, sig2, spcu;
 float aRobin = 16.824, E1Robin = 0.505;
 float TRobin = 0.5, E0Robin = 0.0;
 float abestL = -1000.,bbestL = -1000.,abestH = -1000.,bbestH = -1000.;
+float red = 1.;
 
 int   searchAalpha();
+int   searchT();
 int   makeroot1();
 int   makeroot2();
 int   makeroot3();
-void  rhofg(float Amass, float ex, float a, float T, float E1, float E0, int isig, int itemp, int imodel);
+void  rhofg(float Amass, float ex, float a, float T, float E1, float E0, int isig, int itemp, int imodel, float red);
 float corrL();
 float corrH();
+float anchorL();
+float anchorH();
 int   extendL();
 int   extendH();
-
+float Tlow, Thigh, Tx, dTx, E0x, chi2_lowx, chi2_highx;
 
 float a0_x, a1_x, a2_x;
 float a0_y, a1_y, a2_y;
@@ -65,7 +69,7 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                    C O U N T I N G   1.7.6                   |\r\n");
+    printf(" |                    C O U N T I N G   1.8                     |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |Program to normalize experimental nuclear level density (NLD) |\r\n");
     printf(" |  to NLD from known low energy levels and NLD extracted from  |\r\n");
@@ -98,6 +102,8 @@ int main()
     printf(" | Modified: 15 Feb 2016 Cosmetics                              |\r\n");
     printf(" | Modified: 19 Jul 2016 Extension of gSF starts at TL2         |\r\n");
     printf(" | and down and at TH1 and up in g-energy. NLD from H1 and up   |\r\n");
+    printf(" | Modified: 01 Nov 2016 You may choose reduct. factor of RMI   |\r\n");
+    printf(" | The code also suggests a temperature for the CT NLD formula  |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
 	
@@ -387,6 +393,8 @@ int main()
         sscanf(line, " %d %f %f \n", &ansL, &abestL, &bbestL);
         fgets_ignore(line,sizeof(line),fp);
         sscanf(line, " %d %f %f \n", &ansH, &abestH, &bbestH);
+        fgets_ignore(line,sizeof(line),fp);
+        sscanf(line, " %f \n", &red);
         fclose(fp);
     }
     // For the first time running
@@ -460,7 +468,20 @@ int main()
         sscanf(line,"%d", &itemp);
         if(itemp < 1 || itemp > 2) exit(0);
     }
-	
+    
+    if(isig == 1){
+        if(red < 0.05 || red > 1.5)red = 1.0;
+        printf("\nYou may choose a reduction factor of RMI at Sn");    //new 1. Nov 2016
+        printf("\nTypically, 0.8-1.0 is an appropriate reduction factor");
+        printf("\nGive reduction factor <%4.2f>:",red);
+        fgets_ignore(line,sizeof(line),stdin);
+        sscanf(line,"%f", &red);
+        if(red < 0.05 || red > 1.5){
+            printf("\nSorry, not your day today...\n");
+            exit(0);
+        }
+    }
+    
     printf("\nBe sure to use the correct Rho(Bn or Bp) according\n");
     printf("to type 1, 2, 3 or 4. Run the d2rho program to find Rho\n");
     printf("or use the systematic value found by running Robin\n");
@@ -497,7 +518,6 @@ int main()
         E0 = E0Robin;
     }
     
-	
     /* *********************************************/
     /* Asking for fit limits L1, L2, H1, H2 for Rho*/
     /* *********************************************/
@@ -586,33 +606,13 @@ int main()
     fgets_ignore(line,sizeof(line),stdin);
     sscanf(line,"%d", &TH2);
 	
-    /* **************************************************** */
-    /* Storing default values for the next run in input.cnt */
-    /* **************************************************** */
-    fp = fopen("input.cnt", "w");
-    if(fp == NULL){
-        printf("Could not open file input.cnt \n");
-        exit(0);
-    }
-    else {
-        fprintf(fp, " %f %f %f %f %f \n", Amass, Delta, Bn, rho0, drho0);
-        fprintf(fp, " %d %d %d %d \n", L1, L2, H1, H2);
-        fprintf(fp, " %d %d %d %d \n", TL1, TL2, TH1, TH2);
-        fprintf(fp, " %d %f %f \n", isig, aRobin, E1Robin);
-        fprintf(fp, " %d %f %f \n", itemp, TRobin, E0Robin);
-        fprintf(fp, " %d \n", imodel);
-        fprintf(fp, " %d %f %f \n", ansL, abestL, bbestL);
-        fprintf(fp, " %d %f %f \n", ansH, abestH, bbestH);
-    }
-    fclose(fp);
-	
     /* ************************************************************* */
     /* All inputs are now in place                                   */
     /* Now calculating the Fermi gas formula for the case (1) or (2) */
     /* And determine the eta-parameter to match Rho at Bn or Bp      */
     /* ************************************************************* */
     
-    rhofg(Amass, Bn, a, T, E1, E0, isig, itemp, imodel);
+    rhofg(Amass, Bn, a, T, E1, E0, isig, itemp, imodel, red);
     eta = rho0/rhox;
     if(isig==3){
         printf("\nTemperature parameter T (MeV) = %7.3f",TRobin);
@@ -623,11 +623,45 @@ int main()
         printf("\nFermi-gas level density has been multiplied with eta = %6.3f\n", eta);
     }
     printf("in order to match Rho(Bn or Bp) = %8.1f (1/MeV)\n", rho0);
-    rhofg(Amass, Bn, a, T, E1, E0, isig, itemp, imodel);
+    rhofg(Amass, Bn, a, T, E1, E0, isig, itemp, imodel, red);
 	spcu = sqrt(sig2);
     printf("\nSpin cut-off parameter used at Bn or Bp = %6.3f\n", spcu);
 
+//////////////////////////////////////////////
+    
+    /* ******************************* */
+    /* Searching the best T parameter  */
+    /* ******************************* */
+    if(imodel == 1){
+        Tlow = 0.8*T;
+        Tlow = Tlow*100.;
+        i = (int)(Tlow + .5);
+        Tlow = (float)i/100.;
+        Thigh = 1.2*T;
+        dTx = 0.01;
+        Tx = Tlow;
+        while( Tx <= Thigh){
+            E0x = Bn - Tx*(log(rho0)+log(Tx));
+            searchT();
+            printf("\n T = %7.3f, E0 = %7.3f, Chi2_low = %9.3f, Chi2_high = %9.3f",Tx, E0x, chi2_lowx, chi2_highx);
+            Tx = Tx + dTx;
+        }
+        
+        printf("\n\nYou may change your choice of T from the info of the Chi2 tests above");
+        printf("\nTemperature parameter T (MeV) <%7.3f>:",TRobin);
+        fgets_ignore(line,sizeof(line),stdin);
+        sscanf(line,"%f", &TRobin);
+        E0Robin = Bn - TRobin*(log(rho0)+log(TRobin));
+        printf("\nThe level density goes through Rho(Bn), thus determining the");
+        printf("\nconst. temp. shift parameter to be E0 = %7.3f MeV\n",E0Robin);
+        T  = TRobin;
+        E0 = E0Robin;
+    }
+ 
 
+    
+//////////////////////////////////////////////
+    
     /* **************************** */
     /* Searching the normalization  */
     /* parameters Anorm and alpha   */
@@ -650,7 +684,7 @@ int main()
     else {
         for (i = 0; i <= FGmax; i++){
             ex = (a0+a1*(float)i)/1000.;
-            rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel);
+            rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel, red);
             fprintf(fp, " %14.7e \n", eta*rhox);
         }
     }
@@ -670,7 +704,7 @@ int main()
         for (i = 0; i <= FGmax; i++){
             ex = (a0+a1*(float)i)/1000.;
             if(i < H1) fprintf(fp, " %14.7e \n", Anorm*exp(alpha*ex)*rho[i]); //Changed from H2 to H1, 19 Jul 2016
-            rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel);
+            rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel, red);
             if(i >=  H1) fprintf(fp, " %14.7e \n", eta*rhox);
         }
     }
@@ -799,7 +833,7 @@ int main()
     else {
         for (i = 0; i <= 3*dim; i++){
             ex = (a0+a1*(float)i)/1000.;
-            rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel);
+            rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel,red);
             fprintf(fp, " %14.7e \n", sqrt(sig2));
         }
     }
@@ -807,12 +841,7 @@ int main()
     printf("File spincut.cnt (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",3*dim,a0,a1);
     
     
-    
-    
-    
-    
-    
-    
+
     
     /* ***************************************************** */
     /* Reading matrix fg.rsg with calibration and dimensions */
@@ -867,6 +896,7 @@ int main()
         fprintf(fp, " %d \n", imodel);
         fprintf(fp, " %d %f %f \n", ansL, abestL, bbestL);
         fprintf(fp, " %d %f %f \n", ansH, abestH, bbestH);
+        fprintf(fp, " %f \n",red);
     }
     fclose(fp);
     
@@ -876,7 +906,7 @@ int main()
     return(0);
 }
 
-void rhofg(float Amass, float ex, float a, float T, float E1, float E0, int isig, int itemp, int imodel){
+void rhofg(float Amass, float ex, float a, float T, float E1, float E0, int isig, int itemp, int imodel, float red){
     float exx, uCT=0.01, uFG=0.01, vv;
     rhox = 0.1;
     exx = ex;
@@ -887,8 +917,8 @@ void rhofg(float Amass, float ex, float a, float T, float E1, float E0, int isig
     if(uFG < 0.01) uFG = 0.01;
     
     if(isig == 1){
-        if(itemp == 1) sig2 = 0.0146*pow(Amass,(5./3.))*sqrt(uFG/a);
-        if(itemp == 2) sig2 = 0.0146*pow(Amass,(5./3.))*(1. + sqrt(1. + 4.*a*uFG))/(2.*a);
+        if(itemp == 1) sig2 = red*0.0146*pow(Amass,(5./3.))*sqrt(uFG/a);
+        if(itemp == 2) sig2 = red*0.0146*pow(Amass,(5./3.))*(1. + sqrt(1. + 4.*a*uFG))/(2.*a);
     }
     if(isig == 2){
         if(itemp == 1) sig2 = 0.0888*pow(Amass,(2./3.))*a*sqrt(uFG/a);
@@ -1054,7 +1084,7 @@ int makeroot2(){
     emax = (a0 + a1*(float)dimcut)/1000.;
     emin = a0/1000.;
     if(emin > 0.)emin = 0.;
-    rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel);
+    rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel, red);
     cmax = sqrt(sig2);
     fp = fopen("spincut.cpp", "w+");
     if(fp == NULL){
@@ -1247,7 +1277,7 @@ int searchAalpha(){
     e1 = (a0+a1*(float)Lm)/1000.;
     e2 = (a0+a1*(float)Hm)/1000.;
     /*	printf("Lm=%d,Hm=%d,c1=%f,c2=%f,e1=%f,e2=%f\n",Lm,Hm,c1,c2,e1,e2);*/
-    rhofg(Amass, e2, a, T, E1, E0, isig, itemp, imodel);
+    rhofg(Amass, e2, a, T, E1, E0, isig, itemp, imodel, red);
     alpha = (log(rhoL)+log(c2)-log(eta*rhox)-log(c1))/(e1-e2);;
     Anorm = exp(-alpha*e1)*(rhoL)/c1;
     printf("\nFirst estimate of normalization parameters: A = %7.4f and alpha = %6.4f\n",Anorm,alpha);
@@ -1259,7 +1289,7 @@ int searchAalpha(){
     c1 = c1/corrL();
     c2 = c2/corrH();
     /*	printf("Lm=%d,Hm=%d,c1=%f,c2=%f,e1=%f,e2=%f\n",Lm,Hm,c1,c2,e1,e2);*/
-    rhofg(Amass, e2, a, T, E1, E0, isig, itemp, imodel);
+    rhofg(Amass, e2, a, T, E1, E0, isig, itemp, imodel, red);
     alpha = (log(rhoL)+log(c2)-log(eta*rhox)-log(c1))/(e1-e2);
     Anorm = exp(-alpha*e1)*(rhoL)/c1;
     printf("Final estimate of normalization parameters: A = %7.4f and alpha = %6.4f\n",Anorm,alpha);
@@ -1311,7 +1341,7 @@ float corrH(){
             cc = corr*Anorm*exp(alpha*ex)*rho[i];
             dc2= (corr*Anorm*exp(alpha*ex)*drho[i])*(corr*Anorm*exp(alpha*ex)*drho[i]);
             dc2 =sqrt(dc2*dc2 + 1.*1.);
-            rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel);
+            rhofg(Amass, ex, a, T, E1, E0, isig, itemp, imodel, red);
             if(dc2 > 0) sum=sum+(cc-eta*rhox)*(cc-eta*rhox)/dc2;
         } 
         sum = sum/free;
@@ -1479,3 +1509,106 @@ int extendH()
     }
     return 0;
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+int searchT(){
+    float rhoL;
+    /* ************************************************ */
+    /* Take three channels in the middle of each region */
+    /* in order to make a first estimate of A and alpha */
+    /* ************************************************ */
+    Lm = (L1 + L2)/2;
+    Hm = (H1 + H2)/2;
+    c1 = (rho[Lm-1]+rho[Lm]+rho[Lm+1])/3.;
+    c2 = (rho[Hm-1]+rho[Hm]+rho[Hm+1])/3.;
+    rhoL = (rholev[Lm-1]+rholev[Lm]+rholev[Lm+1])/3.;
+    if(rhoL < 0.01) rhoL = 0.01;
+    e1 = (a0+a1*(float)Lm)/1000.;
+    e2 = (a0+a1*(float)Hm)/1000.;
+    /*	printf("Lm=%d,Hm=%d,c1=%f,c2=%f,e1=%f,e2=%f\n",Lm,Hm,c1,c2,e1,e2);*/
+    rhofg(Amass, e2, a, Tx, E1, E0x, isig, itemp, imodel, red);
+    alpha = (log(rhoL)+log(c2)-log(eta*rhox)-log(c1))/(e1-e2);;
+    Anorm = exp(-alpha*e1)*(rhoL)/c1;
+//    printf("\nFirst estimate of normalization parameters: A = %7.4f and alpha = %6.4f\n",Anorm,alpha);
+    
+    /* ******************************************* */
+    /* Determine c1 and c2 by weighting all points */
+    /* in each region with uncertainties and slope */
+    /* ******************************************* */
+    c1 = c1/anchorL();
+    c2 = c2/anchorH();
+    /*	printf("Lm=%d,Hm=%d,c1=%f,c2=%f,e1=%f,e2=%f\n",Lm,Hm,c1,c2,e1,e2);*/
+    rhofg(Amass, e2, a, Tx, E1, E0x, isig, itemp, imodel, red);
+    alpha = (log(rhoL)+log(c2)-log(eta*rhox)-log(c1))/(e1-e2);
+    Anorm = exp(-alpha*e1)*(rhoL)/c1;
+//    printf("Final estimate of normalization parameters: A = %7.4f and alpha = %6.4f\n",Anorm,alpha);
+    return 0;
+}
+
+float anchorL(){
+    float corr, corrbest=0., sum, sumbest, sum0=0., cc, free, dc2, rhoL;
+    corr = 0.25;
+    sumbest = 1.0e+21;
+    free = (float)L2 - (float)L1;
+    if (free <= 0)free = 1.;
+    for(j = 0; j <= 3750; j++){
+        corr = corr + 0.001;
+        sum  = 0.0;
+        for(i = L1; i <= L2; i++){
+            ex = (a0+a1*(float)i)/1000.;
+            rhoL = rholev[i];
+            if(rhoL < 0.01) rhoL = 0.01;
+            cc = corr*Anorm*exp(alpha*ex)*rho[i];
+            dc2= (corr*Anorm*exp(alpha*ex)*drho[i])*(corr*Anorm*exp(alpha*ex)*drho[i]);
+            dc2 =sqrt(dc2*dc2 + 1.*1.);
+            if(dc2 > 0) sum = sum + ((cc-rhoL)*(cc-rhoL)/dc2);
+        }
+        sum = sum/free;
+        if(j == 499){
+            sum0 = sum;
+        }
+        if(sum <= sumbest){
+            sumbest = sum;
+            corrbest= corr;
+        }
+    }
+//    printf("Improved Chi2 for lower part:  %5.2f -> %5.2f with count correction = %5.3f \n",sum0,sumbest,corrbest);
+    chi2_lowx = sumbest;
+    return corrbest;
+}
+
+float anchorH(){
+    float corr, corrbest=0., sum, sumbest, sum0=0., cc, free, dc2;
+    corr = 0.25;
+    sumbest = 1.0e+21;
+    free = (float)H2 - (float)H1;
+    if (free <= 0)free = 1.;
+    for(j = 0; j <= 3750; j++){
+        corr = corr + 0.001;
+        sum  = 0.0;
+        for(i = H1; i <= H2; i++){
+            ex = (a0+a1*(float)i)/1000.;
+            cc = corr*Anorm*exp(alpha*ex)*rho[i];
+            dc2= (corr*Anorm*exp(alpha*ex)*drho[i])*(corr*Anorm*exp(alpha*ex)*drho[i]);
+            dc2 =sqrt(dc2*dc2 + 1.*1.);
+            rhofg(Amass, ex, a, Tx, E1, E0x, isig, itemp, imodel, red);
+            if(dc2 > 0) sum=sum+(cc-eta*rhox)*(cc-eta*rhox)/dc2;
+        }
+        sum = sum/free;
+        if(j == 499){
+            sum0 = sum;
+        }
+        if(sum <= sumbest){
+            sumbest = sum;
+            corrbest= corr;
+        }
+    }
+//    printf("Improved Chi2 for higher part: %5.2f -> %5.2f with count correction = %5.3f \n",sum0,sumbest,corrbest);
+    chi2_highx = sumbest;
+    return corrbest;
+}
+
+
+
+

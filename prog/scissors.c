@@ -38,7 +38,7 @@ int main ()
     printf("\n");
     printf("  _____________________________________________________ \r\n");
     printf(" |                                                     |\r\n");
-    printf(" |                     SCISSORS 1.4                    |\r\n");
+    printf(" |                   SCISSORS 1.4.1                    |\r\n");
     printf(" |                                                     |\r\n");
     printf(" |                 Program to calculate                |\r\n");
     printf(" |            scissors mode energy centroid            |\r\n");
@@ -49,7 +49,8 @@ int main ()
     printf(" |                                                     |\r\n");
     printf(" | E-mail  : magne.guttormsen@fys.uio.no               |\r\n");
     printf(" | Created : 16 Feb 2012                               |\r\n");
-    printf(" | Modified:  5 Nov 2013                               |\r\n");
+    printf(" | Modified: 05 Nov 2013                               |\r\n");
+    printf(" | Modified: 16 Nov 2016                               |\r\n");
     printf(" |_____________________________________________________|\r\n");
     printf("                                                        \r\n");
 
@@ -152,8 +153,8 @@ int main ()
     }
 /////////////////////
     
-    
-
+//    I_rigid = 0.8*I_rigid;
+//    I_IV    = 0.8*I_IV;
     
 //////////////////////////////////////////////////////////////////////////////    
 
@@ -194,22 +195,21 @@ int main ()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-    printf(" \n \n");
-    printf("Systematics for centroid w(sys): %9.3f\n", 66.*delta*pow(A,-(1./3.)));
-    printf("Energy centroid w(exp) (MeV):     <%6.3f>", w0);
-    fgets_ignore(line,sizeof(line),stdin);
-    sscanf(line,"%f", &w0);
+//    printf(" \n \n");
+//    printf("Systematics for centroid w(sys): %9.3f\n", 66.*delta*pow(A,-(1./3.)));
+//    printf("Energy centroid w(exp) (MeV):     <%6.3f>", w0);
+//    fgets_ignore(line,sizeof(line),stdin);
+//    sscanf(line,"%f", &w0);
     
 //    B_M1 = 0.0042*w0*pow(A,(5./3.))*delta*delta*(g_p-g_n)*(g_p-g_n);
 //    printf("\nResults Lo Iudice and Richter, Phys. Lett. B 304, 193.\n");
 //    printf("B(M1) strength (u_N**2)       = %f\n",B_M1);
     
-    B_M1 = S_d * w0;
-    printf("Results with S_- * w(exp) \n");
-    printf("B(M1) strength (u_N**2)         =%9.3f\n",B_M1);
-    printf(" \n \n");
- 
-    
+//    B_M1 = S_d * w0;
+//    printf("Results with S_- * w(exp) \n");
+//    printf("B(M1) strength (u_N**2)         =%9.3f\n",B_M1);
+//    printf(" \n \n");
+
 /////////////Splitting of scissors mode //////////////////////////  
 //    printf(" \n \n");
 //    printf("Gamma deformation:        <%6.3f>", gamm);
