@@ -44,7 +44,7 @@ int main()
 	printf("\n");
 	printf("  ______________________________________________________________ \r\n");
 	printf(" |                                                              |\r\n");
-	printf(" |               N O R M A L I Z A T I O N  1.5.4               |\r\n");
+	printf(" |               N O R M A L I Z A T I O N  1.5.5               |\r\n");
 	printf(" |                                                              |\r\n");
 	printf(" |  Program to normalize the gamma-ray strength function f(Eg)  |\r\n");
 	printf(" |         to the total average radiation width Gamma           |\r\n");
@@ -60,8 +60,9 @@ int main()
 	printf(" | E-mail  : magne.guttormsen@fys.uio.no                        |\r\n");
 	printf(" | Created : 14 Nov 2006                                        |\r\n");
 	printf(" | Modified: 26 Mar 2014                                        |\r\n");
-        printf(" | Modified: 28 Aug 2015 replace ? and deleting kumac files     |\r\n");
-        printf(" | Modified: 19 Apr 2016 larger dim for root vec. + corr. table |\r\n");
+    printf(" | Modified: 28 Aug 2015 replace ? and deleting kumac files     |\r\n");
+    printf(" | Modified: 19 Apr 2016 larger dim for root vec. + corr. table |\r\n");
+    printf(" | Modified: 21 Dec 2016 larger dim for transext                |\r\n");
 	printf(" |______________________________________________________________|\r\n");
 	printf("                                                                 \r\n");
 	
@@ -475,14 +476,14 @@ int main()
 		exit(0);
 	}
 	else {
-		for (i = 0; i < dim; i++){
+		for (i = 0; i < dim*10; i++){
 			transext[i] = 2.*PI*sigext[i]/Fac;
             if(transext[i] < eps ) transext[i] = 0;
 			fprintf(fp, " %14.7e \n", transext[i]);
 		}
 	}
 	fclose(fp);	
-	printf("File transext.nrm (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",dim-1,a0,a1);
+	printf("File transext.nrm (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",10*dim-1,a0,a1);
 	
 	makeroot1();
 	return(0);
@@ -600,7 +601,8 @@ int makeroot1(){
 		fprintf(fp,"	TCanvas *c1 = new TCanvas(\"c1\",\"Gamma-ray strength function\",600,600);\n");	
 		fprintf(fp,"	TH2F *h = new TH2F(\"h\",\" \",10,0.0,%8.3f,10,%9.3e,%9.3e);\n",Emax+0.5,Tmin,Tmax);
 		fprintf(fp,"	ifstream strengthfile(\"strength.nrm\");\n");
-		fprintf(fp,"	float strength[%d],strengtherr[%d],energy[%d],energyerr[%d],trans[%d];\n",dim+1,dim+1,dim+1,dim+1,dim+1);
+		fprintf(fp,"	float strength[%d],strengtherr[%d],energyerr[%d];\n",dim+1,dim+1,dim+1);
+        fprintf(fp,"	float energy[%d],trans[%d];\n",10*dim+1,10*dim+1);
 		fprintf(fp,"	int i = 0;\n");
 		fprintf(fp,"   float a0 = %8.4f;\n",a0/1000.); 
 		fprintf(fp,"   float a1 = %8.4f;\n",a1/1000.);
