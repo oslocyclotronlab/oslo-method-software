@@ -18,7 +18,7 @@ TARGET  = shiva2paw waiting funcfit gameff autofit onemev mama2pc vigs isotrop \
           toro fgtheo splinetest egidy sea spline2mama normalization  \
           f_model rotor nilsson  normrhof cm2lab grazing \
           spincut rutherford fmodel tave binomial binomialc siriangle sfec alfnasort \
-          alfnamatrix webrho webstrf fitone micro robin gammex d2rho combi \
+          alfnamatrix webrho webstrf fitone micro robin counting gammex d2rho combi \
           pet elise extendspin radex scissors pjolter
 # mtcp mag2mag mag2disc disc2mag
 
