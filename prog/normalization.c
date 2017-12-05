@@ -24,7 +24,7 @@ float	eps = 1.e-20, x;
 float   rho_ex(float);
 float   sig_ex(float);
 float   T_eg(float);
-float   Bn_keV,ex,eg,de=10., Eres = 200. ; //de is steps for the integral of 10 keV, Eres=200 is Si+Nai resolution at rho(Ex=0)
+float   Bn_keV,ex,eg,de=10., Eres = 400. ; //de is steps for the integral of 10 keV, Eres=200 is Si+Nai resolution at rho(Ex=0)
 
 int		makeroot1();
 
