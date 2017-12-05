@@ -189,7 +189,7 @@ int main()
 		exit(0);
 	}
 	i = 0 ;
-	while(i < dim){           //*10, to be sure long enough search for data
+	while(i < dim){
 		if(fgets(line,sizeof(line),fp) != NULL){
             sscanf(line,"%f", &sigext[i]);
             }
@@ -207,7 +207,7 @@ int main()
 		exit(0);
 	}
 	i = 0 ;
-	while(i < MAXDIM && fgets(line,sizeof(line),fp) != NULL){   //*10, to be sure long enough search for data
+	while(i < MAXDIM && fgets(line,sizeof(line),fp) != NULL){
 		sscanf(line,"%f", &sigpaw[i]);
 		i++;
 	}
