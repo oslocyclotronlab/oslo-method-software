@@ -1,6 +1,10 @@
 
 # README-file for OsloSoftware
 
+Concept DOI: [![DOI](https://zenodo.org/badge/46267755.svg)](https://zenodo.org/badge/latestdoi/46267755)
+
+When citing, please use the DOI of the specific verion, which will be accessible via Zenodo.
+
 *****************************************************************************
 
 Magne Guttormsen
