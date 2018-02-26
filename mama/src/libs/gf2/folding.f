@@ -550,7 +550,8 @@ C Updating comment in the heading of spectrum file
       COMMON/State/Istatus,ITYPE,IDEST,cal(2,2,2,3),Idim(2,2,2),fname(2,2),comm(2,2)
       CHARACTER fname*8,comm*60
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
-      COMMON/response2/IR,ETAB(30),FTAB(30),ER(30),ESE(30),EDE(30),FE(30),SE(30),DE(30),ANN(30),EW(30),FW(30),ENA(30)
+      COMMON/response2/IR,ETAB(100),FTAB(100),ER(100),ESE(100),EDE(100),
+     +                 FE(100),SE(100),DE(100),ANN(100),EW(100),FW(100),ENA(100)
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
       CHARACTER ENA*5
       REAL ETAB1(30),FTAB1(30),ER1(30),FE1(30),SE1(30),DE1(30),ANN1(30),EW1(30),FW1(30),ESE1(30),EDE1(30)
@@ -561,6 +562,8 @@ C Updating comment in the heading of spectrum file
       REAL ETAB6(30),FTAB6(30),ER6(30),FE6(30),SE6(30),DE6(30),ANN6(30),EW6(30),FW6(30),ESE6(30),EDE6(30)
       REAL ETAB7(30),FTAB7(30),ER7(30),FE7(30),SE7(30),DE7(30),ANN7(30),EW7(30),FW7(30),ESE7(30),EDE7(30)
       REAL ETAB8(30),FTAB8(30),ER8(30),FE8(30),SE8(30),DE8(30),ANN8(30),EW8(30),FW8(30),ESE8(30),EDE8(30)
+      REAL ETAB9(51),FTAB9(51),ER9(51),FE9(51),SE9(51),DE9(51),ANN9(51),EW9(99),FW9(99),ESE9(51),EDE9(51)
+
       CHARACTER ENA1(30)*5
       CHARACTER ENA2(30)*5
       CHARACTER ENA3(30)*5
@@ -569,6 +572,8 @@ C Updating comment in the heading of spectrum file
       CHARACTER ENA6(30)*5
       CHARACTER ENA7(30)*5
       CHARACTER ENA8(30)*5
+      CHARACTER ENA9(51)*5
+
       DATA RDIM/0/
 
 
@@ -1113,6 +1118,151 @@ C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
 
 
 
+
+
+C*****************************************************************
+C*******************   OSCAR 2017 LaBr    ************************
+C*****************************************************************
+C This block of data represents energies (ETAB) and the total efficience (FTAB)
+C at that energy. Response functions compared with Si, C, Nd data from Mustafa
+C (d,p) and (p,p) reactions with the first OCL experiments with OSCAR 2017 (only 16 LaBr)
+C Response functions simulated by GEANT4 (Fabio and Gry, January 2018)
+C Normalized to 1 at 1.33 MeV.
+      DATA ETAB9/
+     +    2.0000E+02, 4.0000E+02, 6.0000E+02, 8.0000E+02, 1.0000E+03, 1.2000E+03, 1.4000E+03,
+     +    1.6000E+03, 1.8000E+03, 2.0000E+03, 2.2000E+03, 2.4000E+03, 2.6000E+03, 2.8000E+03,
+     +    3.0000E+03, 3.2000E+03, 3.4000E+03, 3.6000E+03, 3.8000E+03, 4.0000E+03, 4.2000E+03,
+     +    4.4000E+03, 4.6000E+03, 4.8000E+03, 5.0000E+03, 5.2000E+03, 5.4000E+03, 5.6000E+03,
+     +    5.8000E+03, 6.0000E+03, 6.2000E+03, 6.4000E+03, 6.6000E+03, 6.8000E+03, 7.0000E+03,
+     +    7.2000E+03, 7.4000E+03, 7.6000E+03, 7.8000E+03, 8.0000E+03, 8.2000E+03, 8.4000E+03,
+     +    8.6000E+03, 8.8000E+03, 9.0000E+03, 9.2000E+03, 9.4000E+03, 9.6000E+03, 9.8000E+03,
+     +    1.0000E+04, 1.0200E+04/
+      DATA FTAB9/
+     +    7.0000E-01, 8.0177E-01, 8.8796E-01, 9.4888E-01, 9.8451E-01, 9.9626E-01, 1.0019E+00,
+     +    1.0028E+00, 1.0090E+00, 1.0102E+00, 1.0053E+00, 1.0059E+00, 1.0049E+00, 1.0037E+00,
+     +    1.0042E+00, 1.0085E+00, 1.0065E+00, 1.0095E+00, 1.0091E+00, 1.0115E+00, 1.0139E+00,
+     +    1.0154E+00, 1.0205E+00, 1.0237E+00, 1.0278E+00, 1.0319E+00, 1.0364E+00, 1.0374E+00,
+     +    1.0403E+00, 1.0458E+00, 1.0468E+00, 1.0532E+00, 1.0593E+00, 1.0608E+00, 1.0654E+00,
+     +    1.0660E+00, 1.0722E+00, 1.0766E+00, 1.0778E+00, 1.0819E+00, 1.0906E+00, 1.0900E+00,
+     +    1.0953E+00, 1.0979E+00, 1.1000E+00, 1.1064E+00, 1.1100E+00, 1.1099E+00, 1.1176E+00,
+     +    1.1231E+00, 1.1272E+00/
+
+C This bolck of data represents energies (ER) for measured resp. func.,
+C intensities of full-energy (FE), single-escape (SE), double-escape (DE) and 511
+C peaks. The numbers are counts of the various
+C response functions. The counts are converted into probabilities
+C pf, pc, ps, pd, pa in the RSPNAI routine.
+      DATA ER9/
+     +    2.0000E+02, 4.0000E+02, 6.0000E+02, 8.0000E+02, 1.0000E+03, 1.2000E+03, 1.4000E+03,
+     +    1.6000E+03, 1.8000E+03, 2.0000E+03, 2.2000E+03, 2.4000E+03, 2.6000E+03, 2.8000E+03,
+     +    3.0000E+03, 3.2000E+03, 3.4000E+03, 3.6000E+03, 3.8000E+03, 4.0000E+03, 4.2000E+03,
+     +    4.4000E+03, 4.6000E+03, 4.8000E+03, 5.0000E+03, 5.2000E+03, 5.4000E+03, 5.6000E+03,
+     +    5.8000E+03, 6.0000E+03, 6.2000E+03, 6.4000E+03, 6.6000E+03, 6.8000E+03, 7.0000E+03,
+     +    7.2000E+03, 7.4000E+03, 7.6000E+03, 7.8000E+03, 8.0000E+03, 8.2000E+03, 8.4000E+03,
+     +    8.6000E+03, 8.8000E+03, 9.0000E+03, 9.2000E+03, 9.4000E+03, 9.6000E+03, 9.8000E+03,
+     +    1.0000E+04, 1.0200E+04/
+
+      DATA ESE9/
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511./
+      DATA EDE9/
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022./
+      DATA FE9/
+     +    2.2386E+05, 1.8693E+05, 1.6166E+05, 1.4470E+05, 1.3394E+05, 1.2482E+05, 1.1666E+05,
+     +    1.1032E+05, 1.0522E+05, 9.9914E+04, 9.4780E+04, 9.1052E+04, 8.7060E+04, 8.3568E+04,
+     +    8.0057E+04, 7.7928E+04, 7.4989E+04, 7.2400E+04, 7.0276E+04, 6.8033E+04, 6.6197E+04,
+     +    6.4399E+04, 6.2454E+04, 6.1046E+04, 5.9120E+04, 5.7882E+04, 5.6308E+04, 5.4900E+04,
+     +    5.3763E+04, 5.2586E+04, 5.1744E+04, 5.0254E+04, 4.8953E+04, 4.7788E+04, 4.7354E+04,
+     +    4.6069E+04, 4.5122E+04, 4.4209E+04, 4.2829E+04, 4.2133E+04, 4.1894E+04, 4.0486E+04,
+     +    3.9566E+04, 3.8962E+04, 3.8248E+04, 3.7333E+04, 3.6544E+04, 3.5510E+04, 3.5006E+04,
+     +    3.4730E+04, 3.3586E+04/
+      DATA SE9/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 4.0250E+01, 7.4800E+02,
+     +    1.7190E+03, 3.3230E+03, 4.8835E+03, 6.3048E+03, 7.8707E+03, 9.4440E+03, 1.1074E+04,
+     +    1.2937E+04, 1.4108E+04, 1.5436E+04, 1.6690E+04, 1.8000E+04, 1.9004E+04, 1.9854E+04,
+     +    2.0845E+04, 2.1682E+04, 2.2316E+04, 2.3116E+04, 2.3677E+04, 2.4334E+04, 2.4283E+04,
+     +    2.4831E+04, 2.5199E+04, 2.5447E+04, 2.5699E+04, 2.5799E+04, 2.6095E+04, 2.5778E+04,
+     +    2.5921E+04, 2.5983E+04, 2.5650E+04, 2.5539E+04, 2.5626E+04, 2.5795E+04, 2.5324E+04,
+     +    2.4918E+04, 2.4735E+04, 2.4694E+04, 2.4380E+04, 2.4132E+04, 2.3888E+04, 2.3906E+04,
+     +    2.3388E+04, 2.3072E+04/
+      DATA DE9/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 1.8000E+02,
+     +    4.5525E+02, 5.2325E+02, 7.5900E+02, 1.0128E+03, 1.2250E+03, 1.3738E+03, 1.5888E+03,
+     +    1.8922E+03, 2.0870E+03, 2.2120E+03, 2.2882E+03, 2.5042E+03, 2.5902E+03, 2.9170E+03,
+     +    2.9300E+03, 3.0355E+03, 3.0415E+03, 3.2762E+03, 3.2695E+03, 3.2862E+03, 3.3280E+03,
+     +    3.3975E+03, 3.4872E+03, 3.4540E+03, 3.5162E+03, 3.3950E+03, 3.3632E+03, 3.4750E+03,
+     +    3.4532E+03, 3.4930E+03, 3.3320E+03, 3.4212E+03, 3.3300E+03, 3.3092E+03, 3.2608E+03,
+     +    3.2802E+03, 3.1292E+03, 3.1560E+03, 3.0855E+03, 3.1105E+03, 3.0795E+03, 3.0678E+03,
+     +    3.0242E+03, 2.9035E+03/
+      DATA ANN9/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 5.4000E+01, 4.4500E+02,
+     +    9.2275E+02, 1.7600E+03, 2.6280E+03, 3.4378E+03, 4.3630E+03, 5.2628E+03, 6.0825E+03,
+     +    7.2310E+03, 8.0403E+03, 8.8380E+03, 9.6315E+03, 1.0562E+04, 1.1358E+04, 1.2130E+04,
+     +    1.2847E+04, 1.3374E+04, 1.3979E+04, 1.4852E+04, 1.5492E+04, 1.5856E+04, 1.6200E+04,
+     +    1.6879E+04, 1.7242E+04, 1.7988E+04, 1.8386E+04, 1.8493E+04, 1.9382E+04, 1.9555E+04,
+     +    1.9822E+04, 1.9952E+04, 2.0581E+04, 2.0782E+04, 2.0906E+04, 2.1355E+04, 2.1316E+04,
+     +    2.1600E+04, 2.2140E+04, 2.2526E+04, 2.2384E+04, 2.2786E+04, 2.3098E+04, 2.3359E+04,
+     +    2.3229E+04, 2.3666E+04/
+      DATA ENA9/
+     +       '200',  '400',  '600',  '800', '1000', '1200', '1400',
+     +      '1600', '1800', '2000', '2200', '2400', '2600', '2800',
+     +      '3000', '3200', '3400', '3600', '3800', '4000', '4200',
+     +      '4400', '4600', '4800', '5000', '5200', '5400', '5600',
+     +      '5800', '6000', '6200', '6400', '6600', '6800', '7000',
+     +      '7200', '7400', '7600', '7800', '8000', '8200', '8400',
+     +      '8600', '8800', '9000', '9200', '9400', '9600', '9800',
+     +     '10000','10200'/
+
+C This block of data represents energies (EW) and half-width (FW) of the
+C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
+      DATA EW9/
+     +    2.0000E+02, 3.0000E+02, 4.0000E+02, 5.0000E+02, 6.0000E+02, 7.0000E+02, 8.0000E+02,
+     +    9.0000E+02, 1.0000E+03, 1.1000E+03, 1.2000E+03, 1.3000E+03, 1.4000E+03, 1.5000E+03,
+     +    1.6000E+03, 1.7000E+03, 1.8000E+03, 1.9000E+03, 2.0000E+03, 2.1000E+03, 2.2000E+03,
+     +    2.3000E+03, 2.4000E+03, 2.5000E+03, 2.6000E+03, 2.7000E+03, 2.8000E+03, 2.9000E+03,
+     +    3.0000E+03, 3.1000E+03, 3.2000E+03, 3.3000E+03, 3.4000E+03, 3.5000E+03, 3.6000E+03,
+     +    3.7000E+03, 3.8000E+03, 3.9000E+03, 4.0000E+03, 4.1000E+03, 4.2000E+03, 4.3000E+03,
+     +    4.4000E+03, 4.5000E+03, 4.6000E+03, 4.7000E+03, 4.8000E+03, 4.9000E+03, 5.0000E+03,
+     +    5.1000E+03, 5.2000E+03, 5.3000E+03, 5.4000E+03, 5.5000E+03, 5.6000E+03, 5.7000E+03,
+     +    5.8000E+03, 5.9000E+03, 6.0000E+03, 6.1000E+03, 6.2000E+03, 6.3000E+03, 6.4000E+03,
+     +    6.5000E+03, 6.6000E+03, 6.7000E+03, 6.8000E+03, 6.9000E+03, 7.0000E+03, 7.1000E+03,
+     +    7.2000E+03, 7.3000E+03, 7.4000E+03, 7.5000E+03, 7.6000E+03, 7.7000E+03, 7.8000E+03,
+     +    7.9000E+03, 8.0000E+03, 8.1000E+03, 8.2000E+03, 8.3000E+03, 8.4000E+03, 8.5000E+03,
+     +    8.6000E+03, 8.7000E+03, 8.8000E+03, 8.9000E+03, 9.0000E+03, 9.1000E+03, 9.2000E+03,
+     +    9.3000E+03, 9.4000E+03, 9.5000E+03, 9.6000E+03, 9.7000E+03, 9.8000E+03, 9.9000E+03,
+     +    1.0000E+04/
+      DATA FW9/
+     +    6.8383E+00, 4.5067E+00, 3.3466E+00, 2.6553E+00, 2.1985E+00, 1.8757E+00, 1.6368E+00,
+     +    1.4538E+00, 1.3099E+00, 1.1945E+00, 1.1004E+00, 1.0227E+00, 9.5780E-01, 9.0314E-01,
+     +    8.5674E-01, 8.1710E-01, 7.8304E-01, 7.5363E-01, 7.2814E-01, 7.0595E-01, 6.8657E-01,
+     +    6.6959E-01, 6.5468E-01, 6.4155E-01, 6.2996E-01, 6.1970E-01, 6.1062E-01, 6.0255E-01,
+     +    5.9537E-01, 5.8898E-01, 5.8329E-01, 5.7820E-01, 5.7365E-01, 5.6958E-01, 5.6594E-01,
+     +    5.6267E-01, 5.5975E-01, 5.5712E-01, 5.5477E-01, 5.5266E-01, 5.5076E-01, 5.4906E-01,
+     +    5.4754E-01, 5.4617E-01, 5.4494E-01, 5.4385E-01, 5.4287E-01, 5.4200E-01, 5.4122E-01,
+     +    5.4053E-01, 5.3992E-01, 5.3938E-01, 5.3890E-01, 5.3849E-01, 5.3813E-01, 5.3781E-01,
+     +    5.3755E-01, 5.3732E-01, 5.3713E-01, 5.3697E-01, 5.3685E-01, 5.3675E-01, 5.3668E-01,
+     +    5.3664E-01, 5.3661E-01, 5.3661E-01, 5.3662E-01, 5.3665E-01, 5.3670E-01, 5.3676E-01,
+     +    5.3683E-01, 5.3691E-01, 5.3701E-01, 5.3711E-01, 5.3722E-01, 5.3734E-01, 5.3747E-01,
+     +    5.3760E-01, 5.3774E-01, 5.3789E-01, 5.3804E-01, 5.3819E-01, 5.3835E-01, 5.3851E-01,
+     +    5.3868E-01, 5.3885E-01, 5.3902E-01, 5.3919E-01, 5.3936E-01, 5.3954E-01, 5.3972E-01,
+     +    5.3989E-01, 5.4007E-01, 5.4025E-01, 5.4043E-01, 5.4062E-01, 5.4080E-01, 5.4098E-01,
+     +    5.4116E-01/
+
+
+
 C*****************************************************************
 C*****************************************************************
 C*****************************************************************
@@ -1157,7 +1307,8 @@ C Reading dimension and energy calibration
       WRITE(6,*)'(6) Clover_old, Notre Dame 2015, GEANT4'
       WRITE(6,*)'(7) Clover,     Notre Dame 2015, GEANT4'
       WRITE(6,*)'(8) Seg23,      SuN at MSU 2015 with target in center, GEANT4'
-      WRITE(6,*)'(9) Gaussian'
+      WRITE(6,*)'(9) LaBr_2017,  OSCAR at OCL 2017 with 15 LaBr, GEANT4'
+      WRITE(6,*)'(10) Gaussian'
       WRITE(6,2)IRSP
    2  FORMAT(/'Choose your response function <',I1,'>:',$)
       CALL READI(5,IRSP)
@@ -1325,6 +1476,14 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
       ENDIF
 
       IF(IRSP.EQ.7)THEN         !Clover_NotreDame_2015
+        WRITE(6,*)' '
+        WRITE(6,*)'For the 150Sm(p,d)149Sm exp. in 2017, the annihilation peak was overestimated'
+        WRITE(6,*)'in the response function. You may divide down with a factor <1. Try 0.25!'
+        facAnn = 1.0    !No reduction
+        WRITE(6,4)facAnn
+ 4      FORMAT(/'Multiply annihilation peak with a factor <',F4.1,'>:',$)
+        CALL READF(5,facAnn)
+        IF(Istatus.NE.0)RETURN
         IW  =13
         ITAB=13
         IR  =13
@@ -1343,7 +1502,7 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
            FE(i)=FE7(i)
            SE(i)=SE7(i)
            DE(i)=DE7(i)
-           ANN(i)=ANN7(i)
+           ANN(i)=facAnn*ANN7(i)
            ENA(i)=ENA7(i)
         ENDDO
       ENDIF
@@ -1362,13 +1521,37 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
        ENDDO
        DO i=1,IR
          ER(i)=ER8(i)
-          ESE(i)=ESE8(i)
+         ESE(i)=ESE8(i)
          EDE(i)=EDE8(i)
          FE(i)=FE8(i)
          SE(i)=SE8(i)
          DE(i)=DE8(i)
          ANN(i)=ANN8(i)
          ENA(i)=ENA8(i)
+       ENDDO
+      ENDIF
+
+      IF(IRSP.EQ.9)THEN         !OSCAR 2017 LaBr
+       IW  =99
+       ITAB=51
+       IR  =51
+       DO i=1,IW
+         EW(i)=EW9(i)
+         FW(i)=FW9(i)
+       ENDDO
+       DO i=1,ITAB
+         ETAB(i)=ETAB9(i)
+         FTAB(i)=FTAB9(i)
+       ENDDO
+       DO i=1,IR
+         ER(i)=ER9(i)
+         ESE(i)=ESE9(i)
+         EDE(i)=EDE9(i)
+         FE(i)=FE9(i)
+         SE(i)=SE9(i)
+         DE(i)=DE9(i)
+         ANN(i)=ANN9(i)
+         ENA(i)=ENA9(i)
        ENDDO
       ENDIF
 
@@ -1402,8 +1585,8 @@ C Finding total efficiency as function of full energy
         IF(EffTot(I).LE.0.00001)EffTot(I)=0.00001                           
       ENDDO
 
-      IF(IRSP.LE.8)CALL RSPDetector(IRSP)
-      IF(IRSP.EQ.9)CALL RSPGAUSS
+      IF(IRSP.LE.9)CALL RSPDetector(IRSP)
+      IF(IRSP.EQ.10)CALL RSPGAUSS
  
       END
 
@@ -1443,10 +1626,11 @@ C     FEn,SEn,..is normalized intensities (not counts of raw specter)
       CHARACTER fname*8,comm*60
 
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
-      COMMON/response2/IR,ETAB(30),FTAB(30),ER(30),ESE(30),EDE(30),FE(30),SE(30),DE(30),ANN(30),EW(30),FW(30),ENA(30)
+      COMMON/response2/IR,ETAB(100),FTAB(100),ER(100),ESE(100),EDE(100),
+     +                 FE(100),SE(100),DE(100),ANN(100),EW(100),FW(100),ENA(100)
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
       COMMON/response4/pf(0:2047),pc(0:2047),ps(0:2047),pd(0:2047),pa(0:2047)
-      DIMENSION FEn(30),SEn(30),DEn(30),ANNn(30)
+      DIMENSION FEn(100),SEn(100),DEn(100),ANNn(100)
       DIMENSION Calib(6)
       INTEGER dim
       DIMENSION Fs(0:4095),Fs1(0:4095),Fs2(0:4095),F1(0:4095),F2(0:4095)
@@ -1502,6 +1686,12 @@ C Response matrix R(i,j) has maximum dimensions 2048x2048
         b0  =3.5     !should be 1.5, but then 511-line is 2 keV off...
         b1  =4.0
         FWHM=5.98
+      ENDIF
+
+      IF(IRSP.EQ.9)THEN   !OSCAR 2017 LaBr
+        b0  =0.0
+        b1  =5.0
+        FWHM=3.0
       ENDIF
 
       ical=6
@@ -1569,14 +1759,12 @@ C But first we check if they already have been read
           IF(IRSP.EQ.1)call makepath("UIO_APPLICATIONS","mama/resp/nai_old/RESP-EXP-"//ENA(I1),filnam)
           IF(IRSP.EQ.2)call makepath("UIO_APPLICATIONS","mama/resp/labr2012/sc"//ENA(I1),filnam)
           IF(IRSP.EQ.3)call makepath("UIO_APPLICATIONS","mama/resp/nai2012/sc"//ENA(I1),filnam)
-
           IF(IRSP.EQ.4)call makepath("UIO_APPLICATIONS","mama/resp/seg2/se"//ENA(I1),filnam)
           IF(IRSP.EQ.5)call makepath("UIO_APPLICATIONS","mama/resp/seg3/se"//ENA(I1),filnam)
-
           IF(IRSP.EQ.6)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v1/ss"//ENA(I1),filnam)
           IF(IRSP.EQ.7)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v2/sm"//ENA(I1),filnam)
-
           IF(IRSP.EQ.8)call makepath("UIO_APPLICATIONS","mama/resp/seg23/sc"//ENA(I1),filnam)
+          IF(IRSP.EQ.9)call makepath("UIO_APPLICATIONS","mama/resp/oscar2017/cmp"//ENA(I1),filnam)
 
 
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
@@ -1592,14 +1780,12 @@ C But first we check if they already have been read
           IF(IRSP.EQ.1)call makepath("UIO_APPLICATIONS","mama/resp/nai_old/RESP-EXP-"//ENA(I2),filnam)
           IF(IRSP.EQ.2)call makepath("UIO_APPLICATIONS","mama/resp/labr2012/sc"//ENA(I2),filnam)
           IF(IRSP.EQ.3)call makepath("UIO_APPLICATIONS","mama/resp/nai2012/sc"//ENA(I2),filnam)
-
           IF(IRSP.EQ.4)call makepath("UIO_APPLICATIONS","mama/resp/seg2/se"//ENA(I2),filnam)
           IF(IRSP.EQ.5)call makepath("UIO_APPLICATIONS","mama/resp/seg3/se"//ENA(I2),filnam)
-
           IF(IRSP.EQ.6)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v1/ss"//ENA(I2),filnam)
           IF(IRSP.EQ.7)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v2/sm"//ENA(I2),filnam)
-
           IF(IRSP.EQ.8)call makepath("UIO_APPLICATIONS","mama/resp/seg23/sc"//ENA(I2),filnam)
+          IF(IRSP.EQ.9)call makepath("UIO_APPLICATIONS","mama/resp/oscar2017/cmp"//ENA(I2),filnam)
 
 
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
@@ -1618,8 +1804,8 @@ C Finding highest counts in Compton spectrum
 C Then take 70 % and put in from channel 0 up to
 C first time spectrum exeeds this threshold
 
-C We drops low energy fix when GEANT is used (seg2, seg3, seg23, clover)
-          IF(IRSP.EQ.4.OR.IRSP.EQ.5.OR.IRSP.EQ.6.OR.IRSP.EQ.7.OR.IRSP.EQ.7)GO TO 1111
+C We drop low energy fix when GEANT is used (seg2, seg3, seg23, clover, oscar)
+          IF(IRSP.GE.4.AND.IRSP.LE.9)GO TO 1111
           maxi=(300.-b0)/b1 + 0.5
           h1=0.
           h2=0.
@@ -1849,8 +2035,8 @@ C the two channels il and ih.
           B=SEn(I1) +( SEn(I2)- SEn(I1))*(Egam-E1)/(E2-E1)
           C=DEn(I1) +( DEn(I2)- DEn(I1))*(Egam-E1)/(E2-E1)
           D=ANNn(I1)+(ANNn(I2)-ANNn(I1))*(Egam-E1)/(E2-E1)
-          SEsc = Egam - (ESE(I1)+(ESE(I2)-ESE(I1))  *(Egam-E1)/(E2-E1))
-          DEsc = Egam - (EDE(I1)+(EDE(I2)-EDE(I1))  *(Egam-E1)/(E2-E1))
+          SEsc = Egam - (ESE(I1)+(ESE(I2)-ESE(I1))*(Egam-E1)/(E2-E1))
+          DEsc = Egam - (EDE(I1)+(EDE(I2)-EDE(I1))*(Egam-E1)/(E2-E1))
           SEi=(SEsc-a0)/a1
           DEi=(DEsc-a0)/a1
 
