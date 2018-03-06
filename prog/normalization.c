@@ -24,8 +24,7 @@ float	eps = 1.e-20, x;
 float   rho_ex(float);
 float   sig_ex(float);
 float   T_eg(float);
-float   Bn_keV,ex,eg,de=10., Eres = 200. ; //de is steps for the integral of 10 keV, Eres=200 is Si+Nai resolution at rho(Ex=0)
-
+float   Bn_keV,ex,eg,de=10., Eres = 400. ; //de is steps for the integral of 10 keV, Eres=200 is Si+Nai resolution at rho(Ex=0)
 int		makeroot1();
 
 static void fgets_ignore(char *s, int size, FILE *stream)
@@ -44,7 +43,7 @@ int main()
 	printf("\n");
 	printf("  ______________________________________________________________ \r\n");
 	printf(" |                                                              |\r\n");
-	printf(" |               N O R M A L I Z A T I O N  1.5.4               |\r\n");
+	printf(" |               N O R M A L I Z A T I O N  1.5.6               |\r\n");
 	printf(" |                                                              |\r\n");
 	printf(" |  Program to normalize the gamma-ray strength function f(Eg)  |\r\n");
 	printf(" |         to the total average radiation width Gamma           |\r\n");
@@ -60,8 +59,10 @@ int main()
 	printf(" | E-mail  : magne.guttormsen@fys.uio.no                        |\r\n");
 	printf(" | Created : 14 Nov 2006                                        |\r\n");
 	printf(" | Modified: 26 Mar 2014                                        |\r\n");
-        printf(" | Modified: 28 Aug 2015 replace ? and deleting kumac files     |\r\n");
-        printf(" | Modified: 19 Apr 2016 larger dim for root vec. + corr. table |\r\n");
+    printf(" | Modified: 28 Aug 2015 replace ? and deleting kumac files     |\r\n");
+    printf(" | Modified: 19 Apr 2016 larger dim for root vec. + corr. table |\r\n");
+    printf(" | Modified: 21 Dec 2016 larger dim for transext                |\r\n");
+    printf(" | Modified: 04 Dec 2017 corrected dim (Fabio)                  |\r\n");
 	printf(" |______________________________________________________________|\r\n");
 	printf("                                                                 \r\n");
 	
@@ -188,7 +189,7 @@ int main()
 		exit(0);
 	}
 	i = 0 ;
-	while(i < dim){           //*10, to be sure long enough search for data
+	while(i < dim){
 		if(fgets(line,sizeof(line),fp) != NULL){
             sscanf(line,"%f", &sigext[i]);
             }
@@ -206,7 +207,7 @@ int main()
 		exit(0);
 	}
 	i = 0 ;
-	while(i < MAXDIM && fgets(line,sizeof(line),fp) != NULL){   //*10, to be sure long enough search for data
+	while(i < MAXDIM && fgets(line,sizeof(line),fp) != NULL){
 		sscanf(line,"%f", &sigpaw[i]);
 		i++;
 	}
@@ -241,7 +242,7 @@ int main()
 		exit(0);
 	}
 	i = 0 ;
-	while(i < dim){
+	while(i < NchBn){
         if(fgets(line,sizeof(line),fp) != NULL){sscanf(line,"%f", &spincut[i]);}
 		spincut[i]=2.*spincut[i]*spincut[i];
 	   i++; 
@@ -252,10 +253,9 @@ int main()
 	/* Printing input functions */
 	/* ************************ */
 	printf("\n No Ex(keV) Rho(1/MeV)  2*Spincut**2  Eg(keV)    Sigext      Sigpaw      dSigpaw  \n");
-	for(i = 0 ; i < dim; i++){
+	for(i = 0 ; i < NchBn; i++){
 		printf("%3d  %6.1f %10.3e %8.2f %12.1f %12.3e %12.3e (%10.3e)\n",i,a0+a1*(float)i,rho[i],spincut[i],a0+a1*(float)i, sigext[i],sig[i],dsig[i]);
 	}
-        
     
 	/* *************************************** */
 	/* Calculating integral, fasten seat-belts */
@@ -267,7 +267,7 @@ int main()
 				x1 = x1 + T_eg(eg)*rho_ex(ex) * ((It+1.) / sig_ex(ex)) * exp(-(It+1.)*(It+1.) / sig_ex(ex));
 				x2 = x2 + T_eg(eg)*rho_ex(ex) * ((It+2.) / sig_ex(ex)) * exp(-(It+2.)*(It+2.) / sig_ex(ex));
                 
-//                printf("Eg = %6.0f   T = %14.7f     Ex = %6.0f  Rho = %14.7f  Sig = %14.7f  x2 = %14.7f\n",eg, T_eg(eg),ex, rho_ex(ex),sig_ex(ex),T_eg(eg)*rho_ex(ex) * ((It+2.) / sig_ex(ex)) * exp(-(It+2.)*(It+2.) / sig_ex(ex)) );
+// printf("Eg = %6.0f   T = %14.7f     Ex = %6.0f  Rho = %14.7f  Sig = %14.7f  x2 = %14.7f\n",eg, T_eg(eg),ex, rho_ex(ex),sig_ex(ex),T_eg(eg)*rho_ex(ex) * ((It+2.) / sig_ex(ex)) * exp(-(It+2.)*(It+2.) / sig_ex(ex)) );
 
                 
                 eg = eg + de;
@@ -475,14 +475,14 @@ int main()
 		exit(0);
 	}
 	else {
-		for (i = 0; i < dim; i++){
+		for (i = 0; i < dim*10; i++){
 			transext[i] = 2.*PI*sigext[i]/Fac;
             if(transext[i] < eps ) transext[i] = 0;
 			fprintf(fp, " %14.7e \n", transext[i]);
 		}
 	}
 	fclose(fp);	
-	printf("File transext.nrm (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",dim-1,a0,a1);
+	printf("File transext.nrm (0:%d) written to disk, (a0,a1)=(%8.2f,%8.3f)\n",10*dim-1,a0,a1);
 	
 	makeroot1();
 	return(0);
@@ -560,7 +560,7 @@ float T_eg(float eg)
     eg2 = a0 + a1*(float)i2;
     
     Teg = sigext[i1] + (sigext[i2] - sigext[i1])*((eg - eg1)/(eg2-eg1));
-    if (Teg < 0.000000000001)Teg = 0.000000000001;
+    if (Teg < 0.00000000000001)Teg = 0.00000000000001;
     return Teg;
 }
 
@@ -600,7 +600,8 @@ int makeroot1(){
 		fprintf(fp,"	TCanvas *c1 = new TCanvas(\"c1\",\"Gamma-ray strength function\",600,600);\n");	
 		fprintf(fp,"	TH2F *h = new TH2F(\"h\",\" \",10,0.0,%8.3f,10,%9.3e,%9.3e);\n",Emax+0.5,Tmin,Tmax);
 		fprintf(fp,"	ifstream strengthfile(\"strength.nrm\");\n");
-		fprintf(fp,"	float strength[%d],strengtherr[%d],energy[%d],energyerr[%d],trans[%d];\n",dim+1,dim+1,dim+1,dim+1,dim+1);
+		fprintf(fp,"	float strength[%d],strengtherr[%d],energyerr[%d];\n",dim+1,dim+1,dim+1);
+        fprintf(fp,"	float energy[%d],trans[%d];\n",10*dim+1,10*dim+1);
 		fprintf(fp,"	int i = 0;\n");
 		fprintf(fp,"   float a0 = %8.4f;\n",a0/1000.); 
 		fprintf(fp,"   float a1 = %8.4f;\n",a1/1000.);

@@ -9,7 +9,7 @@ else
 endif
       FFLAGS = -O2 -ffixed-line-length-132   
         LIBS = -lX11 -lXt -lm -lreadline -lncurses
-   LIB_PATHS = -L/usr/X11R6/lib
+   LIB_PATHS = -L/usr/X11R6/lib -L /opt/X11/lib
    C_INCLUDE = -I/usr/X11R6/include
 
           AR = ar cr
