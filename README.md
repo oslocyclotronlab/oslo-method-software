@@ -130,7 +130,7 @@ This should open the mama prompt, as well as a graphical window.
 
 # Ensuring ROOT support
 
-It is recommended to use ROOT 5, *not* ROOT 6, as there are some backward compatibility issues.
+To our knowledge, we have now ensured compatibility with ROOT 6 in all cases. Please report if you (still) experience backward compatibility issues.
 
 To get ROOT working the environment variable ROOTSYS needs to be defined. If you have ROOT installed, you should already have this, 
 since it is set automatically by the script /path-to-root/bin/thisroot.sh, which you should be calling in some startup script, e.g. in your
