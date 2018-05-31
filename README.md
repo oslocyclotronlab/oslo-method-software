@@ -133,8 +133,7 @@ This should open the mama prompt, as well as a graphical window.
 To our knowledge, we have now ensured compatibility with ROOT 6 in all cases. Please report if you (still) experience backward compatibility issues.
 
 To get ROOT working the environment variable ROOTSYS needs to be defined. If you have ROOT installed, you should already have this, 
-since it is set automatically by the script /path-to-root/bin/thisroot.sh, which you should be calling in some startup script, e.g. in your
-/home/user/.profile file.
+since it is set automatically by the script /path-to-root/bin/thisroot.sh, which you should be calling in some startup script, e.g. in your `/home/user/.profile` file (other common names are `.bashrc`, `.bash_profile`).
 
 You can test whether you have the correct setup by typing
 
@@ -149,26 +148,6 @@ or
 	source /path-to-root/bin/thisroot.csh # for csh shell users
 
 to the end of it.
-
-## ROOT for Mac
-
-For MacOSX users, you might need the following to get ROOT working:
-
-	export LC_ALL="C" 
-	export LANG="en_US" 
-	export TERM=xterm-color
-	
-	PS1='$USER@\H:\W>'
-
-For ROOT, not installed by Fink  
-	export ROOTSYS=/Applications/root
-	export PATH=$ROOTSYS/bin:$PATH
-	export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
-	export LDYLD_LIBRARY_PATH=$ROOTSYS/lib:$DYLD_LIBRARY_PATH
-
-For Fink
-	test -r /sw/bin/init.sh && . /sw/bin/init.sh
-
 
 *****************************
 
