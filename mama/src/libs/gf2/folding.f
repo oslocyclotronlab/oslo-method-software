@@ -563,6 +563,9 @@ C Updating comment in the heading of spectrum file
       REAL ETAB7(30),FTAB7(30),ER7(30),FE7(30),SE7(30),DE7(30),ANN7(30),EW7(30),FW7(30),ESE7(30),EDE7(30)
       REAL ETAB8(30),FTAB8(30),ER8(30),FE8(30),SE8(30),DE8(30),ANN8(30),EW8(30),FW8(30),ESE8(30),EDE8(30)
       REAL ETAB9(51),FTAB9(51),ER9(51),FE9(51),SE9(51),DE9(51),ANN9(51),EW9(99),FW9(99),ESE9(51),EDE9(51)
+      REAL ETAB10(36),FTAB10(36),ER10(36),FE10(36),SE10(36),DE10(36),ANN10(36),EW10(13),FW10(13),ESE10(51),EDE10(51)
+      REAL ETAB11(36),FTAB11(36),ER11(36),FE11(36),SE11(36),DE11(36),ANN11(36),EW11(99),FW11(99),ESE11(51),EDE11(51)
+
 
       CHARACTER ENA1(30)*5
       CHARACTER ENA2(30)*5
@@ -573,6 +576,8 @@ C Updating comment in the heading of spectrum file
       CHARACTER ENA7(30)*5
       CHARACTER ENA8(30)*5
       CHARACTER ENA9(51)*5
+      CHARACTER ENA10(36)*5
+      CHARACTER ENA11(36)*5
 
       DATA RDIM/0/
 
@@ -603,38 +608,38 @@ C peaks. The numbers are counts of the various RESP-EXP-122,...
 C response functions. The counts are converted into probabilities
 C pf, pc, ps, pd, pa in the RSPNAI routine.
       DATA ER1/ 122.,   245.,    344.,   511.,  662.,  1173.,
-     1        1333.,  1836.,   2615.,  4439., 15110.,        0,0,0,0,0,0,0,0,0,
+     +        1333.,  1836.,   2615.,  4439., 15110.,        0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ESE1/ 511.,   511.,    511.,    511.,  511.,  511.,
-     1           511.,   511.,    511.,    511.,  511.,      0,0,0,0,0,0,0,0,0,
+     +           511.,   511.,    511.,    511.,  511.,      0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA EDE1/1022.,  1022.,   1022.,   1022.,  1022., 1022.,
-     1          1022.,  1022.,   1022.,   1022.,  1022.,     0,0,0,0,0,0,0,0,0,
+     +          1022.,  1022.,   1022.,   1022.,  1022.,     0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
 
       DATA FE1/ 1223,   3362,   13709,  44717,248445,  26670,
-     1        25228,  33413,   18737,  69767,  30608,0,0,0,0,0,0,0,0,0,
+     +        25228,  33413,   18737,  69767,  30608,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA SE1/    0,      0,       0,      0,     0,      0,
-     1            0,    898,    1731,  25000, 153009,0,0,0,0,0,0,0,0,0,
+     +            0,    898,    1731,  25000, 153009,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA DE1/    0,      0,       0,      0,     0,      0,
-     1            0,      0,       0,   2008, 122407,0,0,0,0,0,0,0,0,0,
+     +            0,      0,       0,   2008, 122407,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ANN1/   0,      0,       0,      0,     0,      0,
-     1            0,    534,    1579,   3000,  30000,0,0,0,0,0,0,0,0,0,
+     +            0,    534,    1579,   3000,  30000,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ENA1/'122',  '245',   '344',  '511', '662', '1173',
-     1        '1333', '1836',  '2615', '4439','15110','0','0','0','0','0','0','0','0','0',
+     +        '1333', '1836',  '2615', '4439','15110','0','0','0','0','0','0','0','0','0',
      +    '0','0','0','0','0','0','0','0','0','0'/
 
 C This block of data represents energies (EW) and half-width (FW) of the
 C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
       DATA EW1/  122.,   245.,    344.,   779.,  964.,  1332.,
-     1         1408.,  2000.,   4000., 15000.,0,0,0,0,0,0,0,0,0,0,
+     +         1408.,  2000.,   4000., 15000.,0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA FW1/  2.21,   1.83,   1.73,   1.18,  1.09,   1.00,
-     1          0.99,   0.84,   0.60,   0.32,0,0,0,0,0,0,0,0,0,0,
+     +          0.99,   0.84,   0.60,   0.32,0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
 
 C*****************************************************************
@@ -643,14 +648,6 @@ C*****************************************************************
 
 C This block of data represents energies (ETAB) and the total efficience (FTAB)
 C at that energy for 5"x5" NaI. Normalized to 1 at 1.33 MeV
-c      DATA  ETAB2   /
-c     +       0.    ,50.     ,100.      ,200.      ,400.,
-c     +     500.    ,700.    ,1000.     ,1500.     ,2000.,  3000.,
-c     +    5000.   ,7000.   ,10000.    ,20000.                    ,0,0,0,0,0/
-c      DATA  FTAB2   /
-c     +       1,       1,        1,      1,      1,
-c     +    1,    1,     1,      1.00,     1.,   1,
-c     +   1.,   1.,    1.,     1.                     ,0,0,0,0,0/
 
       DATA  ETAB2   /
      +       0.    ,50.     ,100.      ,200.      ,400.,
@@ -670,39 +667,39 @@ C peaks. The numbers are counts of the various RESP-EXP-122,...
 C response functions. The counts are converted into probabilities
 C pf, pc, ps, pd, pa in the RSPNAI routine.
        DATA ER2/   360.,   847.,   1238.,   1779., 2839., 3089.,
-     1           4497.,  6130.,   9900.,  15000.,              0,0,0,0,0,0,0,0,0,0,
+     +           4497.,  6130.,   9900.,  15000.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ESE2/  511.,   511.,    511.,    505.,  491.,  490.,
-     1            493.,   500.,    511.,    511.,              0,0,0,0,0,0,0,0,0,0,
+     +            493.,   500.,    511.,    511.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA EDE2/ 1022.,  1030.,   1022.,   1022.,  994.,  985.,
-     1            982.,   995.,   1050.,   1022.,              0,0,0,0,0,0,0,0,0,0,
+     +            982.,   995.,   1050.,   1022.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
 
 
       DATA FE2/ 144693, 438132,   12013,   11901,  1905, 26494,
-     1             451,    114,     100,    2000,              0,0,0,0,0,0,0,0,0,0,
+     +             451,    114,     100,    2000,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA SE2/      0,      0,     100,     346,   307,  4074,
-     1             163,     79,     103,    1500,              0,0,0,0,0,0,0,0,0,0,
+     +             163,     79,     103,    1500,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA DE2/      0,      0,       0,       0,    92,   737,
-     1              33,     22,      42,     400,              0,0,0,0,0,0,0,0,0,0,
+     +              33,     22,      42,     400,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ANN2/     0,      0,       0,     150,    70,  1471,
-     1              40,     30,      70,    1600,              0,0,0,0,0,0,0,0,0,0,
+     +              40,     30,      70,    1600,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ENA2/ '360',  '847',  '1238',  '1779','2839','3089',
-     1          '4497', '6130',  '9900', '15000',              '0','0','0','0','0','0','0','0','0','0',
+     +          '4497', '6130',  '9900', '15000',              '0','0','0','0','0','0','0','0','0','0',
      +    '0','0','0','0','0','0','0','0','0','0'/
 
 C This block of data represents energies (EW) and half-width (FW) of the
 C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
       DATA EW2/   360.,    847.,   1238.,   1779.,  2839., 3089.,
-     1           4497.,   6130.,   9900.,  15000.,             0,0,0,0,0,0,0,0,0,0,
+     +           4497.,   6130.,   9900.,  15000.,             0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA FW2/   2.38,    1.30,    1.04,   0.873,  0.793, 0.780,
-     1           0.667,   0.655,   0.514,   0.428,             0,0,0,0,0,0,0,0,0,0,
+     +           0.667,   0.655,   0.514,   0.428,             0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
 
 C*****************************************************************
@@ -730,39 +727,39 @@ C response functions. The counts are converted into probabilities
 C pf, pc, ps, pd, pa in the RSPNAI routine.
 
       DATA ER3/   360.,   847.,   1238.,   1779., 2839., 3089.,
-     1           4497.,  6130.,   9900.,  15000.,              0,0,0,0,0,0,0,0,0,0,
+     +           4497.,  6130.,   9900.,  15000.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ESE3/  511.,   511.,    511.,    505.,  491.,  490.,
-     1            493.,   500.,    511.,    511.,              0,0,0,0,0,0,0,0,0,0,
+     +            493.,   500.,    511.,    511.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA EDE3/ 1022.,  1030.,   1022.,   1022.,  994.,  985.,
-     1            982.,   995.,   1050.,   1022.,              0,0,0,0,0,0,0,0,0,0,
+     +            982.,   995.,   1050.,   1022.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
 
 
       DATA FE3/ 144693,2394850,   55988,  494227, 77000, 76115,
-     1           10541,  26554,    3443,    2000,              0,0,0,0,0,0,0,0,0,0,
+     +           10541,  26554,    3443,    2000,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA SE3/      0,      0,     880,   14652,  6552,  9894,
-     1            3206,  12242,    1183,    1500,              0,0,0,0,0,0,0,0,0,0,
+     +            3206,  12242,    1183,    1500,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA DE3/      0,      0,       0,       0,     0,  2104,
-     1             600,   1573,     454,     400,              0,0,0,0,0,0,0,0,0,0,
+     +             600,   1573,     454,     400,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ANN3/     0,      0,       0,    7748,  6039,  6000,
-     1            3627,   6793,    2574,    1600,              0,0,0,0,0,0,0,0,0,0,
+     +            3627,   6793,    2574,    1600,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA ENA3/ '360',  '847',  '1238',  '1779','2839','3089',
-     1          '4497', '6130',  '9900', '15000',              '0','0','0','0','0','0','0','0','0','0',
+     +          '4497', '6130',  '9900', '15000',              '0','0','0','0','0','0','0','0','0','0',
      +    '0','0','0','0','0','0','0','0','0','0'/
 
 C This block of data represents energies (EW) and half-width (FW) of the
 C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
       DATA EW3/   360.,    847.,   1238.,   1779.,  2839., 3089.,
-     1           4497.,   6130.,   9900.,  15000.,             0,0,0,0,0,0,0,0,0,0,
+     +           4497.,   6130.,   9900.,  15000.,             0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
       DATA FW3/   1.85,    1.29,    1.03,   0.913,  0.780, 0.765,
-     1           0.657,   0.554,   0.507,   0.433,             0,0,0,0,0,0,0,0,0,0,
+     +           0.657,   0.554,   0.507,   0.433,             0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
 
 C*****************************************************************
@@ -870,8 +867,6 @@ C pf, pc, ps, pd, pa in the RSPNAI routine.
      +     1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022.,
      +     1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022.,
      +     1022.,         0,0,0,0,0,0,0,0,0/
-
-
       DATA FE5/
      +   6.64E+04,1.20E+05,1.39E+05,1.51E+05,1.59E+05,1.60E+05,1.57E+05,1.59E+05,1.56E+05,1.53E+05,
      +   1.50E+05,1.46E+05,1.41E+05,1.37E+05,1.35E+05,1.25E+05,1.22E+05,1.13E+05,1.08E+05,9.97E+04,
@@ -942,8 +937,6 @@ C pf, pc, ps, pd, pa in the RSPNAI routine.
      +     1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022.,
      +     1022., 1022., 1022., 0., 0., 0., 0., 0., 0., 0.,
      +     0.,         0,0,0,0,0,0,0,0,0/
-
-
       DATA FE6/
      +   6.77E+04,5.58E+04,3.52E+04,2.65E+04,2.17E+04,1.86E+04,1.39E+04,1.13E+04,8.02E+03,6.08E+03,
      +   3.92E+03,2.64E+03,1.92E+03,0,0,0,0,0,0,0,
@@ -975,8 +968,6 @@ C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
      +     7.8386, 4.4151, 2.5849, 1.8641, 1.4895, 1.2658, 0.9048, 0.7394, 0.4961, 0.4182,
      +     0.2822, 0.2331, 0.1916, 0.0, 0., 0., 0., 0., 0., 0.,
      +     0.,         0,0,0,0,0,0,0,0,0/
-
-
 
 
 
@@ -1015,8 +1006,6 @@ C pf, pc, ps, pd, pa in the RSPNAI routine.
      +     1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022., 1022.,
      +     1022., 1022., 1022., 0., 0., 0., 0., 0., 0., 0.,
      +     0.,         0,0,0,0,0,0,0,0,0/
-
-
       DATA FE7/
      +   5.05E+04,6.34E+04,3.01E+04,2.22E+04,1.81E+04,1.81E+04,1.14E+04,8.89E+03,6.20E+03,4.83E+03,
      +   2.88E+03,1.92E+03,1.36E+03,0,0,0,0,0,0,0,
@@ -1048,10 +1037,6 @@ C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
      +     7.8386, 4.4151, 2.5849, 1.8641, 1.4895, 1.2658, 0.9048, 0.7394, 0.4961, 0.4182,
      +     0.2822, 0.2331, 0.1916, 0.0, 0., 0., 0., 0., 0., 0.,
      +     0.,         0,0,0,0,0,0,0,0,0/
-
-
-
-
 
 
 C*****************************************************************
@@ -1115,8 +1100,6 @@ C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
      +     2.5351, 1.564, 1.3414, 1.1943, 1.0994, 1.0319, 0.9860, 0.9339, 0.9101, 0.8893,
      +     0.8640, 0.847, 0.8283, 0.8038, 0.7797, 0.6841, 0.6651, 0.6373, 0.5997, 0.5768,
      +     0.5720, 0.540, 0.5020, 0.4834, 0.4685,  0,0,0,0,0/
-
-
 
 
 
@@ -1262,11 +1245,225 @@ C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
      +    5.4116E-01/
 
 
+C*****************************************************************
+C*******************   Afrodite 2015 Clover   ********************
+C*****************************************************************
+C This block of data represents energies (ETAB) and the total efficience (FTAB)
+C at that energy.
+C Response functions simulated by GEANT4 (Fabio, Gry and Vetle, May 2018)
+C Normalized to 1 at 1.33 MeV.
+      DATA ETAB10/
+     +    1.0000E+02, 2.0000E+02, 4.0000E+02, 6.0000E+02, 8.0000E+02, 1.0000E+03, 1.2000E+03,
+     +    1.4000E+03, 1.6000E+03, 1.8000E+03, 2.0000E+03, 2.2000E+03, 2.4000E+03, 2.6000E+03,
+     +    2.8000E+03, 3.0000E+03, 3.2000E+03, 3.4000E+03, 3.6000E+03, 3.8000E+03, 4.0000E+03,
+     +    4.2000E+03, 4.4000E+03, 4.6000E+03, 4.8000E+03, 5.0000E+03, 5.2000E+03, 5.4000E+03,
+     +    5.6000E+03, 5.8000E+03, 6.0000E+03, 6.2000E+03, 6.4000E+03, 6.6000E+03, 6.8000E+03,
+     +    7.0000E+03/
+      DATA FTAB10/
+     +    1.2114E+00, 1.2830E+00, 1.1430E+00, 1.0689E+00, 1.0266E+00, 1.0169E+00, 9.9580E-01,
+     +    1.0021E+00, 9.8559E-01, 9.8578E-01, 9.7218E-01, 9.6246E-01, 9.5522E-01, 9.5234E-01,
+     +    9.4289E-01, 9.3669E-01, 9.2970E-01, 9.1683E-01, 9.1925E-01, 9.1989E-01, 9.0906E-01,
+     +    9.1087E-01, 9.1070E-01, 9.0300E-01, 9.1787E-01, 8.9855E-01, 9.0144E-01, 8.8768E-01,
+     +    9.0185E-01, 8.9661E-01, 8.9276E-01, 9.0539E-01, 8.9383E-01, 8.9428E-01, 8.8941E-01,
+     +    9.0411E-01/
+
+C This bolck of data represents energies (ER) for measured resp. func.,
+C intensities of full-energy (FE), single-escape (SE), double-escape (DE) and 511
+C peaks. The numbers are counts of the various
+C response functions. The counts are converted into probabilities
+C pf, pc, ps, pd, pa in the RSPNAI routine.
+      DATA ER10/
+     +    1.0000E+02, 2.0000E+02, 4.0000E+02, 6.0000E+02, 8.0000E+02, 1.0000E+03, 1.2000E+03,
+     +    1.4000E+03, 1.6000E+03, 1.8000E+03, 2.0000E+03, 2.2000E+03, 2.4000E+03, 2.6000E+03,
+     +    2.8000E+03, 3.0000E+03, 3.2000E+03, 3.4000E+03, 3.6000E+03, 3.8000E+03, 4.0000E+03,
+     +    4.2000E+03, 4.4000E+03, 4.6000E+03, 4.8000E+03, 5.0000E+03, 5.2000E+03, 5.4000E+03,
+     +    5.6000E+03, 5.8000E+03, 6.0000E+03, 6.2000E+03, 6.4000E+03, 6.6000E+03, 6.8000E+03,
+     +    7.0000E+03/
+      DATA ESE10/
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511./
+      DATA EDE10/
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022./
+      DATA FE10/
+     +    1.5215E+04, 1.2334E+04, 1.0296E+04, 8.5938E+03, 7.7230E+03, 7.0140E+03, 6.6472E+03,
+     +    6.2062E+03, 5.8282E+03, 5.4438E+03, 5.2032E+03, 4.8792E+03, 4.6930E+03, 4.3590E+03,
+     +    4.2168E+03, 4.1170E+03, 3.8912E+03, 3.6915E+03, 3.4460E+03, 3.4152E+03, 3.1888E+03,
+     +    3.0520E+03, 3.0295E+03, 2.9272E+03, 2.8602E+03, 2.6958E+03, 2.6842E+03, 2.5655E+03,
+     +    2.4165E+03, 2.4015E+03, 2.3662E+03, 2.2560E+03, 2.1382E+03, 2.1710E+03, 2.0440E+03,
+     +    2.0640E+03/
+      DATA SE10/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00,
+     +    1.8500E+01, 4.7250E+01, 9.3250E+01, 1.0450E+02, 1.2800E+02, 2.2650E+02, 2.6975E+02,
+     +    3.0400E+02, 3.1425E+02, 3.8925E+02, 3.9200E+02, 3.9825E+02, 4.7300E+02, 4.7475E+02,
+     +    5.7300E+02, 5.3325E+02, 6.2025E+02, 6.3550E+02, 6.1750E+02, 6.2575E+02, 6.3975E+02,
+     +    7.0425E+02, 7.1700E+02, 6.9750E+02, 6.5775E+02, 7.2600E+02, 6.9325E+02, 7.0225E+02,
+     +    7.0125E+02/
+      DATA DE10/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00,
+     +    1.6250E+01, 2.5000E-01, 9.5000E+00, 2.2000E+01, 2.3500E+01, 2.2250E+01, 2.7250E+01,
+     +    6.0750E+01, 4.2000E+01, 5.7250E+01, 7.0250E+01, 6.8000E+01, 4.6250E+01, 4.2000E+01,
+     +    7.8250E+01, 6.8000E+01, 8.5250E+01, 8.6000E+01, 6.7250E+01, 7.7250E+01, 7.8750E+01,
+     +    7.1000E+01, 8.9500E+01, 6.9750E+01, 8.4500E+01, 9.6000E+01, 8.9000E+01, 7.5000E+01,
+     +    7.0000E+01/
+      DATA ANN10/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 4.5000E+00,
+     +    5.7500E+01, 1.0050E+02, 1.6250E+02, 2.3125E+02, 3.7925E+02, 4.1200E+02, 4.4825E+02,
+     +    5.2575E+02, 6.5725E+02, 7.4800E+02, 7.9375E+02, 8.3100E+02, 9.2975E+02, 9.5450E+02,
+     +    1.0053E+03, 1.0518E+03, 1.0680E+03, 1.1412E+03, 1.1668E+03, 1.1802E+03, 1.2682E+03,
+     +    1.3528E+03, 1.2285E+03, 1.2708E+03, 1.2470E+03, 1.3138E+03, 1.3685E+03, 1.3765E+03,
+     +    1.4232E+03/
+      DATA ENA10/
+     +      '100',  '200',  '400',  '600',  '800', '1000', '1200', '1400',
+     +      '1600', '1800', '2000', '2200', '2400', '2600', '2800',
+     +      '3000', '3200', '3400', '3600', '3800', '4000', '4200',
+     +      '4400', '4600', '4800', '5000', '5200', '5400', '5600',
+     +      '5800', '6000', '6200', '6400', '6600', '6800', '7000'/
+
+C This block of data represents energies (EW) and half-width (FW) of the
+C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
+C Taken from Clovers NotreDame 2015
+      DATA EW10/
+     +      100.,  200.,  400.,  600.,  800., 1000., 1500., 2000., 3000., 4000.,
+     +     6000., 8000.,10000./
+      DATA FW10/
+     +     7.8386, 4.4151, 2.5849, 1.8641, 1.4895, 1.2658, 0.9048, 0.7394, 0.4961, 0.4182,
+     +     0.2822, 0.2331, 0.1916/
 
 C*****************************************************************
+C*******************  Afrodite 2015 LaBr  ************************
 C*****************************************************************
-C*****************************************************************
+C This block of data represents energies (ETAB) and the total efficience (FTAB)
+C at that energy.
+C Response functions simulated by GEANT4 (Fabio, Gry and Vetle, May 2018)
+C Normalized to 1 at 1.33 MeV.
+      DATA ETAB11/
+     +    1.0000E+02, 2.0000E+02, 4.0000E+02, 6.0000E+02, 8.0000E+02, 1.0000E+03, 1.2000E+03,
+     +    1.4000E+03, 1.6000E+03, 1.8000E+03, 2.0000E+03, 2.2000E+03, 2.4000E+03, 2.6000E+03,
+     +    2.8000E+03, 3.0000E+03, 3.2000E+03, 3.4000E+03, 3.6000E+03, 3.8000E+03, 4.0000E+03,
+     +    4.2000E+03, 4.4000E+03, 4.6000E+03, 4.8000E+03, 5.0000E+03, 5.2000E+03, 5.4000E+03,
+     +    5.6000E+03, 5.8000E+03, 6.0000E+03, 6.2000E+03, 6.4000E+03, 6.6000E+03, 6.8000E+03,
+     +    7.0000E+03/
+      DATA FTAB11/
+     +    1.2344E+00, 1.2881E+00, 1.2096E+00, 1.1340E+00, 1.0811E+00, 1.0459E+00, 1.0127E+00,
+     +    9.9358E-01, 9.6016E-01, 9.4418E-01, 9.2876E-01, 9.1568E-01, 9.0193E-01, 8.9394E-01,
+     +    8.9192E-01, 8.8753E-01, 8.8480E-01, 8.8143E-01, 8.7377E-01, 8.7199E-01, 8.7626E-01,
+     +    8.6976E-01, 8.7690E-01, 8.6724E-01, 8.7142E-01, 8.7026E-01, 8.6655E-01, 8.6176E-01,
+     +    8.7490E-01, 8.8528E-01, 8.7991E-01, 8.8231E-01, 8.7951E-01, 8.7061E-01, 8.8606E-01,
+     +    8.7971E-01/
 
+C This bolck of data represents energies (ER) for measured resp. func.,
+C intensities of full-energy (FE), single-escape (SE), double-escape (DE) and 511
+C peaks. The numbers are counts of the various
+C response functions. The counts are converted into probabilities
+C pf, pc, ps, pd, pa in the RSPNAI routine.
+      DATA ER11/
+     +    1.0000E+02, 2.0000E+02, 4.0000E+02, 6.0000E+02, 8.0000E+02, 1.0000E+03, 1.2000E+03,
+     +    1.4000E+03, 1.6000E+03, 1.8000E+03, 2.0000E+03, 2.2000E+03, 2.4000E+03, 2.6000E+03,
+     +    2.8000E+03, 3.0000E+03, 3.2000E+03, 3.4000E+03, 3.6000E+03, 3.8000E+03, 4.0000E+03,
+     +    4.2000E+03, 4.4000E+03, 4.6000E+03, 4.8000E+03, 5.0000E+03, 5.2000E+03, 5.4000E+03,
+     +    5.6000E+03, 5.8000E+03, 6.0000E+03, 6.2000E+03, 6.4000E+03, 6.6000E+03, 6.8000E+03,
+     +    7.0000E+03/
+      DATA ESE11/
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511.,  511.,  511.,  511.,  511.,  511.,
+     +      511.,  511./
+      DATA EDE11/
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022., 1022., 1022., 1022., 1022., 1022.,
+     +     1022., 1022./
+      DATA FE11/
+     +    3.6291E+04, 3.2706E+04, 2.6694E+04, 2.2477E+04, 1.9602E+04, 1.7936E+04, 1.6690E+04,
+     +    1.5443E+04, 1.4420E+04, 1.3591E+04, 1.2769E+04, 1.2112E+04, 1.1517E+04, 1.1141E+04,
+     +    1.0720E+04, 1.0236E+04, 9.7605E+03, 9.5275E+03, 9.1255E+03, 8.9272E+03, 8.6258E+03,
+     +    8.2278E+03, 7.9630E+03, 7.6890E+03, 7.6052E+03, 7.3895E+03, 7.2135E+03, 7.1358E+03,
+     +    6.8458E+03, 6.7332E+03, 6.7812E+03, 6.4275E+03, 6.2108E+03, 6.0340E+03, 5.9172E+03,
+     +    5.8312E+03/
+      DATA SE11/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 2.7500E+01,
+     +    8.9250E+01, 2.4825E+02, 4.4100E+02, 6.5100E+02, 8.6800E+02, 1.0498E+03, 1.1898E+03,
+     +    1.4855E+03, 1.6308E+03, 1.8090E+03, 1.9182E+03, 2.1998E+03, 2.3332E+03, 2.4788E+03,
+     +    2.6190E+03, 2.7898E+03, 2.7655E+03, 2.8478E+03, 2.9052E+03, 3.0370E+03, 3.1570E+03,
+     +    3.1702E+03, 3.2672E+03, 3.2302E+03, 3.2152E+03, 3.3370E+03, 3.3528E+03, 3.4200E+03,
+     +    3.3408E+03/
+      DATA DE11/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 6.7750E+01,
+     +    7.5000E+00, 7.1500E+01, 4.6250E+01, 5.9750E+01, 1.4000E+02, 1.7775E+02, 2.1200E+02,
+     +    2.1400E+02, 2.3150E+02, 2.9725E+02, 3.1375E+02, 3.3250E+02, 3.5750E+02, 3.6125E+02,
+     +    4.2900E+02, 4.0350E+02, 4.0475E+02, 3.9975E+02, 4.2350E+02, 4.6425E+02, 3.9300E+02,
+     +    4.6375E+02, 4.7175E+02, 4.4725E+02, 5.0775E+02, 4.8550E+02, 4.5525E+02, 4.6900E+02,
+     +    4.8025E+02/
+      DATA ANN11/
+     +    0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00, 0.0000E+00,
+     +    3.0000E+01, 5.4750E+01, 1.4500E+02, 1.2575E+02, 2.3325E+02, 2.8150E+02, 3.3850E+02,
+     +    4.1950E+02, 4.2750E+02, 4.8075E+02, 5.6350E+02, 5.7800E+02, 6.4625E+02, 6.6850E+02,
+     +    6.7700E+02, 7.9300E+02, 8.0375E+02, 9.1375E+02, 9.0825E+02, 9.3525E+02, 9.4025E+02,
+     +    9.6450E+02, 9.7000E+02, 1.0462E+03, 1.0242E+03, 1.0328E+03, 1.1038E+03, 1.1170E+03,
+     +    1.1482E+03/
+      DATA ENA11/
+     +      '100',  '200',  '400',  '600',  '800', '1000', '1200', '1400',
+     +      '1600', '1800', '2000', '2200', '2400', '2600', '2800',
+     +      '3000', '3200', '3400', '3600', '3800', '4000', '4200',
+     +      '4400', '4600', '4800', '5000', '5200', '5400', '5600',
+     +      '5800', '6000', '6200', '6400', '6600', '6800', '7000'/
+
+C This block of data represents energies (EW) and half-width (FW) of the
+C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
+C Taken from OSCAR LaBr 2017
+      DATA EW11/
+     +    2.0000E+02, 3.0000E+02, 4.0000E+02, 5.0000E+02, 6.0000E+02, 7.0000E+02, 8.0000E+02,
+     +    9.0000E+02, 1.0000E+03, 1.1000E+03, 1.2000E+03, 1.3000E+03, 1.4000E+03, 1.5000E+03,
+     +    1.6000E+03, 1.7000E+03, 1.8000E+03, 1.9000E+03, 2.0000E+03, 2.1000E+03, 2.2000E+03,
+     +    2.3000E+03, 2.4000E+03, 2.5000E+03, 2.6000E+03, 2.7000E+03, 2.8000E+03, 2.9000E+03,
+     +    3.0000E+03, 3.1000E+03, 3.2000E+03, 3.3000E+03, 3.4000E+03, 3.5000E+03, 3.6000E+03,
+     +    3.7000E+03, 3.8000E+03, 3.9000E+03, 4.0000E+03, 4.1000E+03, 4.2000E+03, 4.3000E+03,
+     +    4.4000E+03, 4.5000E+03, 4.6000E+03, 4.7000E+03, 4.8000E+03, 4.9000E+03, 5.0000E+03,
+     +    5.1000E+03, 5.2000E+03, 5.3000E+03, 5.4000E+03, 5.5000E+03, 5.6000E+03, 5.7000E+03,
+     +    5.8000E+03, 5.9000E+03, 6.0000E+03, 6.1000E+03, 6.2000E+03, 6.3000E+03, 6.4000E+03,
+     +    6.5000E+03, 6.6000E+03, 6.7000E+03, 6.8000E+03, 6.9000E+03, 7.0000E+03, 7.1000E+03,
+     +    7.2000E+03, 7.3000E+03, 7.4000E+03, 7.5000E+03, 7.6000E+03, 7.7000E+03, 7.8000E+03,
+     +    7.9000E+03, 8.0000E+03, 8.1000E+03, 8.2000E+03, 8.3000E+03, 8.4000E+03, 8.5000E+03,
+     +    8.6000E+03, 8.7000E+03, 8.8000E+03, 8.9000E+03, 9.0000E+03, 9.1000E+03, 9.2000E+03,
+     +    9.3000E+03, 9.4000E+03, 9.5000E+03, 9.6000E+03, 9.7000E+03, 9.8000E+03, 9.9000E+03,
+     +    1.0000E+04/
+      DATA FW11/
+     +    6.8383E+00, 4.5067E+00, 3.3466E+00, 2.6553E+00, 2.1985E+00, 1.8757E+00, 1.6368E+00,
+     +    1.4538E+00, 1.3099E+00, 1.1945E+00, 1.1004E+00, 1.0227E+00, 9.5780E-01, 9.0314E-01,
+     +    8.5674E-01, 8.1710E-01, 7.8304E-01, 7.5363E-01, 7.2814E-01, 7.0595E-01, 6.8657E-01,
+     +    6.6959E-01, 6.5468E-01, 6.4155E-01, 6.2996E-01, 6.1970E-01, 6.1062E-01, 6.0255E-01,
+     +    5.9537E-01, 5.8898E-01, 5.8329E-01, 5.7820E-01, 5.7365E-01, 5.6958E-01, 5.6594E-01,
+     +    5.6267E-01, 5.5975E-01, 5.5712E-01, 5.5477E-01, 5.5266E-01, 5.5076E-01, 5.4906E-01,
+     +    5.4754E-01, 5.4617E-01, 5.4494E-01, 5.4385E-01, 5.4287E-01, 5.4200E-01, 5.4122E-01,
+     +    5.4053E-01, 5.3992E-01, 5.3938E-01, 5.3890E-01, 5.3849E-01, 5.3813E-01, 5.3781E-01,
+     +    5.3755E-01, 5.3732E-01, 5.3713E-01, 5.3697E-01, 5.3685E-01, 5.3675E-01, 5.3668E-01,
+     +    5.3664E-01, 5.3661E-01, 5.3661E-01, 5.3662E-01, 5.3665E-01, 5.3670E-01, 5.3676E-01,
+     +    5.3683E-01, 5.3691E-01, 5.3701E-01, 5.3711E-01, 5.3722E-01, 5.3734E-01, 5.3747E-01,
+     +    5.3760E-01, 5.3774E-01, 5.3789E-01, 5.3804E-01, 5.3819E-01, 5.3835E-01, 5.3851E-01,
+     +    5.3868E-01, 5.3885E-01, 5.3902E-01, 5.3919E-01, 5.3936E-01, 5.3954E-01, 5.3972E-01,
+     +    5.3989E-01, 5.4007E-01, 5.4025E-01, 5.4043E-01, 5.4062E-01, 5.4080E-01, 5.4098E-01,
+     +    5.4116E-01/
 
 
 C Reading dimension and energy calibration
@@ -1297,18 +1494,21 @@ C Reading dimension and energy calibration
   11  FORMAT( 'Cal. coeff. a1 (keV/ch)  <',F8.1,'>:',$)
       CALL READF(5,a1)
       WRITE(6,*)' '
-      IRSP=3
+      IRSP=9
       WRITE(6,*)'List of response functions. The ones marked old, are not recommended'
-      WRITE(6,*)'(1) NaI_old,    CACTUS 5x5 inch before 2012'
-      WRITE(6,*)'(2) LaBr_2012,  Campaign 4x8 inch LaBr from Milano in CACTUS frame'
-      WRITE(6,*)'(3) NaI_2012,   CACTUS 5x5 inch after 2012'
-      WRITE(6,*)'(4) Seg2,       SuN at MSU 2014, with target inside  (2 cm?), GEANT4'
-      WRITE(6,*)'(5) Seg3,       SuN at MSU 2014, with target outside (2 cm?), GEANT4'
-      WRITE(6,*)'(6) Clover_old, Notre Dame 2015, GEANT4'
-      WRITE(6,*)'(7) Clover,     Notre Dame 2015, GEANT4'
-      WRITE(6,*)'(8) Seg23,      SuN at MSU 2015 with target in center, GEANT4'
-      WRITE(6,*)'(9) LaBr_2017,  OSCAR at OCL 2017 with 15 LaBr, GEANT4'
-      WRITE(6,*)'(10) Gaussian'
+      WRITE(6,*)' (0) Gaussian'
+      WRITE(6,*)' (1) NaI_old         CACTUS 5x5 inch before 2012'
+      WRITE(6,*)' (2) LaBr_2012       Campaign 4x8 inch LaBr from Milano in CACTUS frame'
+      WRITE(6,*)' (3) NaI_2012        CACTUS 5x5 inch after 2012'
+      WRITE(6,*)' (4) Seg2            SuN at MSU 2014, with target inside  (2 cm?), GEANT4'
+      WRITE(6,*)' (5) Seg3            SuN at MSU 2014, with target outside (2 cm?), GEANT4'
+      WRITE(6,*)' (6) Clover_old      Notre Dame 2015, GEANT4'
+      WRITE(6,*)' (7) Clover          Notre Dame 2015, GEANT4'
+      WRITE(6,*)' (8) Seg23           SuN at MSU 2015 with target in center, GEANT4'
+      WRITE(6,*)' (9) LaBr_2017       OSCAR at OCL 2017 with 15 LaBr, GEANT4'
+      WRITE(6,*)'(10) Afrodite_Clover iThemba 2015, 8 Clover, GEANT4 (2018)'
+      WRITE(6,*)'(11) Afrodite_LaBr   iThemba 2015, 2 LaBr, GEANT4 (2018)'
+
       WRITE(6,2)IRSP
    2  FORMAT(/'Choose your response function <',I1,'>:',$)
       CALL READI(5,IRSP)
@@ -1555,6 +1755,54 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
        ENDDO
       ENDIF
 
+        IF(IRSP.EQ.10)THEN         !Afrodite 2015 Clover
+            IW  =13
+            ITAB=36
+            IR  =36
+        DO i=1,IW
+            EW(i)=EW10(i)
+            FW(i)=FW10(i)
+        ENDDO
+        DO i=1,ITAB
+            ETAB(i)=ETAB10(i)
+            FTAB(i)=FTAB10(i)
+        ENDDO
+        DO i=1,IR
+            ER(i)=ER10(i)
+            ESE(i)=ESE10(i)
+            EDE(i)=EDE10(i)
+            FE(i)=FE10(i)
+            SE(i)=SE10(i)
+            DE(i)=DE10(i)
+            ANN(i)=ANN10(i)
+            ENA(i)=ENA10(i)
+        ENDDO
+      ENDIF
+
+      IF(IRSP.EQ.11)THEN         !Afrodite 2015 LaBr
+            IW  =99
+            ITAB=36
+            IR  =36
+        DO i=1,IW
+            EW(i)=EW11(i)
+            FW(i)=FW11(i)
+        ENDDO
+        DO i=1,ITAB
+            ETAB(i)=ETAB11(i)
+            FTAB(i)=FTAB11(i)
+        ENDDO
+        DO i=1,IR
+            ER(i)=ER11(i)
+            ESE(i)=ESE11(i)
+            EDE(i)=EDE11(i)
+            FE(i)=FE11(i)
+            SE(i)=SE11(i)
+            DE(i)=DE11(i)
+            ANN(i)=ANN11(i)
+            ENA(i)=ENA11(i)
+        ENDDO
+      ENDIF
+
 
       DO I=0,2048
 C Finding FWHMs as function of full energy, normalized to 1 at 1.33 MeV
@@ -1585,8 +1833,8 @@ C Finding total efficiency as function of full energy
         IF(EffTot(I).LE.0.00001)EffTot(I)=0.00001                           
       ENDDO
 
-      IF(IRSP.LE.9)CALL RSPDetector(IRSP)
-      IF(IRSP.EQ.10)CALL RSPGAUSS
+      IF(IRSP.LE.11)CALL RSPDetector(IRSP)
+      IF(IRSP.EQ.0)CALL RSPGAUSS
  
       END
 
@@ -1640,7 +1888,7 @@ C     FEn,SEn,..is normalized intensities (not counts of raw specter)
       CHARACTER*20 DATTIM
 
       ISTAT=0
-      
+       
 C The measured response functions have energy 
 C calibration b0 (keV) and b1(keV/ch) 
 C Response matrix R(i,j) has maximum dimensions 2048x2048
@@ -1649,11 +1897,13 @@ C Response matrix R(i,j) has maximum dimensions 2048x2048
         b1  =10.
         FWHM=6.0
       ENDIF
+
       IF(IRSP.EQ.2)THEN   !LaBr2012
         b0  =0.0
         b1  =7.0
         FWHM=3.73
       ENDIF
+
       IF(IRSP.EQ.3)THEN   !NaI2012
         b0  =0.0
         b1  =7.0
@@ -1665,6 +1915,7 @@ C Response matrix R(i,j) has maximum dimensions 2048x2048
         b1  =7.0
         FWHM=5.92
       ENDIF
+
       IF(IRSP.EQ.5)THEN   !Seg3_MSU_2014
         b0  =3.0
         b1  =7.0
@@ -1675,7 +1926,8 @@ C Response matrix R(i,j) has maximum dimensions 2048x2048
         b0  =2.5
         b1  =3.0
         FWHM=0.361
-        ENDIF
+      ENDIF
+
       IF(IRSP.EQ.7)THEN   !Clover_NotreDame_2015
         b0  =2.5
         b1  =3.0
@@ -1692,6 +1944,18 @@ C Response matrix R(i,j) has maximum dimensions 2048x2048
         b0  =0.0
         b1  =5.0
         FWHM=3.0
+      ENDIF
+
+      IF(IRSP.EQ.10)THEN   !Afrodite 2015 Clover
+        b0  =0.0
+        b1  =5.0
+        FWHM=0.361         !Taken from Clover_NotreDame_2015
+      ENDIF
+
+      IF(IRSP.EQ.11)THEN   !Afrodite 2015 LaBr
+        b0  =0.0
+        b1  =5.0
+        FWHM=3.0           !Taken from OSCAR 2017 LaBr
       ENDIF
 
       ical=6
@@ -1756,19 +2020,20 @@ C Reading the two spectra to use for interpolation
 C But first we check if they already have been read
         IF(I1.NE.ISTAT) THEN
           INP=20
-          IF(IRSP.EQ.1)call makepath("UIO_APPLICATIONS","mama/resp/nai_old/RESP-EXP-"//ENA(I1),filnam)
-          IF(IRSP.EQ.2)call makepath("UIO_APPLICATIONS","mama/resp/labr2012/sc"//ENA(I1),filnam)
-          IF(IRSP.EQ.3)call makepath("UIO_APPLICATIONS","mama/resp/nai2012/sc"//ENA(I1),filnam)
-          IF(IRSP.EQ.4)call makepath("UIO_APPLICATIONS","mama/resp/seg2/se"//ENA(I1),filnam)
-          IF(IRSP.EQ.5)call makepath("UIO_APPLICATIONS","mama/resp/seg3/se"//ENA(I1),filnam)
-          IF(IRSP.EQ.6)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v1/ss"//ENA(I1),filnam)
-          IF(IRSP.EQ.7)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v2/sm"//ENA(I1),filnam)
-          IF(IRSP.EQ.8)call makepath("UIO_APPLICATIONS","mama/resp/seg23/sc"//ENA(I1),filnam)
-          IF(IRSP.EQ.9)call makepath("UIO_APPLICATIONS","mama/resp/oscar2017/cmp"//ENA(I1),filnam)
-
+          IF(IRSP.EQ. 1)call makepath("UIO_APPLICATIONS","mama/resp/nai_old/RESP-EXP-"//ENA(I1),filnam)
+          IF(IRSP.EQ. 2)call makepath("UIO_APPLICATIONS","mama/resp/labr2012/sc"//ENA(I1),filnam)
+          IF(IRSP.EQ. 3)call makepath("UIO_APPLICATIONS","mama/resp/nai2012/sc"//ENA(I1),filnam)
+          IF(IRSP.EQ. 4)call makepath("UIO_APPLICATIONS","mama/resp/seg2/se"//ENA(I1),filnam)
+          IF(IRSP.EQ. 5)call makepath("UIO_APPLICATIONS","mama/resp/seg3/se"//ENA(I1),filnam)
+          IF(IRSP.EQ. 6)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v1/ss"//ENA(I1),filnam)
+          IF(IRSP.EQ. 7)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v2/sm"//ENA(I1),filnam)
+          IF(IRSP.EQ. 8)call makepath("UIO_APPLICATIONS","mama/resp/seg23/sc"//ENA(I1),filnam)
+          IF(IRSP.EQ. 9)call makepath("UIO_APPLICATIONS","mama/resp/oscar2017/cmp"//ENA(I1),filnam)
+          IF(IRSP.EQ.10)call makepath("UIO_APPLICATIONS","mama/resp/afrodite_clover2015/cmp"//ENA(I1),filnam)
+          IF(IRSP.EQ.11)call makepath("UIO_APPLICATIONS","mama/resp/afrodite_labr2015/cmp"//ENA(I1),filnam)
 
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
-          dim=-1                      !Gives no headeroutput
+          dim=-1                      !Gives no header output
           DO i=0,4095 
             Spec(i) = 0.
           ENDDO
@@ -1777,19 +2042,20 @@ C But first we check if they already have been read
             Fs1(i)=Spec(i)
           ENDDO
           CLOSE(INP)
-          IF(IRSP.EQ.1)call makepath("UIO_APPLICATIONS","mama/resp/nai_old/RESP-EXP-"//ENA(I2),filnam)
-          IF(IRSP.EQ.2)call makepath("UIO_APPLICATIONS","mama/resp/labr2012/sc"//ENA(I2),filnam)
-          IF(IRSP.EQ.3)call makepath("UIO_APPLICATIONS","mama/resp/nai2012/sc"//ENA(I2),filnam)
-          IF(IRSP.EQ.4)call makepath("UIO_APPLICATIONS","mama/resp/seg2/se"//ENA(I2),filnam)
-          IF(IRSP.EQ.5)call makepath("UIO_APPLICATIONS","mama/resp/seg3/se"//ENA(I2),filnam)
-          IF(IRSP.EQ.6)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v1/ss"//ENA(I2),filnam)
-          IF(IRSP.EQ.7)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v2/sm"//ENA(I2),filnam)
-          IF(IRSP.EQ.8)call makepath("UIO_APPLICATIONS","mama/resp/seg23/sc"//ENA(I2),filnam)
-          IF(IRSP.EQ.9)call makepath("UIO_APPLICATIONS","mama/resp/oscar2017/cmp"//ENA(I2),filnam)
-
+          IF(IRSP.EQ. 1)call makepath("UIO_APPLICATIONS","mama/resp/nai_old/RESP-EXP-"//ENA(I2),filnam)
+          IF(IRSP.EQ. 2)call makepath("UIO_APPLICATIONS","mama/resp/labr2012/sc"//ENA(I2),filnam)
+          IF(IRSP.EQ. 3)call makepath("UIO_APPLICATIONS","mama/resp/nai2012/sc"//ENA(I2),filnam)
+          IF(IRSP.EQ. 4)call makepath("UIO_APPLICATIONS","mama/resp/seg2/se"//ENA(I2),filnam)
+          IF(IRSP.EQ. 5)call makepath("UIO_APPLICATIONS","mama/resp/seg3/se"//ENA(I2),filnam)
+          IF(IRSP.EQ. 6)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v1/ss"//ENA(I2),filnam)
+          IF(IRSP.EQ. 7)call makepath("UIO_APPLICATIONS","mama/resp/clover2015v2/sm"//ENA(I2),filnam)
+          IF(IRSP.EQ. 8)call makepath("UIO_APPLICATIONS","mama/resp/seg23/sc"//ENA(I2),filnam)
+          IF(IRSP.EQ. 9)call makepath("UIO_APPLICATIONS","mama/resp/oscar2017/cmp"//ENA(I2),filnam)
+          IF(IRSP.EQ.10)call makepath("UIO_APPLICATIONS","mama/resp/afrodite_clover2015/cmp"//ENA(I2),filnam)
+          IF(IRSP.EQ.11)call makepath("UIO_APPLICATIONS","mama/resp/afrodite_labr2015/cmp"//ENA(I2),filnam)
 
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
-          dim=-1                      !Gives no headeroutput
+          dim=-1                      !Gives no header output
           DO i=0,4095 
             Spec(i) = 0.
           ENDDO
@@ -1804,8 +2070,8 @@ C Finding highest counts in Compton spectrum
 C Then take 70 % and put in from channel 0 up to
 C first time spectrum exeeds this threshold
 
-C We drop low energy fix when GEANT is used (seg2, seg3, seg23, clover, oscar)
-          IF(IRSP.GE.4.AND.IRSP.LE.9)GO TO 1111
+C We drop low energy fix when GEANT is used (seg2, seg3, seg23, clover, oscar, afrodite etc)
+          IF(IRSP.GE.4.AND.IRSP.LE.11)GO TO 1111
           maxi=(300.-b0)/b1 + 0.5
           h1=0.
           h2=0.
@@ -1830,6 +2096,7 @@ C We drop low energy fix when GEANT is used (seg2, seg3, seg23, clover, oscar)
             endif
          enddo
  1111    CONTINUE
+
 C Streching/compressing Fs1 and Fs2 to fit calibration a0 and a1
           idim1=4096
           idim2=4096
@@ -1920,32 +2187,42 @@ C up to 1000 keV
         IF(MinEgam.GT.Lbsc)Lbsc=MinEgam
         IF(MaxEgam.LT.Lcom)Lcom=MaxEgam
         Lcom=Lcom-1
- 
+        IF(Lcom.LT.0)Lcom=0
+
 C Starting to interpolate between spectra F1 and F2. This concerns the
 C Compton and backscattering events, and is not easy: The main rule
 C is that we interpolate between points in the spectra that represent
 C the same angle theta of Compton scattering. However, up to back.sc. or
 C at 0.1*Egamma, we interpolate between the same energies.
 C One-to-one interpolation up to Lbsc
+
+
         DO I=MinEgam,Lbsc
           f1i=F1(I)
           f2i=F2(I)
-          if1i=(0.5*MaxE1)+0.5
-          if2i=(0.5*MaxE2)+0.5
-          IF(I.GT.if1i)f1i=F1(if1i)
-          IF(I.GT.if2i)f2i=F2(if2i)
+c         if1i=(0.5*MaxE1)+0.5         Corrected June 8 2018/MG
+c         if2i=(0.5*MaxE2)+0.5         (Artificial threshold on gammas if a0 < e.g. -1000 keV)
+c         IF(I.GT.if1i)f1i=F1(if1i)
+c         IF(I.GT.if2i)f2i=F2(if2i)
+          IF(I.GT.MaxE1)f1i=F1(MaxE1)  ! The new 2 lines
+          IF(I.GT.MaxE2)f2i=F2(MaxE2)  ! The new 2 lines
           F(I)=F(I)+f1i+((f2i-f1i)*(Egam-E1)/(E2-E1))
           IF(F(I).LT.0.)F(I)=0.
         ENDDO
         i1Top=I-1
         i2Top=I-1
         iTop =I-1
+
 C Interpolating between equal theta for 0 up to 180 dgrs.
         DO I=Lbsc+1,Lcom
           E=a0+I*a1
           IF(E.GT.0.1.AND.E.LT.Ecom)THEN
             if(ABS(Egam-E).GT.0.001)z=E/((Egam/511.)*(Egam-E))
             Theta=ACOS(1.-z)
+c New, to catch the lilit values
+            IF(Theta.LT.0)Theta=0.001
+            IF(Theta.GT.3.141592654)Theta=3.142
+
             IF(Theta.GT.0.AND.Theta.LT.3.141592654)THEN
               IF1=((EnEl(E1,Theta)-a0))/a1+0.5
               IF2=((EnEl(E2,Theta)-a0))/a1+0.5
