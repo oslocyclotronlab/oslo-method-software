@@ -40,6 +40,7 @@ float b1, b2;
 float exe1=0.5, sige1=2.7, exe2=-1, sige2=7.7;
 double rhoobs[MAXDIM],sigma2[MAXDIM];
 double start_spin,stop_spin=30.;
+float part_res=0;
 
 int   searchAalpha();
 int   searchT();
@@ -55,6 +56,7 @@ int   extendL();
 int   extendH();
 float Tlow, Thigh, Tx, dTx, E0x, chi2_lowx, chi2_highx;
 void  nld_talys();
+void  ReadSmooth(float); // Read and smooth discrete states...
 double rhoexp(double);
 double spin_distribution(double, double);
 double temperature(double);
@@ -116,6 +118,7 @@ int main()
     printf(" | Modified: 15 Mar 2017 New spin cutoff opt.(5) from Alexander |\r\n");
     printf(" | Modified: 01 Apr 2017 The upbend gSF is now lin. in log.     |\r\n");
     printf(" | Modified: 17 Apr 2017 TALYS nld spin-formated outputfile     |\r\n");
+    printf(" | Modified: 13 Jun 2018 Smoothing of discrete level density    |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
 	
@@ -282,7 +285,7 @@ int main()
         }
 	i++;
     }
-    diml = l-1;
+    diml=l;//diml = l-1;
     fclose(fp);
     printf("Binning %d known levels:\n",diml);
     printf(" No   Ex(keV)   NoLev   RhoLeV(1/MeV)\n");
@@ -402,6 +405,8 @@ int main()
         sscanf(line, " %f \n", &red);
         fgets_ignore(line,sizeof(line),fp);
         sscanf(line, " %f %f %f %f \n", &exe1, &sige1, &exe2, &sige2);
+        fgets_ignore(line,sizeof(line),fp);
+        sscanf(line, " %f \n", &part_res);
         fclose(fp);
     }
     // For the first time running
@@ -411,6 +416,16 @@ int main()
     /* *********************** */
     /* Asking for input values */
     /* *********************** */
+
+    printf("To allow for a 'apples' to 'apples' comparison of the level density\n");
+    printf("we will smooth the descrete level density with the particle resolution.\n");
+    printf("If you don't want any smoothing, set to zero.\n");
+    printf("Particle FWHM (keV) <%6.3f>:",part_res);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f",&part_res);
+    if (part_res > 0){
+        ReadSmooth(part_res);
+    }
     
     printf("Mass number A             <%3d>:",(int)Amass);
     fgets_ignore(line,sizeof(line),stdin);
@@ -961,6 +976,7 @@ int main()
         fprintf(fp, " %d %f %f \n", ansH, abestH, bbestH);
         fprintf(fp, " %f \n",red);
         fprintf(fp, " %f %f %f %f \n", exe1, sqrt(sige1), exe2, sqrt(sige2));
+        fprintf(fp, " %f \n", part_res);
     }
     fclose(fp);
     
@@ -1757,6 +1773,39 @@ void nld_talys(){
     }
     fclose(fp);
     printf("File talys_nld_cnt.txt written to disk. The table has %2d rows and 35 columns.\n",i);
+}
+
+void ReadSmooth(float resolution)
+{
+    float sigma = resolution/(2*sqrt(2*log(2)));
+
+    // At this point we have already read all the discrete states.
+    // Now we will set everything to zero and start over.
+    for (i = 0 ; i < dim ; ++i){
+        rholev[i] = 0;
+    }
+
+    for (i = 0 ; i < diml ; ++i){
+
+        for (j = 0 ; j < dim ; ++j){
+            emin = a0 + (j-0.5)*a1;
+            emax = a0 + (j+0.5)*a1;
+
+            double w0 = erf( (levenergy[i] - emax)/(sqrt(2)*sigma) );
+            double w1 = erf( (levenergy[i] - emin)/(sqrt(2)*sigma) );
+            //printf("%2.3f %2.3f\n", (levenergy[i] - emax)/(sqrt(2)*sigma), (levenergy[i] - emin)/(sqrt(2)*sigma));
+            double weight = 0.5*(w1 - w0)/(a1*1e-3);
+
+            
+
+            rholev[j] += weight;
+        }
+    }
+    printf("Binning %d known levels:\n",diml);
+    printf(" No   Ex(keV)   RhoLeV(1/MeV)\n");
+    for (i = 0 ; i < dim ; ++i){
+        printf("%3d  %8.2f  %14.3e\n",i,a0+a1*i,rholev[i]);
+    }
 }
 
 double spin_distribution(double Ex, double I){
