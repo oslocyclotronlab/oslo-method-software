@@ -77,7 +77,7 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                    C O U N T I N G   1.8.4                   |\r\n");
+    printf(" |                    C O U N T I N G   1.8.4.2                 |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |Program to normalize experimental nuclear level density (NLD) |\r\n");
     printf(" |  to NLD from known low energy levels and NLD extracted from  |\r\n");
@@ -116,6 +116,7 @@ int main()
     printf(" | Modified: 15 Mar 2017 New spin cutoff opt.(5) from Alexander |\r\n");
     printf(" | Modified: 01 Apr 2017 The upbend gSF is now lin. in log.     |\r\n");
     printf(" | Modified: 17 Apr 2017 TALYS nld spin-formated outputfile     |\r\n");
+    printf(" | Modified: 09 Jul 2018 Print chi2 instead of chi2_red at T fit|\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
 	
@@ -685,14 +686,17 @@ int main()
         i = (int)(Tlow + .5);
         Tlow = (float)i/100.;
         Thigh = 1.2*T;
-        dTx = 0.01;
+        dTx = 0.005;
         Tx = Tlow;
+        int freeL = L2 - L1;
+        int freeH = H2 - H1;
         while( Tx <= Thigh){
             E0x = Bn - Tx*(log(rho0)+log(Tx));
             searchT();
             printf("\n T = %7.3f, E0 = %7.3f, Chi2_low = %9.3f, Chi2_high = %9.3f",Tx, E0x, chi2_lowx, chi2_highx);
             Tx = Tx + dTx;
         }
+        printf("\nNumber of free parameter in regions: Lower: %i \t upper: %i", freeL, freeH);
         
         printf("\n\nYou may change your choice of T from the info of the Chi2 tests above");
         printf("\nTemperature parameter T (MeV) <%7.3f>:",TRobin);
@@ -1649,7 +1653,6 @@ float anchorL(){
             dc2 =sqrt(dc2*dc2 + 1.*1.);
             if(dc2 > 0) sum = sum + ((cc-rhoL)*(cc-rhoL)/dc2);
         }
-        sum = sum/free;
         if(j == 499){
             sum0 = sum;
         }
@@ -1679,7 +1682,6 @@ float anchorH(){
             rhofg(Amass, ex, a, Tx, E1, E0x, isig, itemp, imodel, red, b1, b2);
             if(dc2 > 0) sum=sum+(cc-eta*rhox)*(cc-eta*rhox)/dc2;
         }
-        sum = sum/free;
         if(j == 499){
             sum0 = sum;
         }
