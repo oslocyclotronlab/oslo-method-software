@@ -116,7 +116,7 @@ int main()
     printf(" | Modified: 15 Mar 2017 New spin cutoff opt.(5) from Alexander |\r\n");
     printf(" | Modified: 01 Apr 2017 The upbend gSF is now lin. in log.     |\r\n");
     printf(" | Modified: 17 Apr 2017 TALYS nld spin-formated outputfile     |\r\n");
-    printf(" | Modified: 09 Jul 2018 Print chi2 instead of chi2_red at T fit|\r\n");
+    printf(" | Modified: 02 Aug 2018 Update printing of chi2 fit T          |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
 	
@@ -688,15 +688,19 @@ int main()
         Thigh = 1.2*T;
         dTx = 0.005;
         Tx = Tlow;
-        int freeL = L2 - L1;
-        int freeH = H2 - H1;
+        // int freeL = L2 - L1 - 1; // -1 due to one fit parameter
+        int freeH = H2 - H1 - 1; // -1 due to one fit parameter
+        printf("\n Fitting T to chosen data in the higher region");
+        printf("\n     T                E0          Chi2          Chi2/free");
         while( Tx <= Thigh){
             E0x = Bn - Tx*(log(rho0)+log(Tx));
             searchT();
-            printf("\n T = %7.3f, E0 = %7.3f, Chi2_low = %9.3f, Chi2_high = %9.3f",Tx, E0x, chi2_lowx, chi2_highx);
+            // printf("\n T = %7.3f, E0 = %7.3f, Chi2 = %9.3f, Chi2/freeH = %9.3f",Tx, E0x, chi2_highx, chi2_highx/freeH);
+            printf("\n %7.3f \t %9.3f \t %7.3f \t %7.3f",Tx, E0x, chi2_highx, chi2_highx/freeH);
             Tx = Tx + dTx;
         }
-        printf("\nNumber of free parameter in regions: Lower: %i \t upper: %i", freeL, freeH);
+        printf("\nNumber of free parameter in upper region: %i", freeH);
+        printf("\nNote: Uncertainty can be rerived from intersection with (Chi2_min + 1)");
         
         printf("\n\nYou may change your choice of T from the info of the Chi2 tests above");
         printf("\nTemperature parameter T (MeV) <%7.3f>:",TRobin);
@@ -1639,7 +1643,7 @@ float anchorL(){
     float corr, corrbest=0., sum, sumbest, sum0=0., cc, free, dc2, rhoL;
     corr = 0.25;
     sumbest = 1.0e+21;
-    free = (float)L2 - (float)L1;
+    free = (float)L2 - (float)L1 - 1;
     if (free <= 0)free = 1.;
     for(j = 0; j <= 3750; j++){
         corr = corr + 0.001;
@@ -1669,7 +1673,7 @@ float anchorH(){
     float corr, corrbest=0., sum, sumbest, sum0=0., cc, free, dc2;
     corr = 0.25;
     sumbest = 1.0e+21;
-    free = (float)H2 - (float)H1;
+    free = (float)H2 - (float)H1 -1;
     if (free <= 0)free = 1.;
     for(j = 0; j <= 3750; j++){
         corr = corr + 0.001;
