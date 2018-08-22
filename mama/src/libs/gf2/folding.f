@@ -1138,7 +1138,7 @@ C Response function read from folder below
       ! FW9    FWHMs (NB! Normalized to 1. for 1.33 MeV)
 
       DO row = 1, NLines
-        READ (1,*,iostat=stat) ETAB9(row), FTAB9(row), FW9(row), FE9(row), SE9(row), DE9(row), Ann9(row)
+        READ (1,*,iostat=stat) ETAB9(row), FW9(row), FTAB9(row), FE9(row), SE9(row), DE9(row), Ann9(row)
         if ( stat > 0 ) then
           stop 'An error occured while reading the file'
         elseif ( stat < 0 ) then
@@ -1158,12 +1158,14 @@ C Response function read from folder below
        write (ENA9(row),'(I0)') int(ETAB9(row))
       END DO
 
-      ! Print *, "Eg", ETAB9 
-      ! Print *, "FHWM", FTAB9
+      ! Print *, "Eg", ETAB9
+      ! Print *, "FHWM", FW9
+      ! Print *, "TotEff_NoThreshold", FTAB9
       ! Print *, "FE", FE9
       ! Print *, "Se", SE9
       ! Print *, "DE",DE9
       ! Print *, "Ann",ANN9
+      ! Print *, ETAB9(50:53), FW9(50:53), FTAB9(50:53), FE9(50:53), SE9(50:53), DE9(50:53), Ann9(50:53)
 
       ! deallocate(ETAB9)
       close(1)
