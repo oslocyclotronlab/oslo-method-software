@@ -1123,6 +1123,12 @@ C Response function read from folder below
       read(1,*) HeaderLine   ! Ignore line: HEADER
       read(1,*) NLines            ! Number of lines
       read(1,*) HeaderLine   ! Ignore line: HEADER
+
+      IF(NLines>SIZE(ETAB)) then 
+          print *, 'Response matrix read from disk has more rows then SIZE(ETAB)'
+          call EXIT(1)
+      ENDIF
+
       allocate( ETAB9(NLines),FTAB9(NLines),ER9(NLines),FE9(NLines),SE9(NLines),DE9(NLines),ANN9(NLines))
       allocate( EW9(NLines),FW9(NLines),ESE9(NLines),EDE9(NLines) )  ! further on you only have N-1 elements
 
