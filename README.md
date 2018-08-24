@@ -127,6 +127,17 @@ All executables are now installed in /path-to-software/oslo-method-software/prog
 This should open the mama prompt, as well as a graphical window.
 
 *****************************************************************************
+# Adding new response matrixes
+
+You can read reponse matrixes from file, which is now the default method. 
+
+You can add another response matrix by adding a folder in the mama/resp directory, eg "oscar2018", and export the enviroment variable `MAMA_MYRESP`
+
+     export MAMA_MYRESP=oscar2018
+
+If you do not set it manually, it will choose the `myresp` folder. You can take this folder as a starting point for adding you own response functions if you like.   
+
+*****************************************************************************
 
 # Ensuring ROOT support
 

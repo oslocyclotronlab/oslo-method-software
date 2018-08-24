@@ -903,6 +903,10 @@ C Calculating the length of a string of characters
          BASEENV="/Applications"
          CALL LENGDE(BASEENV,LB)
       end if
+      if(LB.eq.0.and.base.eq.'MAMA_MYRESP') then
+         BASEENV="myresp"
+         CALL LENGDE(BASEENV,LB)
+      end if
       FULL = BASEENV(1:LB)//'/'//TAIL
       RETURN
       END
