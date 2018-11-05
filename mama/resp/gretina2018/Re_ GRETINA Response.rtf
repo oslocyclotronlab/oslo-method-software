@@ -1,0 +1,815 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
+{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;\f1\fswiss\fcharset0 Helvetica;\f2\fnil\fcharset0 Calibri;
+\f3\froman\fcharset0 TimesNewRomanPSMT;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue0;\red9\green80\blue208;
+\red69\green60\blue204;\red20\green160\blue194;\red29\green184\blue14;\red24\green55\blue106;\red107\green0\blue109;
+}
+{\*\expandedcolortbl;;\csgray\c0;\cssrgb\c0\c0\c0;\cssrgb\c0\c41176\c85098;
+\cssrgb\c34510\c33725\c83922;\cssrgb\c0\c68627\c80392;\cssrgb\c7059\c75294\c5490;\cssrgb\c12157\c28627\c49020;\cssrgb\c50196\c0\c50196;
+}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs28 \cf2 From: "Spyrou, Artemis" <spyrou@nscl.msu.edu>\
+Subject: Re: GRETINA Response\
+Date: 24 September 2018 at 15:23:52 CEST\
+To: Magne Guttormsen <m.s.guttormsen@fys.uio.no>\
+Cc: Ann-Cecilie Larsen <a.c.larsen@fys.uio.no>\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1\fs24 \cf2 \
+\pard\pardeftab720\sl320\partightenfactor0
+
+\fs28 \cf3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 Hi Magne,\'a0\
+Thanks for sharing. I\'92m glad this seems to work well.\'a0\
+The numbers you are quoting seem reasonable to me as well. I\'92m not as familiar with GRETINA but I can ask Remco\'a0\
+Thanks\
+Artemis\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+Artemis Spyrou\
+Associate Professor of Physics,\'a0\
+Associate Director for Education\'a0and Outreach\
+National Superconducting\'a0Cyclotron Laboratory\
+Department of Physics &\'a0Astronomy\
+Michigan State University\
+640 S. Shaw Ln, Rm. 2008\
+517-908-7141\
+\pard\pardeftab720\sl320\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "mailto:spyrou@nscl.msu.edu"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 spyrou@nscl.msu.edu}}\
+https://people.nscl.msu.edu/~spyrou\
+twitter: @ArtemisSpyrou\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+\pard\pardeftab720\sl320\partightenfactor0
+\cf5 \strokec5 On Sep 24, 2018, at 6:58 AM, Magne Sveen Guttormsen <{\field{\*\fldinst{HYPERLINK "mailto:m.s.guttormsen@fys.uio.no"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 m.s.guttormsen@fys.uio.no}}> wrote:\
+Hi Artemis,\
+\
+this seems to work fine. A typical response function at 4 MeV looks like this:\
+\
+<Screen Shot 2018-09-24 at 12.35.09.png>\
+\
+When I project the response matrix on the y-axis, I get a function that looks like the total efficiency as function of incident gammas (see below).\
+For the unfolding, we need only this shape to get the gSF correct.\'a0\
+\
+From the projection (red spectrum) w detect totally about 1000 gammas for each bin of 10 keV incident gamma. For curiosity, how many gammas where simulated? \'a0I find a number of "32 million emitted gammas into one quad\'94\'a0in the e-mail from\'a0\'a0Lew Riley. Is that distributed on 0-8 MeV in 10 keV bins, giving 32000000/800= 40000 incident gammas, which results in about a total of 1/40 = 2.5% efficiency for e.g. a 4 MeV gamma? If \'93quad" means 1/4 of a sphere, we get about 10% efficiency for a total GRETINA, which seems reasonable.\
+\
+Cheers Magne\
+\
+<Screen Shot 2018-09-24 at 12.33.37.png>\
+\
+\
+\
+___________________________\
+Magne Guttormsen\
+Cell: \'a0 \'a0+47 45667796\
+Office: +47 22-856460\'a0\
+web: \'a0 \'a0{\field{\*\fldinst{HYPERLINK "http://folk.uio.no/magneg/"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 folk.uio.no/magneg/}}\
+Department of Physics\
+University of Oslo\
+Box 1048, Blindern\
+N-0316 Oslo\
+Norway\
+___________________________\
+\
+\
+\pard\pardeftab720\sl320\partightenfactor0
+\cf6 \strokec6 On 10 Sep 2018, at 21:29, Spyrou, Artemis <{\field{\*\fldinst{HYPERLINK "mailto:spyrou@nscl.msu.edu"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 spyrou@nscl.msu.edu}}> wrote:\
+Hi Magne,\'a0\
+I know you are busy with the paper so I don\'92t expect you to get to this any time soon. In any case I\'92m sending it so you have it in mind\'85.\
+I forward an email from Remco with a root file that has the response of GRETINA. They simulated a flat distribution of gamma rays and then the response.\'a0\
+In the attached root file you will find a 2D histogram called hemitted_detected. This is the emitted gamma energy vs the detected gamma energy. I think this is what you need, right?\
+It was done in a continuous energy distribution. If this is a problem please let me know and I can go back to Remco\
+\
+Thanks\
+Artemis\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+Artemis Spyrou\
+Associate Professor of Physics,\'a0\
+Associate Director for Education\'a0and Outreach\
+National Superconducting\'a0Cyclotron Laboratory\
+Department of Physics &\'a0Astronomy\
+Michigan State University\
+640 S. Shaw Ln, Rm. 2008\
+517-908-7141\
+\pard\pardeftab720\sl320\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "mailto:spyrou@nscl.msu.edu"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 spyrou@nscl.msu.edu}}\
+\pard\pardeftab720\sl320\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://people.nscl.msu.edu/~spyrou"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 https://people.nscl.msu.edu/~spyrou}}\
+twitter: @ArtemisSpyrou\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+\pard\pardeftab720\sl320\partightenfactor0
+\cf7 \strokec7 Begin forwarded message:\
+\
+\pard\pardeftab720\sl320\partightenfactor0
+
+\b \cf7 From: 
+\b0 "Zegers, Remco" <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 zegers@nscl.msu.edu}}>\
+
+\b Subject: FW: GRETINA Response
+\b0 \
+
+\b Date: 
+\b0 September 10, 2018 at 2:27:09 PM EDT\
+
+\b To: 
+\b0 "Spyrou, Artemis" <{\field{\*\fldinst{HYPERLINK "mailto:spyrou@nscl.msu.edu"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 spyrou@nscl.msu.edu}}>\
+\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Artemis,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 I forgot to send this to you. If you tell me exactly what is needed in terms of a response function, I can extract it from the root file. If it is easier for to have this in the form of a root file, perhaps this is sufficient? Let me know.
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Thanks,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 remco
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf7 From:
+\b0 \'a0Lew Riley [{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 mailto:lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Saturday, August 25, 2018 5:14 PM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+Hi Remco,\
+\'a0\
+Here's a first pass (32 million emitted gammas into one quad).\
+\'a0\
+The matrix is the histogram hemitted_detected, and hemitted and hdetected are the projections.\
+\'a0\
+Let me know (a) if this is what you actually need and (b) what you need as far as additional statistics.\
+\'a0\
+Cheers,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Sat, Aug 25, 2018 at 11:03 AM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Lew,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Yes, this was a forward kinematics experiment.
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Thanks,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Remco
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf7 From:
+\b0 \'a0Lew Riley [mailto:{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Saturday, August 25, 2018 11:02 AM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Cc:
+\b0 \'a0Weisshaar, Dirk <{\field{\*\fldinst{HYPERLINK "mailto:weisshaa@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 weisshaa@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+A stationary source is good enough for the 46Ti(t,3He) test case?\
+\'a0\
+Cheers,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Fri, Aug 24, 2018 at 10:18 PM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Lew,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 The flat distribution is perfectly fine.
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 The bare quad is fine for now. This is just for a test \'96 if we have an approved experiment, we can study more detail.
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 The idea is to do a (p,n) reaction (with the LH2 target!) in inverse kinematics and measure gammas in gretina. From the gamma measurements we can then determine the level densities. If it works, it would be really exciting.
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Thanks,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Remco
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf7 From:
+\b0 \'a0Lew Riley [mailto:{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Friday, August 24, 2018 10:14 PM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Cc:
+\b0 \'a0Weisshaar, Dirk <{\field{\*\fldinst{HYPERLINK "mailto:weisshaa@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 weisshaa@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+\'a0\
+It's actually easier to draw from a continuous flat distribution, if that's OK. Once I've set up the simulation, it'll become clear how fast it'll run.\
+\'a0\
+Do you want to account for absorption/scattering by dead material (the quad cryostat, the beam pipe, the mounting shell, e.g.), or do you just want bare GRETINA quad?\
+\'a0\
+Cheers,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Fri, Aug 24, 2018 at 8:30 PM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Lew,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 I suggest to make the simulation for one GRETINA detector, generate gammas from 0 to 8 MeV in 250 keV intervals (i.e. at 0, 250 keV, 500 keV etc). The response can be recorded in perhaps 10 keV bins. Perhaps 1 million events per 250-keV interval would be sufficient.\'a0 If it is not too time consuming to do more (e.g. 10 million per interval) that would be great.
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Any format is fine. Even text files of the response per interval would work.
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Many thanks,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Remco
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf7 From:
+\b0 \'a0Lew Riley [mailto:{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Friday, August 24, 2018 12:04 PM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Cc:
+\b0 \'a0Weisshaar, Dirk <{\field{\*\fldinst{HYPERLINK "mailto:weisshaa@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 weisshaa@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+Hi Remco,\
+\'a0\
+I can generate a matrix for you. Is root OK?\
+\'a0\
+Please specify the GRETINA configuration (which holes have modules), the bin width, the range of emitted gammas, and some way of deciding how many gammas to simulate (maybe a minimum number of counts in a particular channel?).\
+\'a0\
+Cheers,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Fri, Aug 24, 2018 at 8:07 AM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Lew,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Yes, that is correct. We are just doing a test by using 46Ti(t,3He+gamma) data at present. If it looks promising, I plan to submit a (p,n+gamma) proposal for the next GRETINA campaign.
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Cheers,
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Remco
+\f3\fs32 \cf7 \strokec7 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf7 \strokec7 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf7 From:
+\b0 \'a0Lew Riley [mailto:{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Tuesday, August 21, 2018 7:52 AM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Cc:
+\b0 \'a0Weisshaar, Dirk <{\field{\*\fldinst{HYPERLINK "mailto:weisshaa@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 weisshaa@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+Hi Remco,\
+\'a0\
+If I understand correctly what you want, this should be fairly straightforward to generate, but let's make sure I do understand. We can simulate a "white" energy source drawing from a flat gamma-ray energy distribution up to 8 MeV (or whatever upper limit you choose), and sort the response into a detected energy vs. emitted energy 2D histogram.\'a0 Is that what you have in mind?\
+\'a0\
+Best,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Mon, Aug 20, 2018 at 5:28 PM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+Dear Lew, Dirk,\
+\'a0\
+Do you have a simulated response function of a GRETINA module? (Energy detected vs energy of incoming gamma ray). I\'92d be interested in such a response function up to 8 MeV or so. We are trying to see if we can adopt the Oslo method to GRETINA data.\
+\'a0\
+Many thanks,\
+\'a0\
+Remco\
+\'a0\
+\'a0\
+\'a0\
+\'a0\
+Remco Zegers\
+NSCL Associate Director for Experimental Nuclear Science\
+Michigan State University\
+640 S. Shaw Lane\
+MI 48824 East Lansing\
+Tel: 517-908-7473\
+\pard\pardeftab720\sl360\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}\
+\'a0\
+\pard\pardeftab720\sl320\partightenfactor0
+
+\f1\fs28 \cf7 \
+\pard\pardeftab720\sl320\partightenfactor0
+\cf6 \strokec6 \
+<white_histos.root>\
+\pard\pardeftab720\sl320\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sl320\partightenfactor0
+\cf3 \strokec3 \
+\
+\page \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0 \cf2 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 From: "Spyrou, Artemis" <spyrou@nscl.msu.edu>\
+Subject: Fwd: GRETINA Response\
+Date: 10 September 2018 at 21:29:51 CEST\
+To: Magne Guttormsen <m.s.guttormsen@fys.uio.no>\
+Cc: Ann-Cecilie Larsen <a.c.larsen@fys.uio.no>\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1\fs24 \cf2 \
+\pard\pardeftab720\sl320\partightenfactor0
+
+\fs28 \cf3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 Hi Magne,\'a0\
+I know you are busy with the paper so I don\'92t expect you to get to this any time soon. In any case I\'92m sending it so you have it in mind\'85.\
+I forward an email from Remco with a root file that has the response of GRETINA. They simulated a flat distribution of gamma rays and then the response.\'a0\
+In the attached root file you will find a 2D histogram called hemitted_detected. This is the emitted gamma energy vs the detected gamma energy. I think this is what you need, right?\
+It was done in a continuous energy distribution. If this is a problem please let me know and I can go back to Remco\
+\
+Thanks\
+Artemis\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+Artemis Spyrou\
+Associate Professor of Physics,\'a0\
+Associate Director for Education\'a0and Outreach\
+National Superconducting\'a0Cyclotron Laboratory\
+Department of Physics &\'a0Astronomy\
+Michigan State University\
+640 S. Shaw Ln, Rm. 2008\
+517-908-7141\
+\pard\pardeftab720\sl320\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "mailto:spyrou@nscl.msu.edu"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 spyrou@nscl.msu.edu}}\
+https://people.nscl.msu.edu/~spyrou\
+twitter: @ArtemisSpyrou\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+\pard\pardeftab720\sl320\partightenfactor0
+\cf5 \strokec5 Begin forwarded message:\
+\
+\pard\pardeftab720\sl320\partightenfactor0
+
+\b \cf5 From: 
+\b0 "Zegers, Remco" <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 zegers@nscl.msu.edu}}>\
+
+\b Subject: FW: GRETINA Response
+\b0 \
+
+\b Date: 
+\b0 September 10, 2018 at 2:27:09 PM EDT\
+
+\b To: 
+\b0 "Spyrou, Artemis" <{\field{\*\fldinst{HYPERLINK "mailto:spyrou@nscl.msu.edu"}}{\fldrslt \cf4 \ul \ulc4 \strokec4 spyrou@nscl.msu.edu}}>\
+\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Artemis,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 I forgot to send this to you. If you tell me exactly what is needed in terms of a response function, I can extract it from the root file. If it is easier for to have this in the form of a root file, perhaps this is sufficient? Let me know.
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Thanks,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 remco
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf5 From:
+\b0 \'a0Lew Riley [{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 mailto:lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Saturday, August 25, 2018 5:14 PM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+Hi Remco,\
+\'a0\
+Here's a first pass (32 million emitted gammas into one quad).\
+\'a0\
+The matrix is the histogram hemitted_detected, and hemitted and hdetected are the projections.\
+\'a0\
+Let me know (a) if this is what you actually need and (b) what you need as far as additional statistics.\
+\'a0\
+Cheers,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Sat, Aug 25, 2018 at 11:03 AM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Lew,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Yes, this was a forward kinematics experiment.
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Thanks,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Remco
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf5 From:
+\b0 \'a0Lew Riley [mailto:{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Saturday, August 25, 2018 11:02 AM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Cc:
+\b0 \'a0Weisshaar, Dirk <{\field{\*\fldinst{HYPERLINK "mailto:weisshaa@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 weisshaa@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+A stationary source is good enough for the 46Ti(t,3He) test case?\
+\'a0\
+Cheers,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Fri, Aug 24, 2018 at 10:18 PM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Lew,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 The flat distribution is perfectly fine.
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 The bare quad is fine for now. This is just for a test \'96 if we have an approved experiment, we can study more detail.
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 The idea is to do a (p,n) reaction (with the LH2 target!) in inverse kinematics and measure gammas in gretina. From the gamma measurements we can then determine the level densities. If it works, it would be really exciting.
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Thanks,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Remco
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf5 From:
+\b0 \'a0Lew Riley [mailto:{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Friday, August 24, 2018 10:14 PM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Cc:
+\b0 \'a0Weisshaar, Dirk <{\field{\*\fldinst{HYPERLINK "mailto:weisshaa@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 weisshaa@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+\'a0\
+It's actually easier to draw from a continuous flat distribution, if that's OK. Once I've set up the simulation, it'll become clear how fast it'll run.\
+\'a0\
+Do you want to account for absorption/scattering by dead material (the quad cryostat, the beam pipe, the mounting shell, e.g.), or do you just want bare GRETINA quad?\
+\'a0\
+Cheers,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Fri, Aug 24, 2018 at 8:30 PM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Lew,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 I suggest to make the simulation for one GRETINA detector, generate gammas from 0 to 8 MeV in 250 keV intervals (i.e. at 0, 250 keV, 500 keV etc). The response can be recorded in perhaps 10 keV bins. Perhaps 1 million events per 250-keV interval would be sufficient.\'a0 If it is not too time consuming to do more (e.g. 10 million per interval) that would be great.
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Any format is fine. Even text files of the response per interval would work.
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Many thanks,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Remco
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf5 From:
+\b0 \'a0Lew Riley [mailto:{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Friday, August 24, 2018 12:04 PM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Cc:
+\b0 \'a0Weisshaar, Dirk <{\field{\*\fldinst{HYPERLINK "mailto:weisshaa@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 weisshaa@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+Hi Remco,\
+\'a0\
+I can generate a matrix for you. Is root OK?\
+\'a0\
+Please specify the GRETINA configuration (which holes have modules), the bin width, the range of emitted gammas, and some way of deciding how many gammas to simulate (maybe a minimum number of counts in a particular channel?).\
+\'a0\
+Cheers,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Fri, Aug 24, 2018 at 8:07 AM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Hi Lew,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Yes, that is correct. We are just doing a test by using 46Ti(t,3He+gamma) data at present. If it looks promising, I plan to submit a (p,n+gamma) proposal for the next GRETINA campaign.
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Cheers,
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 Remco
+\f3\fs32 \cf5 \strokec5 \
+
+\f2\fs29\fsmilli14667 \cf8 \strokec8 \'a0
+\f3\fs32 \cf5 \strokec5 \
+\pard\pardeftab720\sl360\partightenfactor0
+
+\f2\b\fs29\fsmilli14667 \cf5 From:
+\b0 \'a0Lew Riley [mailto:{\field{\*\fldinst{HYPERLINK "mailto:lriley@ursinus.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 lriley@ursinus.edu}}]\'a0\
+
+\b Sent:
+\b0 \'a0Tuesday, August 21, 2018 7:52 AM\
+
+\b To:
+\b0 \'a0Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}>\
+
+\b Cc:
+\b0 \'a0Weisshaar, Dirk <{\field{\*\fldinst{HYPERLINK "mailto:weisshaa@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 weisshaa@nscl.msu.edu}}>\
+
+\b Subject:
+\b0 \'a0Re: GRETINA Response
+\f3\fs32 \
+\'a0\
+Hi Remco,\
+\'a0\
+If I understand correctly what you want, this should be fairly straightforward to generate, but let's make sure I do understand. We can simulate a "white" energy source drawing from a flat gamma-ray energy distribution up to 8 MeV (or whatever upper limit you choose), and sort the response into a detected energy vs. emitted energy 2D histogram.\'a0 Is that what you have in mind?\
+\'a0\
+Best,\
+\'a0\
+Lew\
+______________________________________________\
+Lew Riley\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0\'a0\'a0{\field{\*\fldinst{HYPERLINK "http://webpages.ursinus.edu/lriley"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 http://webpages.ursinus.edu/lriley}}\
+Ursinus College Department of Physics and Astronomy\
+\'a0\
+\'a0\
+On Mon, Aug 20, 2018 at 5:28 PM Zegers, Remco <{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}> wrote:\
+Dear Lew, Dirk,\
+\'a0\
+Do you have a simulated response function of a GRETINA module? (Energy detected vs energy of incoming gamma ray). I\'92d be interested in such a response function up to 8 MeV or so. We are trying to see if we can adopt the Oslo method to GRETINA data.\
+\'a0\
+Many thanks,\
+\'a0\
+Remco\
+\'a0\
+\'a0\
+\'a0\
+\'a0\
+Remco Zegers\
+NSCL Associate Director for Experimental Nuclear Science\
+Michigan State University\
+640 S. Shaw Lane\
+MI 48824 East Lansing\
+Tel: 517-908-7473\
+\pard\pardeftab720\sl360\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "mailto:zegers@nscl.msu.edu"}}{\fldrslt \cf9 \ul \ulc9 \strokec9 zegers@nscl.msu.edu}}\
+\'a0\
+\pard\pardeftab720\sl320\partightenfactor0
+
+\f1\fs28 \cf5 \
+\pard\pardeftab720\sl320\partightenfactor0
+\cf3 \strokec3 \
+}

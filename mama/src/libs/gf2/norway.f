@@ -76,12 +76,6 @@ C Setting up colors for 3-dim landscape
 
       CALL FINIG
 
-      DO i=1,10000000                    !dummy and artificial wait
-        x=SIN(.022)
-        x=SIN(.022)
-        x=SIN(.022)
-      ENDDO 
-
 c      isystem=sleep(1)
       CALL SLEEP(1)
 
