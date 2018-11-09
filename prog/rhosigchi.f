@@ -30,7 +30,7 @@ C Stuff for the rhosig iteration
       DIMENSION Fi(0:511),Ff(0:511) 
       WRITE(6,*)' ________________________________________'
       WRITE(6,*)'|                                        |'
-      WRITE(6,*)'|         R H O S I G C H I  1.5.4       |'
+      WRITE(6,*)'|         R H O S I G C H I  1.5.5       |'
       WRITE(6,*)'|                                        |'
       WRITE(6,*)'|  Program to calculate level density    |'
       WRITE(6,*)'| Rho, and gamma-strength function Sig   |'
@@ -90,6 +90,9 @@ C Reading first-generation mama-matrix
       ITYPE=3
       WRITE(6,*)'Please, answer 1 and the name of your input first-'
       WRITE(6,*)'generation matrix in the two next questions... '
+      WRITE(6,*)'WARNING: Data of the fg-matrix are not read for channels > 511'
+      WRITE(6,*)'WARNING: Taking only into account lin. energy calibration (a2 = 0)'
+
       CALL READFILE
       IF(XDIM.GT.512)XDIM=512
       IF(YDIM.GT.512)YDIM=512
@@ -713,6 +716,8 @@ C Writting spectra to mama matrices
       WRITE(23,*)Eg_min,Ex_min,Ex_max ! deleted writing mass, corrected 11 feb 2016
       CLOSE(23)
 888   CONTINUE
+      WRITE(6,*)'REMEMBER: Data of the fg-matrix are not read for channels > 511'
+      WRITE(6,*)'REMEMBER: Taking only into account lin. energy calibration (a2 = 0)'
 
       STOP
  99   WRITE(6,*)'Could not open file for results and spectra'
