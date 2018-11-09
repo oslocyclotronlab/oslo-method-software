@@ -570,9 +570,6 @@ C Updating comment in the heading of spectrum file
       integer :: row, col
       REAL, allocatable :: ETAB13(:),FTAB13(:),ER13(:),FE13(:),SE13(:),DE13(:),ANN13(:)
       REAL, allocatable :: EW13(:),FW13(:),ESE13(:),EDE13(:)
-      character(len=:),allocatable :: ENA13(:)
-      integer :: clen
-
 
       CHARACTER(255) :: fileplace
       CHARACTER(len=500) :: HeaderLineDes13, HeaderLine
@@ -592,6 +589,7 @@ C Updating comment in the heading of spectrum file
       CHARACTER ENA10(36)*5
       CHARACTER ENA11(36)*5
       CHARACTER ENA12(30)*5
+      CHARACTER ENA13(2000)*5
 
       DATA RDIM/0/
 
@@ -1568,8 +1566,6 @@ C Response function read from folder below
 
       allocate( ETAB13(NLines),FTAB13(NLines),ER13(NLines),FE13(NLines),SE13(NLines),DE13(NLines),ANN13(NLines))
       allocate( EW13(NLines),FW13(NLines),ESE13(NLines),EDE13(NLines) )  ! further on you only have N-1 elements
-      clen = 5
-      allocate(character(clen) :: ENA13(NLines))
 
       ! ETAB13  Gamma ray energies
       ! FTAB13  Total efficiency, should be normlized to 1 at 1.33 MeV
@@ -1599,6 +1595,10 @@ C Response function read from folder below
       ESE13(:) = 511  ! SE is at Eg - 511
       EDE13(:) = 1022  ! SE is at Eg - 511
  
+      if (NLines > size(ENA13)) then
+        stop 'Check the (hard-coded) length of ENA13 in comparison to length of Eg array.'
+      endif
+      ! transfer integer Eg's in ETAB13 to strings in ENA13 array
       DO row = 1, NLines
        write (ENA13(row),'(I0)') int(ETAB13(row))
       END DO
