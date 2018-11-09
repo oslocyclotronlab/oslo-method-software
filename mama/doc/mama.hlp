@@ -96,9 +96,9 @@ File Info Display  Modify   Fit  Fold Special
  RE   CL   DS DX  CU  EL  FX  FT  FO    HC
  TR   CR   DY DZ  FN  NO  NF  LP  RM    NU
  WR   HE   EX FI  PA  PC  PO  PF  UN    UX
- WP   LS   IC OD  PM  RN  RP  RF        ST
-      SH   DM OS  SM  UC  SW  RW        TF
-      SU   SC SD  XY  CT  AP  DF        
+ WP   LS   IC OD  PM  RN  RP  RF  FY    ST
+ GY   SH   DM OS  SM  UC  SW  RW  RY    TF
+      SU   SC SD  XY  CT  AP  DF  UY
       SE   TX     RA  RD  DP  MA     
            UD OM  CD      WM
                                                   
@@ -453,6 +453,18 @@ the response matrix has been created first by the command
 RM (Response Matrix). The response function must (of course) have 
 the calibration of the matr./spc. which you wish to fold or unfold.
 >>>>END
+>>>FY
+>>>UY
+FY Fold matr./spc. with response matrix along Y-axis
+UY Ufold matr./spc. with response matrix along Y-axis
+
+FY (and UY) (un)folds the TAS summed gamma spectrum with a
+response function. It is also possible to use a Gaussian response
+which is suitable for particle spectra. The command requires that
+the response matrix has been created first by the command
+RY (Response matrix along Y-axis). The response function must have
+the calibration of the matr./spc. which you want to fold or unfold.
+>>>>END
 >>>FX
 >>>FR
 FX [P]    Fix additional param. P or change fixed value(s)
@@ -563,7 +575,11 @@ initial estimates.
 GR Get Response matrix into working matrix 1 or 2
 
 The command copies the response function into one of the working matr./spc.
-Thus, one can inspect the matrix, make laser print, etc.
+>>>>END
+>>>GY
+GY Get response matrix along Y-axis into working matrix 1 or 2
+
+The command copies the response function into one of the working matr./spc.
 >>>>END
 >>>HC
 HC Hard Copy of screen
@@ -760,6 +776,17 @@ created which describes the detector response function for that energy.
 Thus, the response matrix covers a triangle of a quadratic matrix
 with dimension up to 2048x2048. The response matrix can be inspected by
 the GR (Get Response matrix) command.
+>>>>END
+>>>RY
+RY Make Response matrix along Y-axis
+
+Before folding (FY) or unfolding (UY) spectra, the response matrix have
+to be created. The inputs needed are the energy calibration, dimension
+and FWHM values. For each Y channel (full-energy) a spectrum is
+created which describes the detector response function for that energy.
+Thus, the response matrix is tailored for total absorptin spectrometers
+with dimension up to 2048x2048. The response matrix can be inspected by
+the GY (Get response matrix along Y-axis) command.
 >>>>END
 >>>RN
 RN Replace contents of channels with another value
