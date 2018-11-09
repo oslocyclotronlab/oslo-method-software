@@ -29,15 +29,15 @@ int x1L1=60, y1L1=60, x2L1=200, y2L1=200;
 int x1U1=60, y1U1=70, x2U1=200, y2U1=220;
 int x1L2=60, y1L2=90, x2L2=200, y2L2=240;
 int x1U2=60, y1U2=100,x2U2=200, y2U2=280;
-float  e1L=-0.1, e1U=0.2, e2L=0.8, e2U=1.1;
-int    c1L,      c1U,     c2L,     c2U;
-float I1=0., P1=+1., I2=2., P2=+1;
-float zero0, zero1=1., zero2=1.;
-float rL1,rU1,rL2,rU2;
+float  e1L=-0.2, e1U=0.05, e2L=0.05, e2U=0.2, e3L=0.2, e3U=0.4, e4L=0.4, e4U=0.8;
+int    c1L,      c1U,      c2L,      c2U,     c3L,     c3U,     c4L,     c4U;
+float I1=0., P1=+1., I2=2., P2=+1, I3=4., P3=+1., I4=6., P4=+1;
+float zero0, zero1=1., zero2=1., zero3=1., zero4=1.;
+float rL1,rU1,rL2,rU2,rL3,rU3,rL4,rU4;
 float area_t[2048],area_1[2048],area_2[2048];
 float area_c_t[2048],area_c_1[2048],area_c_2[2048];
 float e_u,e_c;
-float int_t,sint_t,int_1,sint_1,int_2,sint_2;
+float int_t,sint_t,int_1,sint_1,int_2,sint_2,int_3,sint_3,int_4,sint_4;
 
 /* Defining defaults values, taken from 96Mo */
 float Bn = BN0, a0 = 60., a1 = 120.;
@@ -60,7 +60,7 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                        G A M M E X  1.2                      |\r\n");
+    printf(" |                        G A M M E X  1.3                      |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |              Program to calculate <Gamma_g(Ex)>              |\r\n");
     printf(" |   (run counting and normalization prior to this program)     |\r\n");
@@ -75,7 +75,7 @@ int main()
     printf(" | E-mail  : magne.guttormsen@fys.uio.no                        |\r\n");
     printf(" | Created : 14 Nov 2006                                        |\r\n");
     printf(" | Modified: 12 Dec 2006                                        |\r\n");
-    printf(" | Modified: 21 Apr 2017                                        |\r\n");
+    printf(" | Modified: 08 Jun 2017   Four low states implemented          |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
     
@@ -129,11 +129,11 @@ int main()
         fgets_ignore(line,sizeof(line),fp);
         sscanf(line, " %d %d %d %d \n",&x1U2, &y1U2, &x2U2, &y2U2);
         fgets_ignore(line,sizeof(line),fp);
-        sscanf(line, " %f %f %f %f \n",&e1L,  &e1U,  &e2L,  &e2U);
+        sscanf(line, " %f %f %f %f %f %f %f %f \n",&e1L,  &e1U, &e2L,&e2U, &e3L, &e3U, &e4L, &e4U);
         fgets_ignore(line,sizeof(line),fp);
-        sscanf(line, " %f %f %f %f \n",&I1,  &P1,  &I2,  &P2);
+        sscanf(line, " %f %f %f %f %f %f %f %f \n",&I1,   &P1,  &I2, &P2,  &I3,  &P3,  &I4,  &P4);
         fgets_ignore(line,sizeof(line),fp);
-        sscanf(line, " %f %f  \n",&zero1,  &zero2);
+        sscanf(line, " %f %f %f %f \n",&zero1,  &zero2, &zero3,  &zero4);
         for (i = 0; i < Nconf; i++){
             fgets_ignore(line,sizeof(line),fp);
             sscanf(line," %f   %f  %f\n", &Ispin[i], &Iparity[i], &Iweight[i]);
@@ -526,23 +526,23 @@ int main()
         printf("\nOMG, you have spin 0!");
         printf("\nThis state has probably only 1/3 of the level density of a full state.");
     }
-        printf("\nWould you like to automatically adjust this state to 1 in the ");
-        printf("\nexcitation region defined? Type 0 if no,");
-        printf("\ntype 1. for one whole state, or 2. for two states etc.");
-        printf("\nGive number of states (normaly, you should choose 1.0)  <%4.2f>:",zero1);
-        fgets_ignore(line,sizeof(line),stdin);
-        sscanf(line,"%f", &zero1);
+    printf("\nWould you like to automatically adjust this state to 1 in the ");
+    printf("\nexcitation region defined? Type 0 if no,");
+    printf("\ntype 1. for one whole state, or 2. for two states etc.");
+    printf("\nGive number of states (normaly, you should choose 1.0)  <%4.2f>:",zero1);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &zero1);
 
-        if(zero1>0.){
-            zero0 = 0.;
-            for (i = c1L; i <= c1U; i++){
-                zero0 = zero0 + (a1/1000.)*rho[i];
-            }
-            for (i = c1L; i <= c1U; i++){
-                rho[i] = rho[i]*zero1/zero0;
-            }
-            printf("\nBefore number of states were %4.2f, now %4.2f",zero0,zero1);
+    if(zero1>0.){
+        zero0 = 0.;
+        for (i = c1L; i <= c1U; i++){
+            zero0 = zero0 + (a1/1000.)*rho[i];
         }
+        for (i = c1L; i <= c1U; i++){
+            rho[i] = rho[i]*zero1/zero0;
+        }
+        printf("\nBefore number of states were %4.2f, now %4.2f",zero0,zero1);
+    }
     
         
     printf("\n\nSecond state:\n");
@@ -564,7 +564,6 @@ int main()
         printf("\n ch = %4d Ex = %5.2f MeV and rho = %5.3e",i,(a0+a1*i)/1000.,rho[i]);
     }
     printf("\n");
-
     
     if(I2==0.0){
         printf("\nOMG, you have spin 0!");
@@ -576,17 +575,102 @@ int main()
         printf("\nGive number of states (normaly, you should choose 1.0)  <%4.2f>:",zero2);
         fgets_ignore(line,sizeof(line),stdin);
         sscanf(line,"%f", &zero2);
-        
-        if(zero2>0.){
-            zero0 = 0.;
-            for (i = c2L; i <= c2U; i++){
-                zero0 = zero0 + (a1/1000.)*rho[i];
-            }
-            for (i = c2L; i <= c2U; i++){
-                rho[i] = rho[i]*zero2/zero0;
-            }
-            printf("Before number of states were %4.2f, now %4.2f\n",zero0,zero2);
+    
+    if(zero2>0.){
+        zero0 = 0.;
+        for (i = c2L; i <= c2U; i++){
+            zero0 = zero0 + (a1/1000.)*rho[i];
         }
+        for (i = c2L; i <= c2U; i++){
+            rho[i] = rho[i]*zero2/zero0;
+        }
+        printf("Before number of states were %4.2f, now %4.2f\n",zero0,zero2);
+    }
+    
+    printf("\nThird state:\n");
+    printf("Give spin of state                <%4.1f>:",I3);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &I3);
+    printf("Give parity of state              <%4.1f>:",P3);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &P3);
+    printf("Give lower excitation energy <%5.2f> MeV:",e3L);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &e3L);
+    printf("Give upper excitation energy <%5.2f> MeV:",e3U);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &e3U);
+    c3L = (int)(((1000.*e3L-a0)/a1)+0.5);
+    c3U = (int)(((1000.*e3U-a0)/a1)+0.5);
+    for(i= c3L; i <= c3U; i++){
+        printf("\n ch = %4d Ex = %5.2f MeV and rho = %5.3e",i,(a0+a1*i)/1000.,rho[i]);
+    }
+    printf("\n");
+    
+    if(I3==0.0){
+        printf("\nOMG, you have spin 0!");
+        printf("\nThis state has probably only 1/3 of the level density of a full state.");
+    }
+    printf("\nWould you like to automatically adjust this state to 1 in the ");
+    printf("\nexcitation region defined? Type 0 if no,");
+    printf("\ntype 1. for one whole state, or 2. for two states etc.");
+    printf("\nGive number of states (normaly, you should choose 1.0)  <%4.2f>:",zero3);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &zero3);
+    
+    if(zero3>0.){
+        zero0 = 0.;
+        for (i = c3L; i <= c3U; i++){
+            zero0 = zero0 + (a1/1000.)*rho[i];
+        }
+        for (i = c3L; i <= c3U; i++){
+            rho[i] = rho[i]*zero3/zero0;
+        }
+        printf("\nBefore number of states were %4.2f, now %4.2f",zero0,zero3);
+    }
+    
+    printf("\n\nFourth state:\n");
+    printf("Give spin of state                <%4.1f>:",I4);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &I4);
+    printf("Give parity of state              <%4.1f>:",P4);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &P4);
+    printf("Give lower excitation energy <%5.2f> MeV:",e4L);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &e4L);
+    printf("Give upper excitation energy <%5.2f> MeV:",e4U);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &e4U);
+    c4L = (int)(((1000.*e4L-a0)/a1)+0.5);
+    c4U = (int)(((1000.*e4U-a0)/a1)+0.5);
+    for(i= c4L; i <= c4U; i++){
+        printf("\n ch = %4d Ex = %5.2f MeV and rho = %5.3e",i,(a0+a1*i)/1000.,rho[i]);
+    }
+    printf("\n");
+    
+    if(I4==0.0){
+        printf("\nOMG, you have spin 0!");
+        printf("\nThis state has probably only 1/3 of the level density of a full state.");
+    }
+    printf("\nWould you like to automatically adjust this state to 1 in the ");
+    printf("\nexcitation region defined? Type 0 if no,");
+    printf("\ntype 1. for one whole state, or 2. for two states etc.");
+    printf("\nGive number of states (normaly, you should choose 1.0)  <%4.2f>:",zero4);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%f", &zero4);
+    
+    if(zero4>0.){
+        zero0 = 0.;
+        for (i = c4L; i <= c4U; i++){
+            zero0 = zero0 + (a1/1000.)*rho[i];
+        }
+        for (i = c4L; i <= c4U; i++){
+            rho[i] = rho[i]*zero4/zero0;
+        }
+        printf("Before number of states were %4.2f, now %4.2f\n",zero0,zero4);
+    }
+
     
 	 
     /* **************************************************** */
@@ -602,9 +686,9 @@ int main()
         fprintf(fp, " %d %d %d %d \n",x1U1, y1U1, x2U1, y2U1);
         fprintf(fp, " %d %d %d %d \n",x1L2, y1L2, x2L2, y2L2);
         fprintf(fp, " %d %d %d %d \n",x1U2, y1U2, x2U2, y2U2);
-        fprintf(fp, " %f %f %f %f \n",e1L, e1U, e2L, e2U);
-        fprintf(fp, " %f %f %f %f \n",I1, P1, I2, P2);
-        fprintf(fp, " %f %f  \n",zero1, zero2);
+        fprintf(fp, " %f %f %f %f %f %f %f %f\n",e1L, e1U, e2L, e2U, e3L, e3U, e4L, e4U);
+        fprintf(fp, " %f %f %f %f %f %f %f %f\n",I1,  P1,  I2,  P2,  I3,  P3,  I4,  P4);
+        fprintf(fp, " %f %f %f %f \n",zero1, zero2, zero3, zero4);
 
         for (i = 0; i < Nconf; i++){
             fprintf(fp,"%f   %f  %f\n",Ispin[i],Iparity[i],Iweight[i]);
@@ -794,7 +878,7 @@ double g(int jexc, float jspin, int jparity)
     if(jspin < 0){
         return xj;
     }
-    //Hard-wiring direct decay to e.g. 0+ and 2+ states
+    //Hard-wiring direct decay to e.g. 0+, 2+, 4+ and 6+ states
     if(jexc >= c1L && jexc <= c1U){
         if(jspin == I1 && jparity == P1){
             xj = 1.;
@@ -811,6 +895,24 @@ double g(int jexc, float jspin, int jparity)
         }else{
         xj = 0.;
         return xj;
+        }
+    }
+    if(jexc >= c3L && jexc <= c3U){
+        if(jspin == I3 && jparity == P3){
+            xj = 1.;
+            return xj;
+        }else{
+            xj = 0.;
+            return xj;
+        }
+    }
+    if(jexc >= c4L && jexc <= c4U){
+        if(jspin == I4 && jparity == P4){
+            xj = 1.;
+            return xj;
+        }else{
+            xj = 0.;
+            return xj;
         }
     }
     
