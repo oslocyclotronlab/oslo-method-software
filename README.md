@@ -120,6 +120,13 @@ Then, navigate in a terminal to your installation directory, and execute the fol
 	make all
 	make install
 
+NOTE: if you are a Mac user with Mac OSX High Sierra (version 10.13) or later, you might need to do
+
+	export PATH=/usr/bin:$PATH
+
+
+before running the above commands. 
+
 All executables are now installed in /path-to-software/oslo-method-software/prog/bin, but they should also be in your $PATH so you can run them from anywhere by typing e.g.
 	
 	mama
