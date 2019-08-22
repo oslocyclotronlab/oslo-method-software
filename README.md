@@ -120,10 +120,13 @@ Then, navigate in a terminal to your installation directory, and execute the fol
 	make all
 	make install
 
-NOTE: if you are a Mac user with Mac OSX High Sierra (version 10.13) or later, you might need to do
+NOTE: if you are a Mac user with Mac OSX High Sierra (version 10.13) or later with Macports installed, you might get this error message:
+
+	FATAL:/opt/local/bin/../libexec/as/x86_64/as: I don't understand 'm' flag!
+
+Then you need to do
 
 	export PATH=/usr/bin:$PATH
-
 
 before running the above commands. 
 
