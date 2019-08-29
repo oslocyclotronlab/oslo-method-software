@@ -2615,7 +2615,7 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           lim=MAX0(INT((6.*(Fwhm1(il)*facFWHM*FWHM/100.))*FLOAT(il)+0.5) , 1)
           m1=MAX0(il-lim,MinEgam)
           m2=MIN0(ih+lim,MaxEgam)
-          factor=1.0*facFWHM !Assuming annihilation peak 100% FWHM
+          factor= 0.9*facFWHM !Assuming annihilation peak 90% FWHM, changed from 100% -> 90%. 2 Aug. 2019/magne
           CALL GaussSmoothing(Fan,Gan,m1,m2,factor,w0) !smoothing ann. peak
         ENDIF
 
