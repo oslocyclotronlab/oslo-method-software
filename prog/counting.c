@@ -418,10 +418,11 @@ int main()
     /* Asking for input values */
     /* *********************** */
 
-    printf("To allow for a 'apples' to 'apples' comparison of the level density\n");
-    printf("we will smooth the descrete level density with the particle resolution.\n");
-    printf("If you don't want any smoothing, set to zero.\n");
-    printf("Particle FWHM (keV) <%6.3f>:",part_res);
+    printf("You may want to smooth the discrete level density with the\n");
+    printf("resolution of the experimental level density (FWHM = 100–500 keV).\n");
+    printf("If no smoothing, set FWHM = 0.\n");
+    printf("Excitation energy FWHM (keV) <%6.3f>:",part_res);
+
     fgets_ignore(line,sizeof(line),stdin);
     sscanf(line,"%f",&part_res);
     if (part_res > 0){
