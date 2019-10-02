@@ -1341,8 +1341,8 @@ CCC   Release seat belts   CCC
 CCC                        CCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-C Writing out to file: respy.dat
-  20  OPEN(UNIT=25,FILE='respy.dat', ERR=9998)
+C Writing out to file: respyout.dat
+  20  OPEN(UNIT=25,FILE='respyout.dat', ERR=9998)
       ISM=1
       IF(ITYPE.EQ.1)ISM=2
       CALL DATETIME(DATTIM)
@@ -1368,7 +1368,7 @@ C Writing out to file: respy.dat
         ENDIF
       ENDDO
       write(6,*)
-      write(6,*)'Parameters for response function written to respy.dat'
+      write(6,*)'Parameters for response function written to respyout.dat'
       write(6,*)
       GOTO 9998
  9999 WRITE(6,*)'Cannot find the response function: ',FILNAM
