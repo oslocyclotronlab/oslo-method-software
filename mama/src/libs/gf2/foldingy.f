@@ -1593,7 +1593,7 @@ C        Iter   = Max number of iteration steps
 
       ISP=1
       IF(IDEST.EQ.1)ISP=2
-      Iter   =    20          ! Number of max. iterations
+      Iter   =    100          ! Number of iterations
 
 C Using rSPEC(IDEST,i) to display spectra. Putting back later
       DO i=0,MAXCH
@@ -1702,11 +1702,11 @@ c      IF(ANS.EQ.'y'.OR.ANS.EQ.'Y')THEN
 c        CALL ExpThres
 c      ENDIF
 
-      iter=20
+      iter=100
       WRITE(6,134)iter   
- 134  FORMAT(/,'Number of iterations ( <200 )  <',I2,'>:',$)
+ 134  FORMAT(/,'Number of iterations ( <500 )  <',I2,'>:',$)
       CALL READI(5,iter)
-      IF(iter.GT.200)iter=200
+      IF(iter.GT.500)iter=500
       IF(Istatus.NE.0)RETURN
 
       wfluc=0.2
@@ -1839,8 +1839,8 @@ C Saves the best solution after at least 3 iterations
             ENDDO
           ENDIF
 
-          IF(L.GT.3.AND.ABS( CHISQ-CHIold).LT.0.0006)       IterStop=1
-          IF(L.GT.3.AND.ABS((CHISQ-CHIold)/CHISQ).LT.0.002) IterStop=1
+          IF(L.GT.3.AND.ABS( CHISQ-CHIold).LT.0.0003)       IterStop=1
+          IF(L.GT.3.AND.ABS((CHISQ-CHIold)/CHISQ).LT.0.001) IterStop=1
           IF(iTry.GT.10.AND.CHISQ.GT.CHIold)                IterStop=1
           IF(iTry.GT.Iter/2.0 .AND.ModeChange.EQ.1)         IterStop=1
           iTry=iTry+1
