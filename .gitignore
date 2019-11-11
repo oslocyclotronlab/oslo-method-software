@@ -32,3 +32,6 @@ Presequisites
 *.exe
 *.out
 *.appe
+
+# CMake build folders
+cmake-build-*
