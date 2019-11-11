@@ -12,6 +12,7 @@ C Read/write stuff (mama)
 C Stuff for the rhosig iteration
       REAL Rho(0:100,0:511),Rhov(0:100,0:511)
       REAL Sig(0:100,0:511),Sigv(0:100,0:511)
+      REAL Slow(0:511),Shigh(0:511)
       REAL SumFg(0:511),SumFgv(0:511)
       REAL Fg(0:511,0:511),FgTeo(0:511,0:511),FgN(0:511,0:511)
       REAL Fgv(0:511,0:511),sFg(0:511,0:511),sFgN(0:511,0:511)
@@ -29,10 +30,10 @@ C Stuff for the rhosig iteration
       DIMENSION Fi(0:511),Ff(0:511) 
       WRITE(6,*)' ________________________________________'
       WRITE(6,*)'|                                        |'
-      WRITE(6,*)'|         R H O S I G C H I  1.5.3       |'
+      WRITE(6,*)'|         R H O S I G C H I  1.5.5       |'
       WRITE(6,*)'|                                        |'
       WRITE(6,*)'|  Program to calculate level density    |'
-      WRITE(6,*)'| Rho, and gamma strength function Sig   |'
+      WRITE(6,*)'| Rho, and gamma-strength function Sig   |'
       WRITE(6,*)'| from first-generation spectra, using   |'
       WRITE(6,*)'|   FgNorm(Ex,Eg)=Rho(Ex-Eg)*Sig(Eg)     |'
       WRITE(6,*)'|                                        |'
@@ -53,6 +54,8 @@ C Stuff for the rhosig iteration
       WRITE(6,*)'|  Modified 15 Dec 2015: input > 10**-06 |'
       WRITE(6,*)'|  Modified 11 Feb 2016: new Ydim, Xdim  |'
       WRITE(6,*)'|  REAL->REAL*8 precision, smooth 300 keV|'
+      WRITE(6,*)'|  Modified 06 Dec 2016: Turns y-axis if |'
+      WRITE(6,*)'|  a1 < 0                                |'
       WRITE(6,*)'|________________________________________|'
 C Things that should be done in the future:
 C Fitting with error weighting
@@ -87,6 +90,9 @@ C Reading first-generation mama-matrix
       ITYPE=3
       WRITE(6,*)'Please, answer 1 and the name of your input first-'
       WRITE(6,*)'generation matrix in the two next questions... '
+      WRITE(6,*)'WARNING: Data of the fg-matrix are not read for channels > 511'
+      WRITE(6,*)'WARNING: Taking only into account lin. energy calibration (a2 = 0)'
+
       CALL READFILE
       IF(XDIM.GT.512)XDIM=512
       IF(YDIM.GT.512)YDIM=512
@@ -103,6 +109,29 @@ C Reading first-generation mama-matrix
         aEx0=cal(1,IDEST,2,1)
         aEx1=cal(1,IDEST,2,2)
       ENDIF
+
+C
+C Turning the y-axis if negative aEx1   (implemented 06 Dec 2016)
+C
+      IF(aEx1.LT.0)THEN
+        ey2 = aEx0 + (YDIM-1)*aEx1 ! Remember energy in ch YDIM-1, which will be ch 0 after turning
+        DO k = 0, INT(YDIM/2.)-1
+            DO i = 0, XDIM-1
+                Slow(i)  = rMAT(IDEST,i,     0 + k) !Swapping low and high y channels
+                Shigh(i) = rMAT(IDEST,i,YDIM-1 - k)
+                rMAT(IDEST,i,   0 + k)   = Shigh(i)
+                rMAT(IDEST,i,YDIM-1 - k) = Slow(i)
+            ENDDO
+        ENDDO
+        cal(1,IDEST,2,1) = ey2
+        cal(1,IDEST,2,2) = -aEx1
+        aEx0=cal(1,IDEST,2,1)
+        aEx1=cal(1,IDEST,2,2)
+      ENDIF
+C
+C The y-axis is now turned, and new calibration coeff. are given
+C
+
       a1=ABS(aEx1)
       multiple=INT((120./a1)+0.5)
       IF(a1.GT.150.)multiple=1
@@ -175,12 +204,8 @@ C Compressing (or stretching) along X and Y - axis
 C Replacing negative counts with 0 and finding dimension of Fg matrix
 C      XDIM=INT(FLOAT(XDIM)*ABS(aEg1/a1)+0.5) + iu0
 c      YDIM=INT(FLOAT(YDIM)*ABS(aEx1/a1)+0.5)
-c      YDIM=INT((ABS((FLOAT(YDIM) * aEx1 + aEx0 - a0))/ABS(a1)) + 0.5)
-c      XDIM=YDIM + iu0
       XDIM=INT((ABS((FLOAT(XDIM) * aEg1 + aEg0 - a0))/ABS(a1)) + 0.5) + iu0
       YDIM=INT((ABS((FLOAT(YDIM) * aEx1 + aEx0 - a0))/ABS(a1)) + 0.5)
-
-c           write(6,*)xdim,ydim
       imax=10
       DO j=0,YDIM
          DO i=0,XDIM
@@ -188,7 +213,6 @@ c           write(6,*)xdim,ydim
             IF(Fg(i,j).LE.0.)Fg(i,j)=0             !Delete negative numbers
          ENDDO
       ENDDO
-
       imax=MIN(imax,XDIM)
       Eg_limit = a0+a1*imax
 
@@ -239,10 +263,6 @@ C Input lower limit for gammas used in the extraction
       Emr=Ex_max-Eg_min
       iemr=INT(((Emr-a0)/a1)+0.5)
       Emr=a0+a1*iemr
-
-
-      imax = jmax + iu0
-
 
       Eg_max=egmax(imax)
       IF(Eg_max.GT.Eg_limit)Eg_max = Eg_limit
@@ -301,6 +321,10 @@ C Calculating statistical error of first generation spectra
          isFEg=0
          TotM=MAX(1.,gM(Ex))            !Number of gammas for 1.gen. 
          BckM=MAX(0.,gM(Ex)-1.)         !Number og gammas from 2.+3.+... gen.
+
+
+              write(6,*)ix, ex, totm,bckm
+
          DO ig=igmin,igmax(ix)
 C Fg=total-background NaI spectra, factor 2 due to unfolding
 C Total and background error are assumed to be independent from each 
@@ -692,6 +716,8 @@ C Writting spectra to mama matrices
       WRITE(23,*)Eg_min,Ex_min,Ex_max ! deleted writing mass, corrected 11 feb 2016
       CLOSE(23)
 888   CONTINUE
+      WRITE(6,*)'REMEMBER: Data of the fg-matrix are not read for channels > 511'
+      WRITE(6,*)'REMEMBER: Taking only into account lin. energy calibration (a2 = 0)'
 
       STOP
  99   WRITE(6,*)'Could not open file for results and spectra'

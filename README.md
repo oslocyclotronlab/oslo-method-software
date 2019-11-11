@@ -1,6 +1,10 @@
 
 # README-file for OsloSoftware
 
+Concept DOI: [![DOI](https://zenodo.org/badge/46267755.svg)](https://zenodo.org/badge/latestdoi/46267755)
+
+When citing, please use the DOI of the specific verion, which will be accessible via Zenodo.
+
 *****************************************************************************
 
 Magne Guttormsen
@@ -116,6 +120,16 @@ Then, navigate in a terminal to your installation directory, and execute the fol
 	make all
 	make install
 
+NOTE: if you are a Mac user with Mac OSX High Sierra (version 10.13) or later with Macports installed, you might get this error message:
+
+	FATAL:/opt/local/bin/../libexec/as/x86_64/as: I don't understand 'm' flag!
+
+Then you need to do
+
+	export PATH=/usr/bin:$PATH
+
+before running the above commands. 
+
 All executables are now installed in /path-to-software/oslo-method-software/prog/bin, but they should also be in your $PATH so you can run them from anywhere by typing e.g.
 	
 	mama
@@ -123,14 +137,24 @@ All executables are now installed in /path-to-software/oslo-method-software/prog
 This should open the mama prompt, as well as a graphical window.
 
 *****************************************************************************
+# Adding new response matrixes
+
+You can read reponse matrixes from file, which is now the default method. 
+
+You can add another response matrix by adding a folder in the mama/resp directory, eg "oscar2018", and export the enviroment variable `MAMA_MYRESP`
+
+     export MAMA_MYRESP=oscar2018
+
+If you do not set it manually, it will choose the `myresp` folder. You can take this folder as a starting point for adding you own response functions if you like.   
+
+*****************************************************************************
 
 # Ensuring ROOT support
 
-It is recommended to use ROOT 5, *not* ROOT 6, as there are some backward compatibility issues.
+To our knowledge, we have now ensured compatibility with ROOT 6 in all cases. Please report if you (still) experience backward compatibility issues.
 
 To get ROOT working the environment variable ROOTSYS needs to be defined. If you have ROOT installed, you should already have this, 
-since it is set automatically by the script /path-to-root/bin/thisroot.sh, which you should be calling in some startup script, e.g. in your
-/home/user/.profile file.
+since it is set automatically by the script /path-to-root/bin/thisroot.sh, which you should be calling in some startup script, e.g. in your `/home/user/.profile` file (other common names are `.bashrc`, `.bash_profile`).
 
 You can test whether you have the correct setup by typing
 
@@ -145,26 +169,6 @@ or
 	source /path-to-root/bin/thisroot.csh # for csh shell users
 
 to the end of it.
-
-## ROOT for Mac
-
-For MacOSX users, you might need the following to get ROOT working:
-
-	export LC_ALL="C" 
-	export LANG="en_US" 
-	export TERM=xterm-color
-	
-	PS1='$USER@\H:\W>'
-
-For ROOT, not installed by Fink  
-	export ROOTSYS=/Applications/root
-	export PATH=$ROOTSYS/bin:$PATH
-	export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
-	export LDYLD_LIBRARY_PATH=$ROOTSYS/lib:$DYLD_LIBRARY_PATH
-
-For Fink
-	test -r /sw/bin/init.sh && . /sw/bin/init.sh
-
 
 *****************************
 

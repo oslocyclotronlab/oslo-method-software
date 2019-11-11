@@ -5,7 +5,7 @@
 #************************************************************
 
          F95 = gfortran -W -Wall -O3 -ffixed-line-length-132
-         CC = gcc -W -Wall -O3
+         CC = gcc -W -Wall -O3 -std=gnu99
          LIBS = -lm
          RWLIB = rewr/rewr.a
 	     INSTALL_BIN = install -m 0755
@@ -19,12 +19,12 @@ TARGET  = shiva2paw waiting funcfit gameff autofit onemev mama2pc vigs isotrop \
           f_model rotor nilsson  normrhof cm2lab grazing \
           spincut rutherford fmodel tave binomial binomialc siriangle sfec alfnasort \
           alfnamatrix webrho webstrf fitone micro robin counting gammex d2rho combi \
-          pet elise extendspin radex scissors
+          pet elise extendspin radex scissors pjolter
 # mtcp mag2mag mag2disc disc2mag
 
 C_SOURCES = shiva2paw.c waiting.c kin.c hex.c rocket.c normalization.c \
     binomialc.c micro.c counting.c gammex.c d2rho.c combi.c scissors.c\
-    extendspin.c
+    extendspin.c pjolter
 # mtcp.c mag2mag.c mag2disc.c disc2mag.c
 C_TARGETS = $(C_SOURCES:%.c=%)
 

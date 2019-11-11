@@ -38,6 +38,7 @@ F_SRCS = addcomment.f \
        fix_para.f \
        fixorfree.f \
        folding.f \
+       foldingy.f \
        funcfit.f \
        getmkrchnl.f \
        gfexec.f \

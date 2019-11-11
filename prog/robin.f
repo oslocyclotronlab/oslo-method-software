@@ -8,7 +8,7 @@
       DOUBLE PRECISION S,dS
       WRITE(6,*)'    __________________________________________'
       WRITE(6,*)'   |                                          |'
-      WRITE(6,*)'   |                 ROBIN 1.7                |'
+      WRITE(6,*)'   |                 ROBIN 1.91               |'
       WRITE(6,*)'   |                                          |'
       WRITE(6,*)'   |  Program to calculate the level density  |'
       WRITE(6,*)'   |         and spin cut-off parameter       |'
@@ -26,15 +26,20 @@
       WRITE(6,*)'   |            Created: 13 Jun 2005          |'
       WRITE(6,*)'   |           Modified: 14 Sep 2012          |'
       WRITE(6,*)'   |           Modified: 25 Mar 2013          |'
+      WRITE(6,*)'   | Modified: 16 Aug 2016:                   |'
+      WRITE(6,*)'   | Opt(2) proposes better a and E1 values   |'
+      WRITE(6,*)'   | Modified: 19 Nov 2016:                   |'
+      WRITE(6,*)'   | In Opt(1) you may choose reduct. of RMI  |'
+      WRITE(6,*)'   | Temp. given at Bn and Bp for Fermi gas   |'
       WRITE(6,*)'   |__________________________________________|'
 
-      
       Z0     =  66
       A0     =  162
       isig   =  4
       itemp  =  1
       Exx    = -1.
       sig2   = -1.
+      red    =  1.
       
       WRITE(6,*)' '
       call makepath("UIO_APPLICATIONS","prog/lib/egidy03/mass.mas03",filnam)
@@ -82,7 +87,7 @@
       WRITE(6,*)'(If not, mismatch of values will give wrong results.)'
       
       OPEN(23,FILE='input.rbn',STATUS='old',ERR=666)
-      READ(23,*,ERR=666)Z0,A0,isig,itemp,Exx,sig2
+      READ(23,*,END=666,ERR=666)Z0,A0,isig,itemp,Exx,sig2,red
       GO TO 777
  666  WRITE(6,*)'Could not read input.rbn, using default values'
  777  CLOSE(23)
@@ -134,7 +139,15 @@
         IF(itemp.LT.0)STOP
         IF(itemp.LT.1.OR.itemp.GT.2)go to 998
       ENDIF
-      WRITE(6,*)' '                     
+      WRITE(6,*)' '
+
+      IF(isig.EQ.1)THEN
+        WRITE(6,*)'You may choose a reduction factor of RMI at Sn'   ! new 1. Nov. 2016
+        WRITE(6,*)'Typically, 0.8-1.0 is an appropriate reduction factor'
+        WRITE(6,32)red
+  32    FORMAT('Give reduction factor of RMI <',F4.2,'>:',$)
+        CALL READF(5,red)
+      ENDIF
 
       N0=A0-Z0
       IF((N0/2)*2.EQ.N0.AND.(Z0/2)*2.EQ.Z0)ieo=0 ! even-even nucleus
@@ -195,7 +208,35 @@ C VALUES FROM E&B2009
           E1 = -0.381 + 0.5   *Pa_prime
         ENDIF
 
-        WRITE(6,*)'You may choose another a and/or E1 than proposed by E&B:'
+        IF(isig.EQ.2)THEN  ! New 16. aug 2016
+                WRITE(6,*)'In the T. von Egidy paper NPA A481, 189 (1988), they used the'
+                WRITE(6,*)'Gilbert and Cameron formula (G&C) Can. J. Phys 43(1965) 1446'
+                WRITE(6,*)'with U = E-C1-Epair, C1 = -6.6A**(-0.32)MeV, a= 0.21A**(0.87) MeV**(-1),'
+                WRITE(6,*)'and Dp and Dn from mass differences. The same procedure was used by us'
+                WRITE(6,*)'in Guttormsen et al, PRC 68, 064306 (2003).'
+                WRITE(6,*)'Below we calculate these values for you. You may use them'
+                WRITE(6,*)'or the default a and E1 values from E&B 2009.'
+
+                pair_n = Pn(i)/1000.
+                pair_p = Pp(i)/1000.
+                a_gc = 0.21*A0**( 0.87)
+                C1_gc=-6.6 *A0**(-0.32)
+                IF(ieo.EQ.0)pair_gc = pair_n + pair_p
+                IF(ieo.EQ.1)pair_gc = 0      + pair_p
+                IF(ieo.EQ.2)pair_gc = pair_n + 0
+                IF(ieo.EQ.3)pair_gc = 0      + 0
+                E1_gc = pair_gc + C1_gc
+                WRITE(6,80)pair_n, pair_p
+ 80             FORMAT('Mass difference pairing, neutron =',F7.3,' ,proton =',F7.3,' MeV')
+                WRITE(6,81)pair_gc, C1_gc
+ 81             FORMAT('Pairing for this nucleus =',F7.3,' and C1 =',f7.3' MeV')
+                WRITE(6,82)a_gc, E1_gc
+ 82             FORMAT('a =',F7.3,' MeV**(-1) and energy shift E1 =',F7.3,' MeV')
+                WRITE(6,*)' '
+        ENDIF
+
+
+        WRITE(6,*)'You may choose another a and/or E1 than proposed by E&B2009:'
         WRITE(6,25)aa
  25     FORMAT('Level density parameter a    <',F7.3,'>:',$)
         CALL READF(5,aa)
@@ -204,8 +245,8 @@ C VALUES FROM E&B2009
         CALL READF(5,E1)
         WRITE(6,*)' '                     
 
-        CALL FermiGas(rho_n,A0,Sn(i)/1000.,aa,E1,sig_n,isig,itemp)
-        CALL FermiGas(rho_p,A0,Sp(i)/1000.,aa,E1,sig_p,isig,itemp)
+        CALL FermiGas(rho_n,A0,Sn(i)/1000.,aa,E1,sig_n,isig,itemp,red)
+        CALL FermiGas(rho_p,A0,Sp(i)/1000.,aa,E1,sig_p,isig,itemp,red)
 
         IF(isig.EQ.1.AND.itemp.EQ.1) WRITE(6,20)A0,El(i)
         IF(isig.EQ.1.AND.itemp.EQ.2) WRITE(6,21)A0,El(i)
@@ -219,9 +260,17 @@ C VALUES FROM E&B2009
         WRITE(6,45)SQRT(sig_n),SQRT(sig_p)
         WRITE(6,46)rho_n,rho_p
 
+C Calculating the temperature at Bn
+        IF(itemp.EQ.1)tempBn = SQRT(((Sn(i)/1000)-E1)/aa)
+        IF(itemp.EQ.1)tempBp = SQRT(((Sp(i)/1000)-E1)/aa)
+        IF(itemp.EQ.2)tempBn = (1.+SQRT(1.+4.*aa*((Sn(i)/1000)-E1)))/(2.*aa)
+        IF(itemp.EQ.2)tempBp = (1.+SQRT(1.+4.*aa*((Sp(i)/1000)-E1)))/(2.*aa)
+        WRITE(6,49)tempBn,tempBp
+
+
       ELSE
 
-        sig= (0.98*(FLOAT(A0)**(0.29)))    ! CONSTANT TEMPERATUR
+        sig= (0.98*(FLOAT(A0)**(0.29)))    ! CONSTANT TEMPERATURE
         sig2 = sig*sig
         tt = FLOAT(A0)**(-0.66666)/(0.0597 + 0.00198 * S_prime)
         E0 = -1.004 + 0.5 * Pa_prime
@@ -253,7 +302,7 @@ C VALUES FROM E&B2009
  50   FORMAT('Calculate rho and sigma at Ex (MeV)  <',F7.3,'>:',$)
       CALL READF(5,Exx)
       IF(isig.EQ.1.OR.isig.EQ.2.OR.isig.EQ.4)THEN
-         CALL FermiGas(rhox,A0,Exx,aa,E1,sigx,isig,itemp)
+         CALL FermiGas(rhox,A0,Exx,aa,E1,sigx,isig,itemp,red)
       ELSE
          CALL ConstT(rhox,Exx,tt,E0)
          sigx = sig2
@@ -274,6 +323,8 @@ C VALUES FROM E&B2009
  45   FORMAT('Spin cut-off parameters : sig_n=',F7.3,'        sig_p=',F7.3)
  46   FORMAT('Level densities         : rho_n=',E12.5,' 1/MeV, rho_p=',E12.5,' 1/MeV')
  40   FORMAT('Constant temp. param.   : T=    ',F7.3,' MeV,   E0=   ',F7.3,' MeV')
+ 49   FORMAT('Temperature (FG)        : T(Bn)=',E12.5,' MeV,   T(Bp)=',E12.5,' MeV')
+
 
  51   FORMAT('For Ex =',F7.3,' MeV     : rho  =',E12.5,' 1/MeV,',' sig =',F7.3)
       
@@ -304,14 +355,14 @@ C VALUES FROM E&B2009
       ENDDO
       xI_ave = xI_ave/Sum_g
       WRITE(6,*)' '
-      WRITE(6,52)xI_ave,xI_max,Sum_g
- 52   FORMAT('File spindis.rbn written with <I> =',F5.2,', Pmax @ I =',F4.1,' and sum_P =',F5.3)
+      WRITE(6,52)xI_ave,sig-0.5,Sum_g
+ 52   FORMAT('File spindis.rbn written with <I> =',F5.2,', Pmax @ I = sigma-0.5 =',F4.1,' and sum_P =',F5.3)
       GO TO 773
  663  WRITE(6,*)'Could not write to spindis.rbn'
  773  CLOSE(12)
       
       OPEN(UNIT=13,FILE='input.rbn')
-      WRITE(13,*,ERR=668)Z0,A0,isig,itemp,Exx,sig2
+      WRITE(13,*,ERR=668)Z0,A0,isig,itemp,Exx,sig2,red
       GO TO 778
  668  WRITE(6,*)'Could not write to input.rbn'
  778  CLOSE(13)
@@ -362,7 +413,7 @@ C VALUES FROM E&B2009
       RETURN
       END
       
-      SUBROUTINE FermiGas(rho,A0,U,aa,E1,sig2,isig,itemp)
+      SUBROUTINE FermiGas(rho,A0,U,aa,E1,sig2,isig,itemp,red)
       INTEGER A0
       REAL T1, T2, T
       T = 0.
@@ -374,7 +425,7 @@ C VALUES FROM E&B2009
       IF(uu.LE.0.010)uu=0.0010
       IF(itemp.EQ.1)T = T1
       IF(itemp.EQ.2)T = T2
-      IF(isig.EQ.1)sig2=0.0146*(rA**(5./3))*T ! Rigid body
+      IF(isig.EQ.1)sig2=red*0.0146*(rA**(5./3))*T ! Rigid body
       IF(isig.EQ.2)sig2=0.0888*(rA**(2./3.))*aa*T ! G&C
       IF(isig.EQ.4)sig2=0.391 *(rA**(0.675))*(U-(E1+0.381))**0.312  !Last factor is Ex-0.5Pa_prime, with 0.5Pa_prime=E1+0.381
       IF(sig2.LE.0) RETURN
