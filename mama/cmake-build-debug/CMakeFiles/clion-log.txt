@@ -1,4 +1,0 @@
-"/Users/vetlewi/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/192.7142.39/CLion.app/Contents/bin/cmake/mac/bin/cmake" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /Users/vetlewi/Git_Repositories/development/oslo-method-software/mama
--- Configuring done
--- Generating done
--- Build files have been written to: /Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug
