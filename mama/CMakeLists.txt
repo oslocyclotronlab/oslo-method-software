@@ -128,6 +128,11 @@ target_include_directories(gf2
 target_compile_options(gf2 PRIVATE -ffixed-line-length-132)
 
 
-add_executable(MaMa app/gf2.f)
+add_executable(mama app/gf2.f)
 
-target_link_libraries(MaMa MaMa::gf2 MaMa::minig_x)
+target_link_libraries(mama MaMa::gf2 MaMa::minig_x)
+
+#########################################
+###### Install instructions
+install(TARGETS mama
+        RUNTIME DESTINATION bin)
