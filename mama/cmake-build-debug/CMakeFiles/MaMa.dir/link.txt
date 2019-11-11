@@ -1,0 +1,1 @@
+/usr/local/bin/gfortran   -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk CMakeFiles/MaMa.dir/app/gf2.f.o  -o MaMa libgf2.a libminig_x.a /opt/X11/lib/libX11.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libreadline.tbd 
