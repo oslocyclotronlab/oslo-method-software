@@ -1,0 +1,5 @@
+/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/CMakeFiles/gf2.dir
+/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/CMakeFiles/MaMa.dir
+/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/CMakeFiles/minig_x.dir

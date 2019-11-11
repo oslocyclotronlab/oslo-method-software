@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="MaMa"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\cmake\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gf2">
+				<Option output="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/libgf2.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 gf2"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gf2/fast">
+				<Option output="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/libgf2.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 gf2/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MaMa">
+				<Option output="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/MaMa" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/include"/>
+					<Add directory="/opt/X11/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 MaMa"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MaMa/fast">
+				<Option output="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/MaMa" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/include"/>
+					<Add directory="/opt/X11/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 MaMa/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="minig_x">
+				<Option output="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/libminig_x.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DHAVE_GNU_READLINE=1"/>
+					<Add directory="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/include"/>
+					<Add directory="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x"/>
+					<Add directory="/opt/X11/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 minig_x"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="minig_x/fast">
+				<Option output="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/libminig_x.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DHAVE_GNU_READLINE=1"/>
+					<Add directory="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/include"/>
+					<Add directory="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x"/>
+					<Add directory="/opt/X11/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 minig_x/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/app/gf2.f">
+			<Option target="MaMa"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/addcomment.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/adddelpk.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/addwin.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/ask.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/askyn.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/attshared2mama.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/attspec2mama.c">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/cask.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/caskyn.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/changecol.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/chngmark.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/cleanup.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/comfil.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/curse.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/dofit.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/dspfit.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/dspma.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/dspmkr.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/dspsp.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/energy.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/environment.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/eval.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/ffin.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/figega.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/fitter.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/fix_para.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/fixorfree.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding1.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding2.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding3.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding4.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding5.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding6.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding7.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/folding8.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/foldingy.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/funcfit.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/getmkrchnl.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/gfexec.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/gffin.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/gfhelp.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/gfinit.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/gfset.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/grabchar.c">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/grax.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/gridls.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/inin.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/inin_flg.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/kelvin.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/lineup.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/matinv.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/norway.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/offspec2mama.c">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/outlay.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/para2num.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/parset.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/peakfind.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/polyfit.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/removepeak.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/rewr.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/setcts.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/setext.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/setmarker.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/sumcts.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/trax.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/typeit.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/gf2/uncorr.f">
+			<Option target="gf2"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/cask.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/caskyn.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/minig_custom.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/miniga.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/minigb.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/minigc.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/qio_put_text.f">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/report_curs.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/set_focus.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/txtclr.f">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/util.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/src/minig_x/write_no_advance.c">
+			<Option target="minig_x"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/vetlewi/Git_Repositories/development/oslo-method-software/mama/cmake/FindReadline.cmake">
+			<Option virtualFolder="CMake Files\cmake\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
