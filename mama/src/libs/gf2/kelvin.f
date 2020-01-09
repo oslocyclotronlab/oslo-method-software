@@ -3315,7 +3315,7 @@ C ESTIMATE PARAMETERS TO BE FITTED
       
 
 C*********************************************************************
-C   FITIING LOOP STARTS
+C   FITING LOOP STARTS
 C*********************************************************************
       M     =0
       PROG  =0.00005
@@ -4178,7 +4178,7 @@ C Trying to find out if PM is made in a serie - then displaymarkers are kept the
         IF(ifreeze.EQ.1)THEN
           CALL SetMarker(0,0,0)
         ELSE
-          CALL SetMarker(2,2,0)
+          CALL SetMarker(1,2,0) !changed from 2,2,0 -> 1,2,0
         ENDIF
       ELSE
         CALL SetMarker(0,0,0)
