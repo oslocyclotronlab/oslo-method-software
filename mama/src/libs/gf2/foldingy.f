@@ -279,7 +279,7 @@ C FOLDING : F(J)=R(I,J)*U(J)
               F(J)=F(J)+R(J,K)*U(K)
             ENDDO
           ENDDO
-C PUTTING THE FOLDED SPECTRUM INTO DESTINATION MATRIX OR SPECTRUM
+C PUTTING THE FOLDED SPECTRUM INTO DESTINATION MATRIX
           DO J=LOWi,HIGH
            rMAT(IDEST,I,J)=F(J)
           ENDDO
@@ -306,7 +306,7 @@ C FOLDING : F(J)=R(I,J)*U(J)
             F(J)=F(J)+R(J,K)*U(K)
           ENDDO
         ENDDO
-C PUTTING THE FOLDED SPECTRUM INTO DESTINATION MATRIX OR SPECTRUM
+C PUTTING THE FOLDED SPECTRUM INTO DESTINATION SPECTRUM
         DO J=LOW,HIGH
          rSPEC(IDEST,J)=F(J)
         ENDDO
@@ -347,9 +347,7 @@ C It takes values between 1 and 2
       w0=w0*ABS(a1)        !from channels to energy
       DO I=l1,l2
         E=a0+I*a1
-c        Wtot=Fwhm1(I)*(factor*FWHM/100.)*E
-        Wtot=Fwhm1(I)*(factor*FWHM/100.)*E          !The FWHM is the true relative width
-
+        Wtot=Fwhm1(I)*(factor*FWHM/100.)*E  !The FWHM is the true relative width
         xx=(Wtot*Wtot)-(w0*w0)
         IF(xx.GT.0         )W=SQRT(xx)
         IF(W .LT.ABS(a1)/5.)W=ABS(a1)/5.  
@@ -1017,7 +1015,7 @@ C Finding lower and upper limit for the response function
       IF(MinEx.GT.2047)MinEx=2047
       iEx0 = INT(((0-a0)/a1)+0.5)      ! The ch where Ex = 0 keV
       IF(IRSP.EQ.1)Qvalue = 12300    ! Hardwired in response functions
-      ExMax = Qvalue + 500.       ! Upper limit for the response function (500 keV above Q-value)
+      ExMax = Qvalue + 1000.       ! Upper limit for the response function (1000 keV above Q-value)
       MaxEx = INT(((ExMax-a0)/a1)+0.5)
       IF(MaxEx.LT.0)  MaxEx=0
       IF(MaxEx.GT.2047)MaxEx=2047
@@ -1100,16 +1098,19 @@ C Testing that we do not read response spectra with Ex > Q-value
           ENDIF
         ENDIF
 
-C If we want to get Ex above the strickt the Q-value, we need to increase Q-value in this case
-C Here is the fix when Iq1 < Ie2, but do not use this part of the matrix for Ex > Q-value
-        IF(QVA(iq1).LT.ER(Ie2))THEN
-          iq1=iq2
-          iq2=iq1+1
+C This is a funny situation:
+C If we want to use Ie1 and Ie2 for the lowest iq1, it may be that ER(Ie2)>QAV(Iq1)
+C Then drop one unit on Ie1 and Ie2
+C The Ie1L and Ie2L should be used for low Iq1
+        IF(IQ.GT.1) THEN !Interpolations between Qvalues, have to test if Ex > Qvalue
+          Ie1L = Ie1
+          Ie2L = Ie2
+          IF(ER(Ie2).GT.QVA(Iq1)) THEN
+            Ie2L=Ie2-1
+            Ie1L=Ie2-1
+          ENDIF
         ENDIF
-        IF(Iq1.EQ.IQ) THEN
-          Iq1=IQ-1
-          Iq2=IQ
-        ENDIF
+C         write(6,*)Iq1,Iq2,Ie1,Ie2,Ie2L,QVA(Iq1),QVA(Iq2),ER(Ie2),ER(Ie2L)
 
         ifep1 = INT(((ER(Ie1)-a0)/a1)+0.5)                                 ! the ch for Ex1
         ifep2 = INT(((ER(Ie2)-a0)/a1)+0.5)                                 ! the ch for Ex2
@@ -1210,7 +1211,7 @@ C////////////////////////////////////
 
 C We deal first with the low Ex
 C Reading two Q-value spectra for low M and low Ex
-          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2018/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie1),filnam)
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2018/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie1L),filnam)
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
           DO i=0,4095
             Spec(i) = 0.
@@ -1240,7 +1241,7 @@ C Making average spectrum for low M and low Ex
           ENDDO
 
 C Reading two Q-value spectra for high M and low Ex
-          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2018/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie1),filnam)
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2018/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie1L),filnam)
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
           DO i=0,4095
             Spec(i) = 0.
@@ -1274,7 +1275,7 @@ C Then making average spectrum for low Ex
           ENDDO
 
 C Reading two Q-value spectra for low M and high Ex
-          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2018/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie2),filnam)
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2018/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie2L),filnam)
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
           DO i=0,4095
             Spec(i) = 0.
@@ -1305,7 +1306,7 @@ C Making average spectrum for low M and low Ex
           ENDDO
 
 C Reading two Q-value spectra for high M and high Ex
-          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2018/b"//QNA(iq1)//"_"//MNA(Im2)//"_"//ENA(Ie2),filnam)
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2018/b"//QNA(iq1)//"_"//MNA(Im2)//"_"//ENA(Ie2L),filnam)
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
           DO i=0,4095
             Spec(i) = 0.
