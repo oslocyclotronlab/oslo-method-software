@@ -63,8 +63,8 @@ float rL1,rU1,rL2,rU2;
 int   i;
 float sum;
 int   da01_1 = 0, da01_2 = 0;          //Choosing discrete levels
-float spin_1[20] = {0,2,3,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of levels in diagonal D1
-float spin_2[20] = {0,2,3,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of levels in diagonal D2
+float spin_1[50] = {0,2,3,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of levels in diagonal D1
+float spin_2[50] = {0,2,3,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of levels in diagonal D2
 float n_1 = 14.6278, n_2 = 38.8045;    // Average number of levels in continuum diagonal D1 and D2
 float xxj_1 = 4.5, xxj_2 = 5.6;        // Average spin of levels in contiuum diagonal D1 and D2, taken for 238Np at Ex = 1100 and 1500 keV
 float xj_1, xj_2;
@@ -83,6 +83,7 @@ float a0c,a1c;
 float sigma;
 float prob( float sigma, float jspin);
 float gsum(float sigma, float jlow);
+int   makerootplot();
 
 static void fgets_ignore(char *s, int size, FILE *stream)
 {
@@ -96,7 +97,7 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                       D I A B L O  1.4                       |\r\n");
+    printf(" |                        D I A B L O  1.5                      |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |    Program to calculate gamma-ray strength function (gSF)    |\r\n");
     printf(" |   You need a first-generation matrix (fg) in your directory  |\r\n");
@@ -105,16 +106,17 @@ int main()
     printf(" |  the shape of the gSF. It is assumed that the fg matrix has  |\r\n");
     printf(" |  relative small dispersion like 40 keV x 40 keV per channel  |\r\n");
     printf(" |  in order to accurately integrate counts in the diagonals.   |\r\n");
-    printf(" |  You will later be asked to use a disperion around 120 keV.  |\r\n");
+    printf(" |  You will later be asked to use a dispersion around 120 keV. |\r\n");
     printf(" |       See M. Wiediking et al., PRL 108, 162503 (2012).       |\r\n");
     printf(" |                                                              |\r\n");
-    printf(" |  Input files: fg (mama matrix)     Output files: input.dia   |\r\n");
+    printf(" |  Input files: fg (mama matrix)     Output files:   input.dia |\r\n");
     printf(" |               (input.dia)                        results.dia |\r\n");
-    printf(" |                                                              |\r\n");
+    printf(" |                                              diablo_plot.cpp |\r\n");
     printf(" | E-mail  : magne.guttormsen@fys.uio.no                        |\r\n");
     printf(" | Created : 04 Feb 2020                                        |\r\n");
     printf(" | Modified: 14 Apr 2020  Average gSF and systematic errors     |\r\n");
     printf(" | Modified: 17 Apr 2020  Compress with accurate integrals      |\r\n");
+    printf(" | Modified: 26 May 2020  Root plot created: diablo_plot.cpp    |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
     
@@ -149,7 +151,7 @@ int main()
         fgets_ignore(line,sizeof(line),fp);
         sscanf(line, " %d %d \n",&nl1, &nl2);
         
-        for(i=0;i<20;i++){
+        for(i=0;i<50;i++){
             fgets_ignore(line,sizeof(line),fp);
             sscanf(line, " %f %f \n",&spin_1[i], &spin_2[i]);
         }
@@ -177,7 +179,6 @@ int main()
         fgets_ignore(line,sizeof(line),fp);
         sscanf(line,"%15s %d %3s %d",cdum, &dimfgx, cdum, &dimfgy);
         fgets_ignore(line,sizeof(line),fp);
-        
     }
     for(iy=0;iy<=dimfgy;iy++){
         for(ix=0;ix<=dimfgx;ix++){
@@ -289,6 +290,17 @@ int main()
     fgets_ignore(line,sizeof(line),stdin);
     sscanf(line,"%f", &Exf_2);
     
+    printf("\nTake a look if the energy distances reflect the gamma FWHM\n");
+    printf("\n        U2   D2   L2            U1   D1   L1 ");
+    printf("\n        .   x   .               .   x   .   ");
+    printf("\n      %4d x%4d              %4d x%4d  ", (int)(y2U2-x2U2-Exf_2),(int)(x2L2-y2L2+Exf_2),(int)(y2U1-x2U1-Exf_1),(int)(x2L1-y2L1+Exf_1));
+    printf("\n      .   x   .               .   x   .   ");
+    printf("\n     .   x   .               .   x   .   ");
+    printf("\n    .   x   .               .   x   .   ");
+    printf("\n   .   x   .               .   x   .  ");
+    printf("\n %4d x%4d              %4d x%4d  ", (int)(y1U2-x1U2-Exf_2),(int)(x1L2-y1L2+Exf_2),(int)(y1U1-x1U1-Exf_1),(int)(x1L1-y1L1+Exf_1));
+    printf("\n .   x   .               .   x   . \n");
+    
     printf("\nYou should consider what part of the initial ");
     printf("\nexcitation energy region that gives reasonable gSF,");
     printf("\ne.g. from 3500 keV and up to Ex = Sn");
@@ -351,9 +363,9 @@ int main()
     fgets_ignore(line,sizeof(line),stdin);
     sscanf(line,"%d", &da01_1);
     if(da01_1==0){
-        printf("Give number of discrete levels (< 20)            <%2d>:",nl1);
+        printf("Give number of discrete levels (< 50)            <%2d>:",nl1);
         fgets_ignore(line,sizeof(line),stdin);
-        sscanf(line,"%d", &nl1); if(nl1>20)nl1=20;
+        sscanf(line,"%d", &nl1); if(nl1>50)nl1=50;
         for (i=0; i < nl1; i++){
             printf("Give spin of level no. %2d                      <%4.1f>:",i+1, spin_1[i]);
             fgets_ignore(line,sizeof(line),stdin);
@@ -380,9 +392,9 @@ int main()
     fgets_ignore(line,sizeof(line),stdin);
     sscanf(line,"%d", &da01_2);
     if(da01_2==0){
-        printf("Give number of discrete levels (< 20)            <%2d>:",nl2);
+        printf("Give number of discrete levels (< 50)            <%2d>:",nl2);
         fgets_ignore(line,sizeof(line),stdin);
-        sscanf(line,"%d", &nl2); if(nl2>20)nl2=20;
+        sscanf(line,"%d", &nl2); if(nl2>50)nl2=50;
         for (i=0; i < nl2; i++){
             printf("Give spin of level no. %2d                      <%4.1f>:",i+1, spin_2[i]);
             fgets_ignore(line,sizeof(line),stdin);
@@ -529,7 +541,7 @@ int main()
         }
     }
     
-    printf("\nIn the table below the gSF is calculated from the number of counts at diagonal D1 and D2");
+    printf("\nIn the table below, the gSF is calculated from the number of counts at diagonal D1 and D2");
     printf("\nThe pairs are still not sewed together. Each gSF point (gsf_1 and gsf_2) is");
     printf("\ncalculated by gSF = Counts / (Eg**3 x p), where p is the fraction of levels with spin that");
     printf("\ncan feed the levels of the diagonals, e.g 0+ can be fed by 1+ and 1-, only.\n\n");
@@ -606,6 +618,9 @@ int main()
     }
     fclose(fp);
 	 
+
+    
+    
     /* **************************************************** */
     /* Storing default values for the next run in input.dia */
     /* **************************************************** */
@@ -625,11 +640,15 @@ int main()
         fprintf(fp, " %f %f  \n",n_1, n_2);
         fprintf(fp, " %d %d  \n",da01_1, da01_2);
         fprintf(fp, " %d %d  \n",nl1, nl2);
-        for(i=0;i<20;i++){
+        for(i=0;i<50;i++){
             fprintf(fp, " %f %f \n",spin_1[i], spin_2[i]);
         }
     }
     fclose(fp);
+    
+    makerootplot();
+    printf("\nYou may plot your results by: root -l diablo_plot.cpp \n\n");
+
     return(0);
 }
 
@@ -681,6 +700,7 @@ float ch2eg(int ch){
 float ch2ex(int ch){
     return a0fgy + (float)ch*a1fgy;
 }
+
 //The + or - a1fgx/2 is to assure that the chosen energy is within the
 // upper and lower diagonal boarders enclosing the diagonal
 float ex2egL1(float ex){
@@ -701,15 +721,15 @@ void compressing(){
     float temp1[2048],temp2[2048],temp3[2048],temp4[2048],temp5[2048],temp6[2048],temp7[2048],temp8[2048],temp9[2048],temp10[2048];
     float  sumgsf1,sumgsf2,sumcen1,sumcen2,sumr1,sumr2,sumarea1,sumarea2,sump1,sump2,numb;
     for(i=0; i< 2048;i++ ){
-        temp1[i] = 0.;
-        temp2[i] = 0.;
-        temp3[i] = 0.;
-        temp4[i] = 0.;
-        temp5[i] = 0.;
-        temp6[i] = 0.;
-        temp7[i] = 0.;
-        temp8[i] = 0.;
-        temp9[i] = 0.;
+        temp1[i]  = 0.;
+        temp2[i]  = 0.;
+        temp3[i]  = 0.;
+        temp4[i]  = 0.;
+        temp5[i]  = 0.;
+        temp6[i]  = 0.;
+        temp7[i]  = 0.;
+        temp8[i]  = 0.;
+        temp9[i]  = 0.;
         temp10[i] = 0.;
     }
     ex = (ch2ex(chH)+ch2ex(chH-(compress-1)))/2.;
@@ -845,12 +865,12 @@ void two2one(){ //Making one gSF and estimating statistical (dgsf_ave) and syste
         if(delta[l]<0.05)delta[l]=0.05;
         if(delta[l]>1.00)delta[l]=1.00;
     }
-    delta_ave[L1]   = delta[L1]; //smoothing relative errors by 5 and 5 channels
+    delta_ave[L1]   = delta[L1];
     delta_ave[L1+1] = delta[L1+1];
     delta_ave[L4]   = delta[L4];
     delta_ave[L4-1] = delta[L4-1];
 
-    for(l=L1+2;l<=L4-2;l++){
+    for(l=L1+2;l<=L4-2;l++){        //smoothing relative errors by 5 and 5 channels
         delta_ave[l] = (delta[l-2] + delta[l-1] + delta[l] + delta[l+1] + delta[l+2])/5.;
     }
 }
@@ -869,3 +889,109 @@ void linfit(int Low, int High){ //Chi**2 fit with y = a + b*x
     a   = (D*C-E*A)/(D*B-A*A);
     b   = (E*B-C*A)/(D*B-A*A);
 }
+
+int makerootplot(){
+    fp = fopen("diablo_plot.cpp", "w+");
+    if(fp == NULL){
+        printf("Could not open file diablo_plot.cpp \n");
+        exit(0);
+    }
+    else {
+        int middle  = (L1 + L4)/2;
+        float xnorm = (5.e-08)/gsf_ave[middle];  //Scaling gSF in the middle of the data set to 5.e-08 MeV**(-3)
+        fprintf(fp,"{\n");
+        fprintf(fp,"    gROOT->Reset();\n");
+        fprintf(fp,"    gROOT->SetStyle(\"Plain\");\n");
+        fprintf(fp,"    gStyle->SetOptTitle(0);\n");
+        fprintf(fp,"    gStyle->SetOptStat(0);\n");
+        fprintf(fp,"    gStyle->SetFillColor(0);\n");
+        fprintf(fp,"    gStyle->SetPadBorderMode(0);\n");
+        fprintf(fp,"    m = (TH1F*)gROOT->FindObject(\"h\");\n");
+        fprintf(fp,"    if (m) m->Delete();\n");
+        fprintf(fp,"    TCanvas *c1 = new TCanvas(\"c1\",\"Gamma-ray strength function\",800,600);\n");
+        fprintf(fp,"    TH2F *h     = new TH2F(\"h\",\" \",10,0.0,   10.0,10,5.0e-9,5.0e-07);\n");
+        fprintf(fp,"    ifstream diafile(\"results.dia\");\n");
+        fprintf(fp,"    float eg[500], energyerr[500];\n");
+        fprintf(fp,"    float gsf_ave[500],dgsf_ave[500],dsys_ave[500];\n");
+        fprintf(fp,"    float gsf1[500],gsf2[500],dgsf1[500],dgsf2[500];\n");
+        fprintf(fp,"    float sysL[500], sysH[500];\n");
+        fprintf(fp,"    float Eg, gsf, dgsf, dsys, gsf_1,gsf_2,dgsf_1,dgsf_2;\n");
+        fprintf(fp,"    int   idum;\n");
+        fprintf(fp,"    i = 0;\n");
+        fprintf(fp,"    float xnorm = %e;\n",xnorm);
+        fprintf(fp,"    while(diafile){\n");
+        fprintf(fp,"        diafile >>idum >> Eg >>gsf>>dgsf>>dsys>>gsf_1>>gsf_2>>dgsf_1>>dgsf_2;\n");
+        fprintf(fp,"        eg[i]        = Eg/1000.;\n");
+        fprintf(fp,"        gsf_ave[i]   = gsf*xnorm;\n");
+        fprintf(fp,"        dgsf_ave[i]  = dgsf*xnorm;\n");
+        fprintf(fp,"        sysL[i]      = (gsf-dsys)*xnorm;\n");
+        fprintf(fp,"        sysH[i]      = (gsf+dsys)*xnorm;\n");
+        fprintf(fp,"        gsf1[i]      = gsf_1*xnorm;\n");
+        fprintf(fp,"        gsf2[i]      = gsf_2*xnorm;\n");
+        fprintf(fp,"        dgsf1[i]     = dgsf_1*xnorm;\n");
+        fprintf(fp,"        dgsf2[i]     = dgsf_2*xnorm;\n");
+        fprintf(fp,"        energyerr[i] = 0.;\n");
+        fprintf(fp,"        i++;\n");
+        fprintf(fp,"    }\n");
+        fprintf(fp,"    TGraphErrors *gsfgr = new TGraphErrors(i,eg,gsf_ave,energyerr,dgsf_ave);\n");
+        fprintf(fp,"    TGraph       *sysLgr = new TGraphErrors(i,eg,sysL);\n");
+        fprintf(fp,"    TGraph       *sysHgr = new TGraphErrors(i,eg,sysH);\n");
+        fprintf(fp,"    TGraphErrors *gsf1gr = new TGraphErrors(i,eg,gsf1,energyerr,dgsf1);\n");
+        fprintf(fp,"    TGraphErrors *gsf2gr = new TGraphErrors(i,eg,gsf2,energyerr,dgsf2);\n");
+        fprintf(fp,"    c1->SetLogy();\n");
+        fprintf(fp,"    c1->SetLeftMargin(0.10);\n");
+        fprintf(fp,"    c1->SetRightMargin(0.02);\n");
+        fprintf(fp,"    c1->SetTopMargin(0.07);\n");
+        fprintf(fp,"    c1->SetBottomMargin(0.10);\n");
+        fprintf(fp,"    h->GetXaxis()->CenterTitle();\n");
+        fprintf(fp,"    h->GetXaxis()->SetTitleOffset(1.1);\n");
+        fprintf(fp,"    h->GetXaxis()->SetTitle(\"#gamma-ray energy E_{#gamma} (MeV)\");\n");
+        fprintf(fp,"    h->GetXaxis()->SetTitleFont(42);\n");
+        fprintf(fp,"    h->GetXaxis()->SetLabelFont(42);\n");
+        fprintf(fp,"    h->GetYaxis()->CenterTitle();\n");
+        fprintf(fp,"    h->GetYaxis()->SetTitleOffset(1.2);\n");
+        fprintf(fp,"    h->GetYaxis()->SetTitle(\"#gamma-ray strength function (MeV^{-3})\");\n");
+        fprintf(fp,"    h->GetYaxis()->SetTitleFont(42);\n");
+        fprintf(fp,"    h->GetYaxis()->SetLabelFont(42);\n");
+        fprintf(fp,"    h->Draw();\n");
+        fprintf(fp,"    gsfgr->SetMarkerStyle(20);\n");
+        fprintf(fp,"    gsfgr->SetMarkerSize(0.6);\n");
+        fprintf(fp,"    gsfgr->SetMarkerColor(kBlack);\n");
+        fprintf(fp,"    gsfgr->Draw(\"P\");\n");
+        fprintf(fp,"    gsf1gr->SetMarkerStyle(22);\n");
+        fprintf(fp,"    gsf1gr->SetMarkerSize(0.6);\n");
+        fprintf(fp,"    gsf1gr->SetMarkerColor(kRed);\n");
+        fprintf(fp,"    gsf1gr->Draw(\"P\");\n");
+        fprintf(fp,"    gsf2gr->SetMarkerStyle(22);\n");
+        fprintf(fp,"    gsf2gr->SetMarkerSize(0.6);\n");
+        fprintf(fp,"    gsf2gr->SetMarkerColor(kBlue);\n");
+        fprintf(fp,"    gsf2gr->Draw(\"P\");\n");
+        fprintf(fp,"    sysLgr->SetMarkerStyle(20);\n");
+        fprintf(fp,"    sysLgr->SetMarkerSize(0.6);\n");
+        fprintf(fp,"    sysLgr->SetMarkerColor(kBlack);\n");
+        fprintf(fp,"    sysLgr->Draw(\"L\");\n");
+        fprintf(fp,"    sysHgr->SetMarkerStyle(20);\n");
+        fprintf(fp,"    sysHgr->SetMarkerSize(0.6);\n");
+        fprintf(fp,"    sysHgr->SetMarkerColor(kBlack);\n");
+        fprintf(fp,"    sysHgr->Draw(\"L\");\n");
+        fprintf(fp,"    TLegend *leg = new TLegend(0.15,0.75,0.55,0.90);\n");
+        fprintf(fp,"    leg->SetBorderSize(0);\n");
+        fprintf(fp,"    leg->SetFillColor(0);\n");
+        fprintf(fp,"    leg->SetTextFont(42);\n");
+        fprintf(fp,"    leg->AddEntry(gsfgr,\"Total gSF\",\"P\");\n");
+        fprintf(fp,"    leg->AddEntry(gsf1gr,\"Gammas feeding D1\",\"P\");\n");
+        fprintf(fp,"    leg->AddEntry(gsf2gr,\"Gammas feeding D2\",\"P\");\n");
+        fprintf(fp,"    leg->AddEntry(sysHgr,\"Systematical errors\",\"L\");\n");
+        fprintf(fp,"    leg->Draw();\n");
+        fprintf(fp,"    TLatex t;\n");
+        fprintf(fp,"    t.SetTextSize(0.05);\n");
+        fprintf(fp,"    t.SetTextFont(42);\n");
+        fprintf(fp,"    t.DrawLatex(    5. ,3.5e-07,\"^{xxx}Yy\");\n");
+        fprintf(fp,"    c1->Update();\n");
+        fprintf(fp,"    c1->Print(\"diablo_plot.pdf\");\n");
+        fprintf(fp,"}\n");
+    }
+    fclose(fp);
+    return 0;
+}
+
