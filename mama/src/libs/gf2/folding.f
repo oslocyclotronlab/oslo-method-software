@@ -634,8 +634,8 @@ C Updating comment in the heading of spectrum file
       COMMON/State/Istatus,ITYPE,IDEST,cal(2,2,2,3),Idim(2,2,2),fname(2,2),comm(2,2)
       CHARACTER fname*8,comm*60
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
-      COMMON/response2/IR,ETAB(100),FTAB(100),ER(100),ESE(100),EDE(100),
-     +                 FE(100),SE(100),DE(100),ANN(100),EW(100),FW(100),ENA(100)
+      COMMON/response2/IR,ETAB(1000),FTAB(1000),ER(1000),ESE(1000),EDE(1000),
+     +           FE(1000),SE(1000),DE(1000),ANN(1000),EW(1000),FW(1000),ENA(1000)
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
       COMMON/response6/LOW, HIGH,LowChi, Iter, ix1,iy1,ix2,iy2, EffD(10)
       INTEGER LOW,HIGH
@@ -830,11 +830,11 @@ C pf, pc, ps, pd, pa in the RSPNAI routine.
       DATA ER3/   360.,   847.,   1238.,   1779., 2839., 3089.,
      +           4497.,  6130.,   9900.,  15000.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
-      DATA ESE3/  511.,   511.,    511.,    511.,  511.,  511.,
-     +            511.,   511.,    511.,    511.,              0,0,0,0,0,0,0,0,0,0,
+      DATA ESE3/  511.,   511.,    511.,    505.,  491.,  490.,
+     +            493.,   500.,    511.,    511.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
-      DATA EDE3/ 1022.,  1022.,   1022.,   1022., 1022., 1022.,
-     +           1022.,  1022.,   1022.,   1022.,              0,0,0,0,0,0,0,0,0,0,
+      DATA EDE3/ 1022.,  1030.,   1022.,   1022.,  994.,  985.,
+     +            982.,   995.,   1050.,   1022.,              0,0,0,0,0,0,0,0,0,0,
      +    0,0,0,0,0,0,0,0,0,0/
 
 
@@ -1673,7 +1673,9 @@ C Response function read from folder below
           stop 'An error occured while reading the resp.dat file'
         elseif ( stat < 0 ) then
           tot_rows = row-1
-          print *, 'EOF reached. Found a total of ', tot_rows, 'rows.'
+          print *, 'EOF reached. Found a total of',tot_rows,' rows'
+          print *, 'Correcting rows from',Nlines,'to',tot_rows
+          NLines = tot_rows
           exit
         endif
       END DO
@@ -2220,17 +2222,17 @@ C     FEn,SEn,..is normalized intensities (not counts of raw specter)
       CHARACTER fname*8,comm*60
 
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
-      COMMON/response2/IR,ETAB(100),FTAB(100),ER(100),ESE(100),EDE(100),
-     +                 FE(100),SE(100),DE(100),ANN(100),EW(100),FW(100),ENA(100)
+      COMMON/response2/IR,ETAB(1000),FTAB(1000),ER(1000),ESE(1000),EDE(1000),
+     +        FE(1000),SE(1000),DE(1000),ANN(1000),EW(1000),FW(1000),ENA(1000)
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
       COMMON/response4/pf(0:2047),pc(0:2047),ps(0:2047),pd(0:2047),pa(0:2047)
       COMMON/response6/LOW, HIGH,LowChi, Iter, ix1,iy1,ix2,iy2, EffD(10)
       INTEGER LOW,HIGH
 
-      DIMENSION FEn(100),SEn(100),DEn(100),ANNn(100)
+      DIMENSION FEn(1000),SEn(1000),DEn(1000),ANNn(1000)
       DIMENSION Calib(6)
       INTEGER dim
-      DIMENSION Fs(0:4095),Fs1(0:4095),Fs2(0:4095),F1(0:4095),F2(0:4095)
+      DIMENSION Fs(0:8191),Fs1(0:8191),Fs2(0:8191),F1(0:8191),F2(0:8191)
       DIMENSION F(0:2047),G(0:2047), Spec(0:8191)
       DIMENSION Ffu(0:2047),Gfu(0:2047),Fse(0:2047),Gse(0:2047)
       DIMENSION Fde(0:2047),Gde(0:2047),Fan(0:2047),Gan(0:2047)
@@ -2403,14 +2405,17 @@ C But first we check if they already have been read
             call makepath("MAMA_MYRESP","cmp"//ENA(I1),filnam)
             call makepath("UIO_APPLICATIONS","mama/resp/"//filnam,filnam)
           ENDIF
-
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
           dim=-1                      !Gives no header output
-          DO i=0,4095 
+          DO i=0,8191
             Spec(i) = 0.
           ENDDO
           CALL norr1dim(INP,comment,dim,Spec,Calib)
-          DO i=0,4095 
+          IF(IRSP==13)THEN
+            b01 = Calib(1)
+            b11 = Calib(2)
+          ENDIF
+          DO i=0,8191
             Fs1(i)=Spec(i)
           ENDDO
           CLOSE(INP)
@@ -2433,11 +2438,15 @@ C But first we check if they already have been read
 
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
           dim=-1                      !Gives no header output
-          DO i=0,4095 
+          DO i=0,8191
             Spec(i) = 0.
           ENDDO
           CALL norr1dim(INP,comment,dim,Spec,Calib)
-          DO i=0,4095 
+          IF(IRSP==13)THEN
+            b02 = Calib(1)
+            b12 = Calib(2)
+          ENDIF
+          DO i=0,8191
             Fs2(i)=Spec(i)
           ENDDO
           CLOSE(INP)
@@ -2474,34 +2483,35 @@ C We drop low energy fix when GEANT is used (seg2, seg3, seg23, clover, oscar, a
          enddo
  1111    CONTINUE
 
-C Determining calibration for spectra read from file
-         IF(IRSP == 13) THEN
-            b0 = Calib(1)
-            b1 = Calib(2)
-         endif
-
 C Streching/compressing Fs1 and Fs2 to fit calibration a0 and a1
-          idim1=4096
-          idim2=4096
-          do i=0,4095
+          idim1=8192
+          idim2=8192
+          do i=0,8191
             Fs(i)=Fs1(i)
           enddo
+          if(IRSP==13) then
+            b0 = b01
+            b1 = b11
+          endif
           CALL ELASTIC(Fs,F1,b0,b1,a0,a1,idim1,idim2) !F1 is new spec.
-          do i=0,4095
+          do i=0,8191
             Fs(i)=Fs2(i)
           enddo
+          if(IRSP==13) then
+            b0 = b02
+            b1 = b12
+          endif
           CALL ELASTIC(Fs,F2,b0,b1,a0,a1,idim1,idim2) !F2 is new spec.
-
 C Total spectrum normalized to one
           SumF1 = 0.
           SumF2 = 0.
-          DO I = 0,4095
+          DO I = 0,8191
              SumF1 = SumF1 + F1(I)
              SumF2 = SumF2 + F2(I)
           ENDDO
           SumF1 = SumF1 + FE(I1) + SE(I1) + DE(I1) + ANN(I1)
           SumF2 = SumF2 + FE(I2) + SE(I2) + DE(I2) + ANN(I2)
-          DO I = 0,4095
+          DO I = 0,8191
              F1(I) = F1(I)/SumF1
              F2(I) = F2(I)/SumF2
           ENDDO
@@ -2580,7 +2590,7 @@ C Interpolating between equal theta for 0 up to 180 dgrs.
           IF(E.GT.0.1.AND.E.LT.Ecom)THEN
             if(ABS(Egam-E).GT.0.001)z=E/((Egam/511.)*(Egam-E))
             Theta=ACOS(1.-z)
-c New, to catch the lilit values
+c New, to catch the limit values
             IF(Theta.LT.0)Theta=0.001
             IF(Theta.GT.3.141592654)Theta=3.142
 
@@ -2645,7 +2655,7 @@ C the two channels il and ih.
         A=FEn(I1)+( FEn(I2)- FEn(I1))*(Egam-E1)/(E2-E1)   !full-energy intensity
         IF(A.LT.0.)A=0.
         Egami=(Egam-a0)/a1
-        il=Egami              ! Distribute counts on ch il and ih
+        il=INT(Egami+0.5)              ! Distribute counts on ch il and ih
         ih=il+1
         yl=(ih-Egami)*A
         yh=(Egami-il)*A
@@ -2689,7 +2699,7 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           IF(C.LT.0.)C=0.
           IF(D.LT.0.)D=0.
 
-          il=SEi
+          il=INT(SEi+0.5)
           ih=il+1
           yl=(ih-SEi)*B
           yh=(SEi-il)*B
@@ -2708,7 +2718,7 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           factor=1.1 !Assuming single escape peak 10% larger FWHM than full energy peak
           CALL GaussSmoothing(Fse,Gse,m1,m2,factor,w0) !smoothing s.esc. peak
 
-          il=DEi
+          il=INT(DEi+0.5)
           ih=il+1
           yl=(ih-DEi)*C
           yh=(DEi-il)*C
@@ -2727,7 +2737,7 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           factor=1.3 !Assuming double escape peak 20% larger FWHM than full energy peak
           CALL GaussSmoothing(Fde,Gde,m1,m2,factor,w0) !smoothing d.esc. peak
 
-          il=ANi 
+          il=INT(ANi+0.5)
           ih=il+1
           yl=(ih-ANi)*D
           yh=(ANi-il)*D
