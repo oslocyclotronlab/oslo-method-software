@@ -34,11 +34,11 @@ C     "good and wanted" gammas.
       IF(IDEST.EQ.1)ISP=2
 
 
-C Defining background to the 2-dim peak
+C Defining background for the 2-dim peak
       WRITE(6,*)'Give coordinates for the corners of the rectangel'
       WRITE(6,*)'that defines the background of the 2-dim peak'
       WRITE(6,*)' '
-      WRITE(6,*)'    (x1,y2)-----------(x2,y2)'
+      WRITE(6,*)'         --------------(x2,y2)'
       WRITE(6,*)'        |      xxx       |'
       WRITE(6,*)'        |      xxx       |'
       WRITE(6,*)'        |   xxxxxxxxxx   |'
@@ -46,18 +46,19 @@ C Defining background to the 2-dim peak
       WRITE(6,*)'        |  xxxxxxxxxxxx  |'
       WRITE(6,*)'        |   xxxxxxxxxx   |'
       WRITE(6,*)'        |      xxxx      |'
-      WRITE(6,*)'    (x1,y1)-----------(x2,y1)'
+      WRITE(6,*)'    (x1,y1)-------------- '
       WRITE(6,*)' '
+
 
       WRITE(6,123)i1
  123  FORMAT(/'Give x1 <',I4,'>:',$)
       CALL READI(5,i1)
-      WRITE(6,124)i2
- 124  FORMAT( 'Give x2 <',I4,'>:',$)
-      CALL READI(5,i2)
-      WRITE(6,125)j1
- 125  FORMAT( 'Give y1 <',I4,'>:',$)
+      WRITE(6,124)j1
+ 124  FORMAT( 'Give y1 <',I4,'>:',$)
       CALL READI(5,j1)
+      WRITE(6,125)i2
+ 125  FORMAT( 'Give x2 <',I4,'>:',$)
+      CALL READI(5,i2)
       WRITE(6,126)j2
  126  FORMAT( 'Give y2 <',I4,'>:',$)
       CALL READI(5,j2)
@@ -67,7 +68,7 @@ C Defining background to the 2-dim peak
       WRITE(6,*)'We need a region on y-axis where the shape of the gamma-peak can be determined'
       WRITE(6,*)'Give lower (L1) and higher (L2) channel on y-axis'
       WRITE(6,*)' '
-      WRITE(6,*)'    (x1,y2)-----------(x2,y2)'
+      WRITE(6,*)'         --------------(x2,y2)'
       WRITE(6,*)'        |      xxx       |'
       WRITE(6,*)'        |      xxx       |'
       WRITE(6,*)'    L2  |   xxxxxxxxxx   |'
@@ -75,7 +76,7 @@ C Defining background to the 2-dim peak
       WRITE(6,*)'        |  xxxxxxxxxxxx  |'
       WRITE(6,*)'    L1  |   xxxxxxxxxx   |'
       WRITE(6,*)'        |      xxxx      |'
-      WRITE(6,*)'    (x1,y1)-----------(x2,y1)'
+      WRITE(6,*)'    (x1,y1)-------------- '
       WRITE(6,*)' '
 
 C Make suggestions for L1 and L2 if they have bizarre values

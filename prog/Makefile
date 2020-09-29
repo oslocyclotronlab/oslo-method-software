@@ -19,12 +19,12 @@ TARGET  = shiva2paw waiting funcfit gameff autofit onemev mama2pc vigs isotrop \
           f_model rotor nilsson  normrhof cm2lab grazing \
           spincut rutherford fmodel tave binomial binomialc siriangle sfec alfnasort \
           alfnamatrix webrho webstrf fitone micro robin counting gammex d2rho combi \
-          pet elise extendspin radex scissors pjolter
+          pet elise extendspin radex scissors pjolter primex diablo
 # mtcp mag2mag mag2disc disc2mag
 
 C_SOURCES = shiva2paw.c waiting.c kin.c hex.c rocket.c normalization.c \
     binomialc.c micro.c counting.c gammex.c d2rho.c combi.c scissors.c\
-    extendspin.c pjolter
+    extendspin.c pjolter.c diablo.c
 # mtcp.c mag2mag.c mag2disc.c disc2mag.c
 C_TARGETS = $(C_SOURCES:%.c=%)
 
@@ -34,7 +34,7 @@ F_SOURCES = beep.f doz.f polar.f funcfit.f gameff.f autofit.f onemev.f mama2pc.f
    toro.f fgtheo.f splinetest.f egidy.f sea.f spline2mama.f f_model.f \
    rotor.f nilsson.f normrhof.f cm2lab.f grazing.f spincut.f rutherford.f fmodel.f tave.f \
    binomial.f siriangle.f sfec.f webstrf.f webrho.f alfnasort.f alfnamatrix.f fitone.f \
-   robin.f pet.f elise.f radex.f
+   robin.f pet.f elise.f radex.f primex.f
 # angle.f
 F_TARGETS = $(F_SOURCES:%.f=%)
 

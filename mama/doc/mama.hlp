@@ -1459,6 +1459,32 @@ May 12. 2002
 November 11. 2002
     Calibration is maintained if the new spectrum has a0=0 and a1=1.
 
+November 7. 2019
+    New for version 7.5.3: Improved coding for the folding and
+    unfolding of the Ex-axis for SuN, mainly more iterations
+    and setting reasonable energy limits. The commands end with “y”:
+    ry - make response matrix for y-axis (summed Ex from gammas)
+    uy - unfold the y-axis
+    fy - fold the y-axis
+    gy - get the response matrix for y-axis
+
+    Folding and unfolding routines have input files called input.unx
+    and input.uny for x-axis (gamma rays) and for y-axis (summed Ex for SuN).
+    The first-generation procedure also has an input file
+    input.fge (previously called figegain.dat). These three input
+    files contain the input parameters for the last run and makes
+    it easier to re-run the program.
+
+    Output files are called respxout.dat and respyout.dat.
+    The unfolding procedure has now 200 iterations as default (max 500).
+    For Ex-unfolding, matrices that have a shift in energy
+    (channel 0 has not energy 0 keV), is proper treated
+    independently on the shift (a0 parameter).
+
+    (The resp.dat file is now dedicated to hold parameters
+    for the response functions.) Some more comments concerning
+    folding/unfolding and cosmetics are included.
+    
 >>>>END
 
 

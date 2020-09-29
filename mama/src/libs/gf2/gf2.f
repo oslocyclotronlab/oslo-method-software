@@ -5,10 +5,10 @@
  5    FORMAT(' ',/,
      +' ____________________________________________________'/
      +'|                                                    |'/ 
-     +'|              Welcome to M A M A  7.5.2             |'/
+     +'|              Welcome to M A M A  7.5.3             |'/
      +'|                                                    |'/
      +'|   MAtrix MAnipulation, Oslo Cyclotron Laboratory   |'/
-     +'|           Magne Guttormsen, November 2002          |'/
+     +'|           Magne Guttormsen, January 1995           |'/
      +'|                                                    |'/
      +'|   MAMA handles 2 matrices of dimension 4096x2048   |'/
      +'|       and 2 singles spectra of length 8192         |'/

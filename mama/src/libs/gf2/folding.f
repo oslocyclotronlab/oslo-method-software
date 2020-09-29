@@ -14,12 +14,13 @@ C ray which is scattered an angle theta. See Canberra catalog ed.7, p.2
       CHARACTER fname*8,comm*60, ANS*1
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
-      DIMENSION EgamD(10),EffD(10),x(10),y(10)
+      COMMON/response6/LOW, HIGH,LowChi, Iter, ix1,iy1,ix2,iy2, EffD(10)
+      DIMENSION EgamD(10),x(10),y(10)
       DATA EgamD/30.,80.,122.,183.,244.,294.,344.,562.,779.,1000./
       DATA EffD/ 0.0,0.0,0.0,0.06,0.44,0.60,0.87,0.99,1.00,1.000/
 c      DATA EffD/ 0.0,0.1,0.51,0.66,0.78,0.85,0.89,0.99,1.00,1.000/  !Replaced April 2013
+      INTEGER IRSP,ix1,iy1,ix2,iy2,LOW,HIGH,Iter
 
-      ID=10
       write(6,*)' '
       write(6,*)'The efficiency at low energy (< 1000 keV) have to be given.'
       write(6,*)'It depends on various experimental conditions as thresholds'
@@ -30,22 +31,41 @@ c      DATA EffD/ 0.0,0.1,0.51,0.66,0.78,0.85,0.89,0.99,1.00,1.000/  !Replaced A
       write(6,*)' '
 
 C Want to save EffD values as default. Therefore, defines x and y to work with.
-      DO i=1,ID
+      DO i=1,10
         x(i)=EgamD(i)
         y(i)=EffD(i)
       ENDDO
+
+      OPEN(23,FILE='input.unx',STATUS='old',ERR=77)
+      READ(23,*,END=66,ERR=66)IRSP,facFWHM,FWHM
+      READ(23,*,END=66,ERR=66)
+      READ(23,*,END=66,ERR=66)
+      READ(23,*,END=66,ERR=66)
+      READ(23,*,END=66,ERR=66)(y(i),i=1,10)
+      GO TO 77
+ 66   WRITE(6,*)'Warning: Something wrong with your input.unx file'
+ 77   CLOSE(23)
+
+C ****Begin, Fix for first run****
+      IF(y(10).LT.0.01.OR.y(10).GT.10)THEN
+        DO i=1,10
+          x(i)=EgamD(i)
+          y(i)=EffD(i)
+        ENDDO
+      ENDIF
+C ****End, Fix for first run****
 
 C Finding x as a function of channels with energy calibration a0 and a1
  9999   DO I=0,2047
         E=a0+FLOAT(I)*a1
         I1=1                      !finding interpolation points (I1 and I2)
-        DO ii=1,ID
+        DO ii=1,10
           IF(E.GT.x(ii))I1=ii
         ENDDO
         I2=I1+1
-        IF(I1.EQ.ID) THEN
-          I1=ID-1
-          I2=ID
+        IF(I1.EQ.10) THEN
+          I1=10-1
+          I2=10
         ENDIF
         EffExp(i)=y(I1)+(y(I2)-y(I1))*(E-x(I1))/(x(I2)-x(I1))
         IF(EffExp(i).LE.0.)EffExp(i)=0.
@@ -63,7 +83,7 @@ C Should function be changed?
       CALL READA1(5,ANS)
       IF(Istatus.NE.0)RETURN
       IF(ANS.EQ.'y'.OR.ANS.EQ.'Y')THEN
-        DO i=2,ID-1
+        DO i=2,10-1
           WRITE(6,2)x(i),y(i)
    2      FORMAT('Give efficiency at ',F6.1,' keV     <',F4.2,'>:',$)
           CALL READF(5,y(i))
@@ -72,16 +92,16 @@ C Should function be changed?
         GO TO 9999
       ELSE
 
-C Writting data to file:resp.dat
+C Writting data to file:respxout.dat
         Idev=27
-        OPEN (Idev,FILE='resp.dat',ACCESS='APPEND',IOSTAT=IOS)
+        OPEN (Idev,FILE='respxout.dat',ACCESS='APPEND',IOSTAT=IOS)
         IF(IOS.EQ.0)THEN
           WRITE(Idev,*)'Details on efficiency up to 1000 keV:'
           WRITE(Idev,22)
           WRITE(Idev,24)
-22        FORMAT('    Egam  EffTot  EffExp  EffTot*EffExp')
-24        FORMAT('=======================================')
-25        FORMAT(   F8.1,  F8.3,    F8.3,     F8.3      )
+ 22       FORMAT('    Egam  EffTot  EffExp  EffTot*EffExp')
+ 24       FORMAT('=======================================')
+ 25       FORMAT(   F8.1,  F8.3,    F8.3,     F8.3      )
           icha=((1000.-a0)/a1)+0.5
           iStep=1
           IF(icha.GT.100)iStep=icha/100
@@ -92,6 +112,21 @@ C Writting data to file:resp.dat
           CLOSE(Idev)
         ENDIF
       ENDIF
+
+C Replacing efficiencies in the common
+      DO i=1,10
+        EffD(i) = y(i)
+      ENDDO
+C Writes parameters to disk, to be used for next run
+      OPEN(23,FILE='input.unx',ACCESS='SEQUENTIAL',ERR=88)
+      WRITE(23,*)IRSP,facFWHM,FWHM
+      WRITE(23,*)ix1,iy1,ix2,iy2
+      WRITE(23,*)LOW,HIGH
+      WRITE(23,*)Iter,LowChi
+      WRITE(23,*)(EffD(i),i=1,10)
+      CLOSE(23)
+ 88   CONTINUE
+
       RETURN
       END
 
@@ -231,6 +266,9 @@ C at 662 keV, and so on (Oslo 4/3-1988 /M. Guttormsen)
         cal(1,IDEST,1,1)=a0
         cal(1,IDEST,1,2)=a1
         cal(1,IDEST,1,3)=0
+        cal(1,IDEST,2,1)=cal(1,ISP,2,1)
+        cal(1,IDEST,2,2)=cal(1,ISP,2,2)
+        cal(1,IDEST,2,3)=cal(1,ISP,2,3)
         IF(a0+a1.NE.cal(1,ISP,1,1)+cal(1,ISP,1,2))THEN
           WRITE(6,*)'Warning, different energy calibration for'
           WRITE(6,*)'response matrix and source spectrum.' 
@@ -250,6 +288,7 @@ C at 662 keV, and so on (Oslo 4/3-1988 /M. Guttormsen)
         cal(2,IDEST,1,1)=a0
         cal(2,IDEST,1,2)=a1
         cal(2,IDEST,1,3)=0
+
         IF(a0+a1.NE.cal(2,ISP,1,1)+cal(2,ISP,1,2))THEN
           WRITE(6,*)'Warning, different energy calibration for'
           WRITE(6,*)'response matrix and source spectrum.' 
@@ -280,18 +319,23 @@ C        LEN    Length of spectrum
 
       CHARACTER APP*4,ANS
       INTEGER XDIM,YDIM,RDIM,UPPER(0:2047)
-      INTEGER LOW,HIGH
       COMMON/Sp2Dim/rMAT(2,0:4095,0:2047),APP(2048),XDIM,YDIM
       COMMON/Sp1Dim/rSPEC(2,0:8191),MAXCH
       COMMON/State/Istatus,ITYPE,IDEST,cal(2,2,2,3),Idim(2,2,2),fname(2,2),comm(2,2)
       CHARACTER fname*8,comm*60
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
-      
+      COMMON/response6/LOW, HIGH,LowChi, Iter, ix1,iy1,ix2,iy2, EffD(10)
+      INTEGER LOW,HIGH
+
       DIMENSION U(0:2047),F(0:2047)
+
+      INTEGER HIGHj
 
       ISP=1
       IF(IDEST.EQ.1)ISP=2
+
+
 
       ANS='y'
       WRITE(6,133)ANS
@@ -330,23 +374,43 @@ C Zeroing destination spectrum
         ENDDO
       ENDIF
 
-C Defining upper border for the unfolding and chisq-test
-      Ix1=LEN-1
-      Ix2=LEN-1
-      Iy1=Iydim-1
-      Iy2=0
-  
+      OPEN(23,FILE='input.unx',STATUS='old',ERR=77)
+      READ(23,*,END=66,ERR=66)IRSP,facFWHM,FWHM
+      READ(23,*,END=66,ERR=66)ix1,iy1,ix2,iy2
+      READ(23,*,END=66,ERR=66)LOW,HIGH
+      READ(23,*,END=66,ERR=66)Iter,LowChi
+      READ(23,*,END=66,ERR=66)(EffD(i),i=1,10)
+      GO TO 77
+ 66   WRITE(6,*)'Warning: Something wrong with your input.unx file'
+ 77   CLOSE(23)
+
+C ****Begin, Fix for first run****
+      IF(HIGH.EQ.0)THEN
+        LOW  = 0
+        HIGH = LEN-1
+      ENDIF
+      IF(Ix1+Ix2+Iy1+Iy2.LT.10)THEN
+        Ix1=XDIM-1
+        Ix2=XDIM-1
+        Iy1=0
+        Iy2=YDIM-1
+      ENDIF
+      IF(Iter.EQ.0)THEN
+        Iter=50
+      ENDIF
+C ****End, Fix for first run****
+
       IF(ITYPE.GT.1)THEN                !matrix
-        WRITE(6,*)'Give upper limits for the unfolding. The boarder is'
+        WRITE(6,*)'Give upper x-limits for the folding. The boarder is'
         WRITE(6,*)'given by interpolation between (x1,y1) and (x2,y2)'
         WRITE(6,*)' '
-        WRITE(6,*)'    (x1,y1)  first point'
-        WRITE(6,*)'xxxxxxx'
-        WRITE(6,*)'xxxxxxxxx'
-        WRITE(6,*)'xxxxxxxxxxx'
-        WRITE(6,*)'xx matrix xxx'
-        WRITE(6,*)'xxxxxxxxxxxxxxx'
         WRITE(6,*)'            (x2,y2)  second point'
+        WRITE(6,*)'xxxxxxxxxxxxxxx'
+        WRITE(6,*)'xx matrix xxx'
+        WRITE(6,*)'xxxxxxxxxxx'
+        WRITE(6,*)'xxxxxxxxx'
+        WRITE(6,*)'xxxxxxx'
+        WRITE(6,*)'    (x1,y1)  first point'
         WRITE(6,*)' '
 
         WRITE(6,123)Ix1
@@ -379,16 +443,22 @@ C Defining upper border for the unfolding and chisq-test
         IF(upper(J).GT.LEN-1)upper(J)=LEN-1
       ENDDO
 
-      DO J=0,IYDIM-1                 !MAIN LOOP
-        HIGH=UPPER(J)
+
+CCCCCCCCCCCCCCCCCCCCCC
+CCC
+CCC Main loop starts
+CCC
+CCCCCCCCCCCCCCCCCCCCCC
+      DO J=0,IYDIM-1
+        HIGHj=UPPER(J)
 
 C Getting the unfolded spectrum into U(i) and correcting for the total
 C detector response function for the unfolded data
-        DO I=0,LEN-1
+        DO I=0,2047
           U(I)=0.
           F(I)=0.
         ENDDO
-        DO I=LOW,HIGH
+        DO I=0,2047
           IF(ANS.EQ.'y'.OR.ANS.EQ.'Y')THEN
             effi=EffTot(I)*EffExp(I)
             IF(ITYPE.GT.1)U(I)=rMAT(ISP,I,J)*effi
@@ -400,24 +470,38 @@ C detector response function for the unfolded data
         ENDDO
 
 C FOLDING : F(I)=R(I,J)*U(J)
-        DO I=LOW,HIGH
+        DO I=LOW,HIGHj
 C WE PUT THE INTEGRATION LIMIT BELOW I DUE TO DETECTOR RESOLUTION
           KLOW=I*0.8
-          DO K=KLOW,HIGH
+          DO K=KLOW,HIGHj
             F(I)=F(I)+R(I,K)*U(K)
           ENDDO
         ENDDO
 
 C PUTTING THE FOLDED SPECTRUM INTO DESTINATION MATRIX OR SPECTRUM
-        DO I=LOW,HIGH
+        DO I=LOW,HIGHj
           IF(ITYPE.GT.1)THEN
             rMAT(IDEST,I,J)=F(I)
           ELSE
             rSPEC(IDEST,I)=F(I)
           ENDIF        
         ENDDO
-      ENDDO                             ! MAIN LOOP
+      ENDDO
+CCCCCCCCCCCCCCCCCCCCCC
+CCC
+CCC Main loop ended
+CCC
+CCCCCCCCCCCCCCCCCCCCCC
 
+C Writes parameters to disk, to be used for next run
+      OPEN(23,FILE='input.unx',ACCESS='SEQUENTIAL',ERR=88)
+      WRITE(23,*)IRSP,facFWHM,FWHM
+      WRITE(23,*)ix1,iy1,ix2,iy2
+      WRITE(23,*)LOW,HIGH
+      WRITE(23,*)Iter,LowChi
+      WRITE(23,*)(EffD(i),i=1,10)
+      CLOSE(23)
+88    CONTINUE
       END
 
 
@@ -450,7 +534,7 @@ C It takes values between 1 and 2
       w0=w0*ABS(a1)        !from channels to energy
       DO I=l1,l2
         E=a0+I*a1
-        Wtot=Fwhm1(I)*(factor*FWHM/100.)*E
+        Wtot=Fwhm1(I)*(factor*(FWHM/facFWHM)/100.)*E
         xx=(Wtot*Wtot)-(w0*w0)
         IF(xx.GT.0         )W=SQRT(xx)
         IF(W .LT.ABS(a1)/5.)W=ABS(a1)/5.  
@@ -550,9 +634,12 @@ C Updating comment in the heading of spectrum file
       COMMON/State/Istatus,ITYPE,IDEST,cal(2,2,2,3),Idim(2,2,2),fname(2,2),comm(2,2)
       CHARACTER fname*8,comm*60
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
-      COMMON/response2/IR,ETAB(100),FTAB(100),ER(100),ESE(100),EDE(100),
-     +                 FE(100),SE(100),DE(100),ANN(100),EW(100),FW(100),ENA(100)
+      COMMON/response2/IR,ETAB(1000),FTAB(1000),ER(1000),ESE(1000),EDE(1000),
+     +           FE(1000),SE(1000),DE(1000),ANN(1000),EW(1000),FW(1000),ENA(1000)
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
+      COMMON/response6/LOW, HIGH,LowChi, Iter, ix1,iy1,ix2,iy2, EffD(10)
+      INTEGER LOW,HIGH
+
       CHARACTER ENA*5
       REAL ETAB1(30),FTAB1(30),ER1(30),FE1(30),SE1(30),DE1(30),ANN1(30),EW1(30),FW1(30),ESE1(30),EDE1(30)
       REAL ETAB2(30),FTAB2(30),ER2(30),FE2(30),SE2(30),DE2(30),ANN2(30),EW2(30),FW2(30),ESE2(30),EDE2(30)
@@ -566,6 +653,8 @@ C Updating comment in the heading of spectrum file
       REAL ETAB10(36),FTAB10(36),ER10(36),FE10(36),SE10(36),DE10(36),ANN10(36),EW10(13),FW10(13),ESE10(51),EDE10(51)
       REAL ETAB11(36),FTAB11(36),ER11(36),FE11(36),SE11(36),DE11(36),ANN11(36),EW11(99),FW11(99),ESE11(51),EDE11(51)
       REAL ETAB12(30),FTAB12(30),ER12(30),FE12(30),SE12(30),DE12(30),ANN12(30),EW12(30),FW12(30),ESE12(30),EDE12(30)
+
+c      DIMENSION EffD(10)
 
       integer :: row, col
       REAL, allocatable :: ETAB13(:),FTAB13(:),ER13(:),FE13(:),SE13(:),DE13(:),ANN13(:)
@@ -1560,7 +1649,7 @@ C Response function read from folder below
       read(1,*) HeaderLine   ! Ignore line: HEADER
 
       IF(NLines>SIZE(ETAB)) then 
-          print *, 'Response matrix read from disk has more rows then SIZE(ETAB)'
+          print *, 'Response matrix read from disk has more rows than SIZE(ETAB)'
           call EXIT(1)
       ENDIF
 
@@ -1581,10 +1670,12 @@ C Response function read from folder below
       DO row = 1, NLines
         READ (1,*,iostat=stat) ETAB13(row), FW13(row), FTAB13(row), FE13(row), SE13(row), DE13(row), ANN13(row)
         if ( stat > 0 ) then
-          stop 'An error occured while reading the file'
+          stop 'An error occured while reading the resp.dat file'
         elseif ( stat < 0 ) then
           tot_rows = row-1
-          print *, 'EOF reached. Found a total of ', tot_rows, 'rows.'
+          print *, 'EOF reached. Found a total of',tot_rows,' rows'
+          print *, 'Correcting rows from',Nlines,'to',tot_rows
+          NLines = tot_rows
           exit
         endif
       END DO
@@ -1614,6 +1705,44 @@ C Response function read from folder below
 
       ! deallocate(ETAB13)
       close(1)
+      IRSP=13
+
+
+C Highest channel set
+      IF(ITYPE.GT.1)THEN
+        LEN=XDIM
+      ELSE
+        LEN=MAXCH+1
+      ENDIF
+
+      OPEN(23,FILE='input.unx',STATUS='old',ERR=777)
+      READ(23,*,END=666,ERR=666)IRSP,facFWHM,FWHM
+      READ(23,*,END=666,ERR=666)ix1,iy1,ix2,iy2
+      READ(23,*,END=666,ERR=666)LOW,HIGH
+      READ(23,*,END=666,ERR=666)Iter,LowChi
+      READ(23,*,END=666,ERR=666)(EffD(i),i=1,10)
+      GO TO 777
+ 666  WRITE(6,*)'Warning: Something wrong with your input.unx file'
+ 777  CLOSE(23)
+
+C ****Begin, Fix for first run****
+      IF(HIGH.EQ.0)THEN
+        LOW  = 0
+        HIGH = LEN-1
+      ENDIF
+      IF(Ix1+Ix2+Iy1+Iy2.LT.10)THEN
+        Ix1=XDIM-1
+        Ix2=XDIM-1
+        Iy1=0
+        Iy2=YDIM-1
+      ENDIF
+      IF(Iter.EQ.0)THEN
+        Iter=50
+      ENDIF
+      IF(LowChi.LE.0.OR.LowChi.GT. 4096)THEN
+        LowChi = 0
+      ENDIF
+C ****End, Fix for first run****
 
 
 C Reading dimension and energy calibration
@@ -1644,7 +1773,6 @@ C Reading dimension and energy calibration
   11  FORMAT( 'Cal. coeff. a1 (keV/ch)  <',F8.1,'>:',$)
       CALL READF(5,a1)
       WRITE(6,*)' '
-      IRSP=13
       WRITE(6,*)'List of response functions. The ones marked old, are not recommended'
       WRITE(6,*)' (0) Gaussian'
       WRITE(6,*)' (1) NaI_old         CACTUS 5x5 inch before 2012'
@@ -1660,7 +1788,7 @@ C Reading dimension and energy calibration
       WRITE(6,*)'(11) Afrodite_LaBr   iThemba 2015, 2 LaBr, GEANT4 (2018)'
       WRITE(6,*)'(12) Gretina2018     MSU, GEANT4 one quad, Remco and Lew'
       WRITE(6,*)' or:'
-      WRITE(6,*)'(13) Read from disc: '// HeaderLineName13
+      WRITE(6,*)'(13) Read from disk: '// HeaderLineName13
 
       WRITE(6,2)IRSP
    2  FORMAT(/'Choose your response function <',I2,'>:',$)
@@ -2014,7 +2142,6 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
        ENDDO
       ENDIF
 
-
       DO I=0,2048
 C Finding FWHMs as function of full energy, normalized to 1 at 1.33 MeV
         E=a0+I*a1
@@ -2046,6 +2173,16 @@ C Finding total efficiency as function of full energy
 
       IF(IRSP.LE.13)CALL RSPDetector(IRSP)
       IF(IRSP.EQ.0)CALL RSPGAUSS
+
+C Writes parameters to disk, to be used for next run
+      OPEN(23,FILE='input.unx',ACCESS='SEQUENTIAL',ERR=888)
+      WRITE(23,*)IRSP,facFWHM,FWHM
+      WRITE(23,*)ix1,iy1,ix2,iy2
+      WRITE(23,*)LOW,HIGH
+      WRITE(23,*)Iter,LowChi
+      WRITE(23,*)(EffD(i),i=1,10)
+      CLOSE(23)
+888   CONTINUE
  
       END
 
@@ -2085,14 +2222,17 @@ C     FEn,SEn,..is normalized intensities (not counts of raw specter)
       CHARACTER fname*8,comm*60
 
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
-      COMMON/response2/IR,ETAB(100),FTAB(100),ER(100),ESE(100),EDE(100),
-     +                 FE(100),SE(100),DE(100),ANN(100),EW(100),FW(100),ENA(100)
+      COMMON/response2/IR,ETAB(1000),FTAB(1000),ER(1000),ESE(1000),EDE(1000),
+     +        FE(1000),SE(1000),DE(1000),ANN(1000),EW(1000),FW(1000),ENA(1000)
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
       COMMON/response4/pf(0:2047),pc(0:2047),ps(0:2047),pd(0:2047),pa(0:2047)
-      DIMENSION FEn(100),SEn(100),DEn(100),ANNn(100)
+      COMMON/response6/LOW, HIGH,LowChi, Iter, ix1,iy1,ix2,iy2, EffD(10)
+      INTEGER LOW,HIGH
+
+      DIMENSION FEn(1000),SEn(1000),DEn(1000),ANNn(1000)
       DIMENSION Calib(6)
       INTEGER dim
-      DIMENSION Fs(0:4095),Fs1(0:4095),Fs2(0:4095),F1(0:4095),F2(0:4095)
+      DIMENSION Fs(0:8191),Fs1(0:8191),Fs2(0:8191),F1(0:8191),F2(0:8191)
       DIMENSION F(0:2047),G(0:2047), Spec(0:8191)
       DIMENSION Ffu(0:2047),Gfu(0:2047),Fse(0:2047),Gse(0:2047)
       DIMENSION Fde(0:2047),Gde(0:2047),Fan(0:2047),Gan(0:2047)
@@ -2175,9 +2315,9 @@ C Response matrix R(i,j) has maximum dimensions 2048x2048
         FWHM=0.361
       ENDIF
 
-      IF(IRSP.EQ.13)THEN   !OSCAR 2017 LaBr/Read from file
-        b0  =0.0
-        b1  =5.0
+      IF(IRSP.EQ.13)THEN   !OSCAR 2017 LaBr or other international gamma arrays, Read from file
+         !   b0  =0.0  Already read from file header in the IRSP 13 case
+         !   b1  =5.0
         FWHM=3.0
       ENDIF
 
@@ -2190,10 +2330,16 @@ C Response matrix R(i,j) has maximum dimensions 2048x2048
 
 C Reading FWHM at 1.33 MeV. It will be multiplied by the function
 C Fwhm1(i), which is normalized to 1 at 1.33 MeV
+      WRITE(6,*)'Typical experimental relative FWHM values (%) at Egam=1.33 MeV, are:'
+      WRITE(6,*)'OSCAR(LaBr)=3.000, Clover(Ge)= 0.361, Gretina(Ge)= 0.361'
+      WRITE(6,*)'SuN(NaI)=   5.980, CACTUS(NaI)=6.000, Hyperion(Ge)=0.550'
       WRITE(6,12)FWHM
-  12  FORMAT('Real experimental relative FWHM value at Egam=1.33 MeV (%)<',F5.1,'>:',$)
+ 12    FORMAT(/'Give relative energy resolution at Egam=1.33 MeV (FWHM/Egam) (%) <',F6.3,'>:',$)
       CALL READF(5,FWHM)
-      FWHM=FWHM/facFWHM          ! NB, we operate with 1/facFWHM parts of the FWHM value
+c      WRITE(6,12)FWHM
+c  12  FORMAT('Real experimental relative FWHM value at Egam=1.33 MeV (%)<',F5.3,'>:',$)
+c      CALL READF(5,FWHM)
+      FWHMunf=FWHM/facFWHM ! NB, we operate with FWHMunf = FWHM/facFWHM for unfolding
       WRITE(6,*)
       WRITE(6,13)facFWHM
   13  FORMAT('(In the calculation the response function is obtained',
@@ -2222,7 +2368,7 @@ C Main loop starts
 
 C Finding upper limit for the response function. Finding first the fwhm
 C and take 6 times sigma above full-energy Egam
-        W=Fwhm1(J)*(FWHM/100.)*Egam
+        W=Fwhm1(J)*((FWHM/facFWHM)/100.)*Egam
         IF(W.LT.ABS(a1)/5.)W=ABS(a1)/5.  
         EgamMax=Egam+(6.*facFWHM*W/2.35)
         MaxEgam=((EgamMax-a0)/a1)+0.5
@@ -2259,14 +2405,17 @@ C But first we check if they already have been read
             call makepath("MAMA_MYRESP","cmp"//ENA(I1),filnam)
             call makepath("UIO_APPLICATIONS","mama/resp/"//filnam,filnam)
           ENDIF
-
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
           dim=-1                      !Gives no header output
-          DO i=0,4095 
+          DO i=0,8191
             Spec(i) = 0.
           ENDDO
           CALL norr1dim(INP,comment,dim,Spec,Calib)
-          DO i=0,4095 
+          IF(IRSP==13)THEN
+            b01 = Calib(1)
+            b11 = Calib(2)
+          ENDIF
+          DO i=0,8191
             Fs1(i)=Spec(i)
           ENDDO
           CLOSE(INP)
@@ -2289,11 +2438,15 @@ C But first we check if they already have been read
 
           OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=9999)
           dim=-1                      !Gives no header output
-          DO i=0,4095 
+          DO i=0,8191
             Spec(i) = 0.
           ENDDO
           CALL norr1dim(INP,comment,dim,Spec,Calib)
-          DO i=0,4095 
+          IF(IRSP==13)THEN
+            b02 = Calib(1)
+            b12 = Calib(2)
+          ENDIF
+          DO i=0,8191
             Fs2(i)=Spec(i)
           ENDDO
           CLOSE(INP)
@@ -2331,49 +2484,34 @@ C We drop low energy fix when GEANT is used (seg2, seg3, seg23, clover, oscar, a
  1111    CONTINUE
 
 C Streching/compressing Fs1 and Fs2 to fit calibration a0 and a1
-          idim1=4096
-          idim2=4096
-          do i=0,4095
+          idim1=8192
+          idim2=8192
+          do i=0,8191
             Fs(i)=Fs1(i)
           enddo
+          if(IRSP==13) then
+            b0 = b01
+            b1 = b11
+          endif
           CALL ELASTIC(Fs,F1,b0,b1,a0,a1,idim1,idim2) !F1 is new spec.
-          do i=0,4095
+          do i=0,8191
             Fs(i)=Fs2(i)
           enddo
+          if(IRSP==13) then
+            b0 = b02
+            b1 = b12
+          endif
           CALL ELASTIC(Fs,F2,b0,b1,a0,a1,idim1,idim2) !F2 is new spec.
-
-C Normalizing before interpolation (Trine)
-C Compton background is normalized to one
-c          SumF1 = 0.
-c          SumF2 = 0.
-c          DO I = 0,4095
-c            SumF1 = SumF1 + F1(I)
-c            SumF2 = SumF2 + F2(I)
-c          ENDDO
-c          DO I = 0,4095
-c            F1(I) = F1(I)/SumF1
-c            F2(I) = F2(I)/SumF2
-c          ENDDO
-c          FEn(I1)  = FE(I1) /SumF1
-c         SEn(I1)  = SE(I1) /SumF1
-c         DEn(I1)  = DE(I1) /SumF1
-c          ANNn(I1) = ANN(I1)/SumF1
-c          FEn(I2)  = FE(I2) /SumF2
-c          SEn(I2)  = SE(I2) /SumF2
-c          DEn(I2)  = DE(I2) /SumF2
-c          ANNn(I2) = ANN(I2)/SumF2
-
-C Corrected April 2013
 C Total spectrum normalized to one
           SumF1 = 0.
           SumF2 = 0.
-          DO I = 0,4095
+          DO I = 0,8191
              SumF1 = SumF1 + F1(I)
              SumF2 = SumF2 + F2(I)
           ENDDO
           SumF1 = SumF1 + FE(I1) + SE(I1) + DE(I1) + ANN(I1)
           SumF2 = SumF2 + FE(I2) + SE(I2) + DE(I2) + ANN(I2)
-          DO I = 0,4095
+          DO I = 0,8191
              F1(I) = F1(I)/SumF1
              F2(I) = F2(I)/SumF2
           ENDDO
@@ -2391,13 +2529,13 @@ C and take 6 times sigma above full-energy of E1 and E2
           E1=ER(I1)
           E2=ER(I2)
           ii1=(E1-a0)/a1+0.5
-          W=Fwhm1(ii1)*(FWHM/100.)*E1
+          W=Fwhm1(ii1)*((FWHM/facFWHM)/100.)*E1
           IF(W.LT.ABS(a1)/5.)W=ABS(a1)/5.  
           E1Max=E1+(6.*facFWHM*W/2.35)
           MaxE1=((E1Max-a0)/a1)+0.5
           IF(MaxE1.GT.4095)MaxE1=4095
           ii2=min0(2047,INT((E2-a0)/a1+0.5))
-          W=Fwhm1(ii2)*(FWHM/100.)*E2
+          W=Fwhm1(ii2)*((FWHM/facFWHM)/100.)*E2
           IF(W.LT.ABS(a1)/5.)W=ABS(a1)/5.  
           E2Max=E2+(6.*facFWHM*W/2.35)
           MaxE2=((E2Max-a0)/a1)+0.5
@@ -2452,7 +2590,7 @@ C Interpolating between equal theta for 0 up to 180 dgrs.
           IF(E.GT.0.1.AND.E.LT.Ecom)THEN
             if(ABS(Egam-E).GT.0.001)z=E/((Egam/511.)*(Egam-E))
             Theta=ACOS(1.-z)
-c New, to catch the lilit values
+c New, to catch the limit values
             IF(Theta.LT.0)Theta=0.001
             IF(Theta.GT.3.141592654)Theta=3.142
 
@@ -2517,7 +2655,7 @@ C the two channels il and ih.
         A=FEn(I1)+( FEn(I2)- FEn(I1))*(Egam-E1)/(E2-E1)   !full-energy intensity
         IF(A.LT.0.)A=0.
         Egami=(Egam-a0)/a1
-        il=Egami              ! Distribute counts on ch il and ih
+        il=INT(Egami+0.5)              ! Distribute counts on ch il and ih
         ih=il+1
         yl=(ih-Egami)*A
         yh=(Egami-il)*A
@@ -2531,7 +2669,7 @@ C the two channels il and ih.
           w0=1.
         ENDIF
         factor=1. 
-        lim=MAX0(INT((6.*(Fwhm1(il)*facFWHM*FWHM/100.))*FLOAT(il)+0.5) , 1)
+        lim=MAX0(INT((6.*(Fwhm1(il)*FWHM/100.))*FLOAT(il)+0.5) , 1)
         m1=MAX0(il-lim,MinEgam)
         m2=MIN0(ih+lim,MaxEgam)
         CALL GaussSmoothing(Ffu,Gfu,m1,m2,factor,w0) !smoothing full energy peak
@@ -2561,7 +2699,7 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           IF(C.LT.0.)C=0.
           IF(D.LT.0.)D=0.
 
-          il=SEi
+          il=INT(SEi+0.5)
           ih=il+1
           yl=(ih-SEi)*B
           yh=(SEi-il)*B
@@ -2574,13 +2712,13 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           ELSE
             w0=1.
           ENDIF
-          lim=MAX0(INT((6.*(Fwhm1(il)*facFWHM*FWHM/100.))*FLOAT(il)+0.5) , 1)
+          lim=MAX0(INT((6.*(Fwhm1(il)*FWHM/100.))*FLOAT(il)+0.5) , 1)
           m1=MAX0(il-lim,MinEgam)
           m2=MIN0(ih+lim,MaxEgam)
           factor=1.1 !Assuming single escape peak 10% larger FWHM than full energy peak
           CALL GaussSmoothing(Fse,Gse,m1,m2,factor,w0) !smoothing s.esc. peak
 
-          il=DEi
+          il=INT(DEi+0.5)
           ih=il+1
           yl=(ih-DEi)*C
           yh=(DEi-il)*C
@@ -2593,13 +2731,13 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           ELSE
             w0=1.
           ENDIF
-          lim=MAX0(INT((6.*(Fwhm1(il)*facFWHM*FWHM/100.))*FLOAT(il)+0.5) , 1)
+          lim=MAX0(INT((6.*(Fwhm1(il)*FWHM/100.))*FLOAT(il)+0.5) , 1)
           m1=MAX0(il-lim,MinEgam)
           m2=MIN0(ih+lim,MaxEgam)
           factor=1.3 !Assuming double escape peak 20% larger FWHM than full energy peak
           CALL GaussSmoothing(Fde,Gde,m1,m2,factor,w0) !smoothing d.esc. peak
 
-          il=ANi 
+          il=INT(ANi+0.5)
           ih=il+1
           yl=(ih-ANi)*D
           yh=(ANi-il)*D
@@ -2612,7 +2750,7 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           ELSE
             w0=1.
           ENDIF
-          lim=MAX0(INT((6.*(Fwhm1(il)*facFWHM*FWHM/100.))*FLOAT(il)+0.5) , 1)
+          lim=MAX0(INT((6.*(Fwhm1(il)*FWHM/100.))*FLOAT(il)+0.5) , 1)
           m1=MAX0(il-lim,MinEgam)
           m2=MIN0(ih+lim,MaxEgam)
           factor=1.0*facFWHM !Assuming annihilation peak 100% FWHM
@@ -2633,7 +2771,7 @@ C We renormalize so that matrix R(i,j) have 1*RDIM counts
       ENDDO
 
 C Finding parameters as function of full energy
-C Writing out to file: resp.dat
+C Writing out to file: respxout.dat
       DO I=0,2047
         E=a0+I*a1
 C The probabilities for full energy, Compton, single, double and annih. made:
@@ -2659,26 +2797,33 @@ C The probabilities for full energy, Compton, single, double and annih. made:
         pd(I) = pd(I)/total
         pa(I) = pa(I)/total
       ENDDO
+      write(6,*)
+      write(6,180)b0,b1
+      write(6,181)a0,a1
 
-  20  OPEN(UNIT=25,FILE='resp.dat', ERR=9998)
+180   FORMAT('Calibration of response function spectra (b0, b1)=',2F8.3)
+181   FORMAT('Calibration of raw spectra (a0,a1) =              ',2F8.3)
+
+  20  OPEN(UNIT=25,FILE='respxout.dat', ERR=9998)
        
       ISM=1
       IF(ITYPE.EQ.1)ISM=2
       CALL DATETIME(DATTIM)
       WRITE(25,199)FNAME(ISM,IDEST),DATTIM(1:18)
-      WRITE(25,210)a0,a1,FWHM*facFWHM
+      WRITE(25,210)a0,a1,FWHM
 199   FORMAT('Response function created for file:',A,' at ',A)
-210   FORMAT('Calibration (a0,a1)=',F8.1,F9.3,'  FWHM=',F7.1,/)
+210   FORMAT('Calibration (a0,a1)=',F8.3,F8.3,'  FWHM (rel. at 1.33 MeV)=',F8.3,/)
 
       iStep=1
       IF(RDIM.GT.50)iStep=RDIM/50                  !steps for output
+      
       WRITE(25,*)'Egam(keV) FWHM(keV) EffTot  Photo  Compton Single  Double   Annih'
       DO i=0,RDIM-1
         Egam=a0+i*a1
         IF(Egam.GT.0)THEN
           IF((i/iStep)*iStep.EQ.i)THEN
             fwh=0.
-            IF(Egam.GT.0)fwh=Fwhm1(i)*(facFWHM*FWHM/100.)*Egam
+            IF(Egam.GT.0)fwh=Fwhm1(i)*(facFWHM*FWHMunf/100.)*Egam
             IF(fwh.LT.ABS(a1)/5.)fwh=ABS(a1)/5.
             WRITE(25,14)Egam, fwh, EffTot(i),pf(i), pc(i), ps(i), pd(i), pa(i)
  14         FORMAT(     F8.1,F10.1,     F8.3, F8.4,  F8.4,  F8.4,  F8.4,  F8.4)
@@ -2686,7 +2831,8 @@ C The probabilities for full energy, Compton, single, double and annih. made:
         ENDIF
       ENDDO
       write(6,*)
-      write(6,*)'Parameters for response function written to resp.dat'
+     
+      write(6,*)'Parameters for response function written to respxout.dat'
       write(6,*)
       GOTO 9998
  9999 WRITE(6,*)'Cannot find the response function: ',FILENAM
@@ -2737,7 +2883,7 @@ C Initializing response matrix
         WRITE(6,13)FWHM
   13    FORMAT(/'FWHM at Egam=1.33 MeV (%)<',F8.3,'>:',$)
         CALL READF(5,FWHM)
-        FWHM=FWHM/facFWHM
+        FWHMunf=FWHM/facFWHM
       ELSE
         IXL=RDIM*0.1+0.5
         IXH=RDIM*0.9+0.5
@@ -2837,7 +2983,7 @@ C We renormalize so that matrix R(i,j) have integral 1*RDIM
  999    CONTINUE
       ENDDO
 
-  20  OPEN(UNIT=25,FILE='resp.dat', ERR=6789)
+  20  OPEN(UNIT=25,FILE='respxout.dat', ERR=6789)
       ISM=1
       IF(ITYPE.EQ.1)ISM=2
       CALL DATETIME(DATTIM)
@@ -2857,7 +3003,7 @@ C We renormalize so that matrix R(i,j) have integral 1*RDIM
           IF((i/iStep)*iStep.EQ.i)THEN
             fwh=0.
             IF(Egam.GT.0)THEN
-              fwh=Fwhm1(i)*(facFWHM*FWHM/100.)*Egam
+              fwh=Fwhm1(i)*(FWHM/100.)*Egam
               IF(IANS.EQ.1)fwh=(AX+BX*SQRT(float(i)))*a1
             ENDIF
             IF(fwh.LT.ABS(a1)/5.)fwh=ABS(a1)/5.
@@ -2869,7 +3015,7 @@ C We renormalize so that matrix R(i,j) have integral 1*RDIM
       ENDDO
       CLOSE(25)
       write(6,*)
-      write(6,*)'Parameters for response function written to resp.dat'
+      write(6,*)'Parameters for response function written to respxout.dat'
       write(6,*)
  6789 CONTINUE
       END
@@ -2880,13 +3026,13 @@ c Routine to calculate the score of each solution. The score-function,
 c which should be as small as possible, is simply a weighted sum of
 c chisquare and fluctuations
 
-      DIMENSION SoluP(200,7),SC(200)
-      CHARACTER SCORE(200)*4
+      DIMENSION SoluP(500,7),SC(500)
+      CHARACTER SCORE(500)*4
 
       Isc=0
-      DO I=1,200
+      DO I=1,500
         SCORE(I)='    '
-        SC(200)=0
+        SC(I)=0
       ENDDO
       IF(wfluc.LT.0.OR.wfluc.GT.0.5)wfluc=0.2
       wchi=1.-wfluc
@@ -2934,7 +3080,6 @@ C Marking the solutions
       COMMON/Sp1Dim/rSPEC(2,0:8191),MAXCH
       COMMON/State/Istatus,ITYPE,IDEST,cal(2,2,2,3),Idim(2,2,2),fname(2,2),comm(2,2)
       CHARACTER fname*8,comm*60,xcomm*60
-
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
     
       IF(RDIM.EQ.0)THEN
@@ -2963,6 +3108,8 @@ C Marking the solutions
       IF(IDEST.LT.1.OR.IDEST.GT.2)Istatus=1
       IF(ISP  .LT.1.OR.ISP  .GT.2)Istatus=1
 
+      write(6,*)' Old unfolding: Iterative guessing U and folding U until convergence'
+      write(6,*)' New unfolding: Compton subtraction method with reduced fluctuations'
       iVersion=0
       WRITE(6,6)iVersion
  6    FORMAT(/'New (0) or old (1) unfolding procedure <',I1,'>:',$)
@@ -3067,14 +3214,14 @@ C        Iter   =Max number of iteration steps
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
       COMMON/response4/pf(0:2047),pc(0:2047),ps(0:2047),pd(0:2047),pa(0:2047)
-
-      INTEGER low,high,ChiLow,ChiHigh,lower,upper
+      COMMON/response6/LOW, HIGH,LowChi, Iter, ix1,iy1,ix2,iy2, EffD(10)
+      INTEGER LOW,HIGH,ChiLow,ChiHigh,lower,upper
       INTEGER sum,Fsum,sumCH,FsumCH
       DIMENSION Raw(0:2047),F(0:2047),U(0:2047),lower(0:2047),upper(0:2047)
       DIMENSION Fsave(0:2047),Usave(0:2047)
-      DIMENSION SoluF(200,0:2047),SoluP(200,7)
+      DIMENSION SoluF(500,0:2047),SoluP(500,7)
       DIMENSION rWAIT(0:8191)
-      CHARACTER SCORE(200)*4,ANS*1
+      CHARACTER SCORE(500)*4,ANS*1
       CHARACTER modus*2,moil*2,moim*2,moir*2
       INTEGER COLORMAP(20),Colorc(0:19)
       COMMON /COLORMAP/ COLORMAP,Limit,Colorc
@@ -3086,11 +3233,14 @@ C        Iter   =Max number of iteration steps
       DIMENSION u0(0:2047),su0(0:2047),v(0:2047),us(0:2047),ud(0:2047)
       DIMENSION ua(0:2047),sua(0:2047),w(0:2047),sw(0:2047),c(0:2047),sc(0:2047)
 
+      INTEGER HIGHj
+
+c      DIMENSION EffD(10)
+
       ISP=1
       IF(IDEST.EQ.1)ISP=2
       Emin  =30.          ! 30 keV lowest limit
       EminCh=100.         ! 100 keV lower limit for Chi2-test
-      Iter  =33           ! Number of max. iterations
 
 C Using rSPEC(IDEST,i) to display spectra. Putting back later
       DO i=0,MAXCH
@@ -3120,29 +3270,60 @@ C Zeroing destination spectrum
         ENDDO
       ENDIF
 
-C Lowest channel treated
-      low=((Emin-a0)/a1)+0.5
-      IF(low.LT.0.OR.low.GE.LEN)low=0
-      lowCh=((EminCh-a0)/a1)+0.5
-      IF(lowCh.LT.0.OR.lowCh.GE.LEN)lowCh=0
+C Lowest channel and highest channel set
+      LOW=((Emin-a0)/a1)+0.5
+      IF(LOW.LT.0.OR.LOW.GE.LEN)LOW=0
+      LowChi=((EminCh-a0)/a1)+0.5
+      IF(LowChi.LT.0.OR.LowChi.GE.LEN)LowChi=0
+      IF(ITYPE.GT.1)THEN
+        LEN=XDIM
+      ELSE
+        LEN=MAXCH+1
+      ENDIF
+      IF(RDIM.LT.LEN)LEN=RDIM
+      HIGH = LEN -1
 
-C Defining upper border for the unfolding and chisq-test
-      Ix1=LEN-1
-      Ix2=LEN-1
-      Iy1=0
-      Iy2=Iydim-1
-  
+      OPEN(23,FILE='input.unx',STATUS='old',ERR=77)
+      READ(23,*,END=66,ERR=66)IRSP,facFWHM,FWHM
+      READ(23,*,END=66,ERR=66)ix1,iy1,ix2,iy2
+      READ(23,*,END=66,ERR=66)
+      READ(23,*,END=66,ERR=66)Iter,LowChi
+      READ(23,*,END=66,ERR=66)(EffD(i),i=1,10)
+      GO TO 77
+ 66   WRITE(6,*)'Warning: Something wrong with your input.unx file'
+ 77   CLOSE(23)
+
+C ****Begin, Fix for first run****
+      IF(HIGH.EQ.0)THEN
+        LOW  = 0
+        HIGH = LEN-1
+      ENDIF
+      IF(Ix1+Ix2+Iy1+Iy2.LT.10)THEN
+        Ix1=XDIM-1
+        Ix2=XDIM-1
+        Iy1=0
+        Iy2=YDIM-1
+      ENDIF
+      IF(Iter.EQ.0)THEN
+        Iter=50
+      ENDIF
+      IF(LowChi.LE.0.OR.LowChi.GT. 4096)THEN
+        LowChi = ABS(((EminCh-a0)/a1)+0.5)
+      ENDIF
+C ****End, Fix for first run****
+
+
       IF(ITYPE.GT.1)THEN                !matrix
-        WRITE(6,*)'Give upper limits for the unfolding. The boarder is'
+        WRITE(6,*)'Give upper x-limits for the unfolding. The boarder is'
         WRITE(6,*)'given by interpolation between (x1,y1) and (x2,y2)'
         WRITE(6,*)' '
-        WRITE(6,*)'    (x2,y2) second point'
-        WRITE(6,*)'xxxxxxx'
-        WRITE(6,*)'xxxxxxxxx'
-        WRITE(6,*)'xxxxxxxxxxx'
-        WRITE(6,*)'xx matrix xxx'
+        WRITE(6,*)'            (x2,y2)  second point'
         WRITE(6,*)'xxxxxxxxxxxxxxx'
-        WRITE(6,*)'             (x1,y1) first point'
+        WRITE(6,*)'xx matrix xxx'
+        WRITE(6,*)'xxxxxxxxxxx'
+        WRITE(6,*)'xxxxxxxxx'
+        WRITE(6,*)'xxxxxxx'
+        WRITE(6,*)'    (x1,y1)  first point'
         WRITE(6,*)' '
 
         WRITE(6,123)Ix1
@@ -3177,13 +3358,18 @@ C Defining upper border for the unfolding and chisq-test
 
 C Setting lower limits for the chisquare test
       WRITE(6,130)
- 130  FORMAT('  Give limits for the chisquare-test:',/,
-     +       '  Opt. 1: Recommended for LaBr- and NaI-spectra. For full-',
-     +/,     '          energy gammas above 2 MeV, we set lower limit at 500 keV.',
-     +/,     '           Below, the limit is 1/4 of the full-energy. Remember,'
-     +/,     '          full-energy is taken from the upper unfolding limit',
+ 130  FORMAT('  Give lower limits for the Chi**2-test:',/,
+     +       '  Opt. 1: Sliding limit for gamma-spectra with known Ex.',
+     +/,     '          For excitation Ex>2 MeV, we set lower limit Eg=500 keV.',
+     +/,     '          Below, the Eg limit is 1/4*Ex, but never below your'
+     +/,     '          lowest limit for Chi**2 testing.',
      +/,     '  Opt. 2: A fixed lower limit for the chi-test is applied'
      +/,     '  Opt. 3: Return and set proper upper limits for unfolding',/)
+
+      WRITE(6,132)LowChi
+ 132  FORMAT(/'Give lowest x-channel for Chi**2 testing  <',I5,'>:',$)
+      CALL READI(5,LowChi)
+      IF(Istatus.NE.0)RETURN
 
       Iopt=1
       IF(Ix1.EQ.Ix2)Iopt=2
@@ -3195,21 +3381,17 @@ C Setting lower limits for the chisquare test
       IF(Iopt.EQ.1)THEN
         DO J=0,Iydim-1
           Emax=a0+upper(J)*a1
-          lower(J)=(500.-a0)/a1                     !500 keV IF E>2MeV
+          lower(J)=(500.-a0)/a1                     !500 keV if E>2MeV
           IF(Emax.LT.2000)lower(J)=(Emax*.25-a0)/a1
-          IF(lower(J).LT.low)lower(J)=low
+          IF(lower(J).LT.LowChi)lower(J)=LowChi
         ENDDO
       ENDIF
 
       IF(Iopt.EQ.2)THEN
-        WRITE(6,132)lowCh
- 132    FORMAT(/'Lower channel for chi-test  <',I5,'>:',$)
-        CALL READI(5,lowCh)
         DO J=0,Iydim-1
-          lower(J)=lowCh
+          lower(J)=LowChi
         ENDDO
       ENDIF
-      IF(Istatus.NE.0)RETURN
 
       IF(Iopt.NE.1.AND.Iopt.NE.2)THEN
         WRITE(6,*)'No unfolding performed'
@@ -3226,11 +3408,10 @@ C Setting lower limits for the chisquare test
         CALL ExpThres
       ENDIF
 
-      iter=33
-      WRITE(6,134)iter   
- 134  FORMAT(/,'Number of iterations ( <200 )  <',I2,'>:',$)
-      CALL READI(5,iter)
-      IF(iter.GT.200)iter=200
+      WRITE(6,134)Iter
+ 134  FORMAT(/,'Number of iterations ( <500 )  <',I3,'>:',$)
+      CALL READI(5,Iter)
+      IF(Iter.GT.500)Iter=500
       IF(Istatus.NE.0)RETURN
 
       wfluc=0.2
@@ -3249,10 +3430,17 @@ C Setting lower limits for the chisquare test
       IF(Istatus.NE.0)RETURN
 
 C Loop for spectrum J to be unfolded***************************
+CCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCC                      CCC
+CCC                      CCC
+CCC   BIG LOOP STARTS    CCC
+CCC  Fasten seat belts   CCC
+CCC                      CCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCC
       DO J=0,Iydim-1
-        high=   upper(J)
-        ChiHigh=upper(J)
-        ChiLow= lower(J)
+        highj=   upper(J)
+        ChiHigh = upper(J)
+        ChiLow  = lower(J)
 
 C Getting the raw spectrum Raw(I)
         DO I=0,2047
@@ -3261,7 +3449,7 @@ C Getting the raw spectrum Raw(I)
         ENDDO
         sum=   0
         sumCH= 0
-        DO I=low,high
+        DO I=low,highj
           sum  =sum + Raw(I)
         ENDDO
         DO I=ChiLow,ChiHigh
@@ -3293,7 +3481,7 @@ C Initialize parameters
        
 C The experimental pulse height spectrum is the first
 C approximation to the unfolded gamma spectrum U(I)
-        DO I=low,high
+        DO I=low,highj
           U(I)=Raw(I)
         ENDDO
 
@@ -3303,10 +3491,10 @@ C detector resolution. We take conservative 20% resolution
         mode=0                      !starts with no method
         iTry=0
         DO L=1,Iter
-          DO I=low,high
+          DO I=low,highj
             F(I)=0.0
             Klow=I*0.8
-            DO K=Klow,high
+            DO K=Klow,highj
               F(I)=F(I)+R(I,K)*U(K)
             ENDDO
           ENDDO
@@ -3327,7 +3515,7 @@ C Calculate chisquare between folded and raw spectrum
 C Compute sum of counts
           Fsum  =0.
           FsumCH=0.
-          DO I=low,high
+          DO I=low,highj
             Fsum=Fsum+F(I)
           ENDDO
           DO I=ChiLow,ChiHigh
@@ -3342,7 +3530,7 @@ C Compute sum of counts
           SoluP(L,5)=FsumCH
           SoluP(L,6)=CHISQ
           SoluP(L,7)=RelFluc
-          DO JJ=low,high
+          DO JJ=0,highj
             SoluF(L,JJ)=U(JJ)
           ENDDO
           Lmax=L
@@ -3351,16 +3539,16 @@ C Saves the best solution after at least 3 iterations
           IF(L.GT.3.AND.CHISQ.LT.CHIsave)THEN
             Lsave=L
             CHIsave=CHISQ
-            DO I=low,high
+            DO I=0,highj
               Usave(I)=U(I)
               Fsave(I)=F(I)
             ENDDO
           ENDIF
 
-          IF(L.GT.3.AND.ABS( CHISQ-CHIold).LT.0.0006)       IterStop=1
-          IF(L.GT.3.AND.ABS((CHISQ-CHIold)/CHISQ).LT.0.002) IterStop=1
+          IF(L.GT.3.AND.ABS( CHISQ-CHIold).LT.0.0003)       IterStop=1
+          IF(L.GT.3.AND.ABS((CHISQ-CHIold)/CHISQ).LT.0.001) IterStop=1
           IF(iTry.GT.10.AND.CHISQ.GT.CHIold)                IterStop=1
-          IF(iTry.GT.Iter/2.0 .AND.ModeChange.EQ.1)         IterStop=1
+          IF(iTry.GT.Iter/2 .AND.ModeChange.EQ.1)           IterStop=1
           iTry=iTry+1
           IF(IterStop.EQ.1)THEN
             IF(ModeChange.LT.10)THEN                   !Changing mode
@@ -3368,7 +3556,7 @@ C Saves the best solution after at least 3 iterations
               iTry    =0
               mode=mode*(-1)
               ModeChange=ModeChange+1
-              DO I=low,high                            !Using the best solution
+              DO I=0,highj                              !Using the best solution
                 F(I)=Fsave(I)                          !as initial function
                 U(I)=Usave(I)
               ENDDO
@@ -3380,11 +3568,11 @@ C Saves the best solution after at least 3 iterations
 C mode=-1 selects difference, mode=+1 ratio iteration
           IF(L.EQ.1)mode=-1                            !used for loop number 2
           IF(mode.EQ.-1) THEN
-            DO I=low,high
+            DO I=0,highj
               U(I)=U(I)+(Raw(I)-F(I))                  !difference mode
             ENDDO
           ELSE
-            DO I=low,high
+            DO I=0,highj
               IF(ABS(F(I)).GT.4)U(I)=U(I)*(Raw(I)/F(I))!ratio mode
             ENDDO
           ENDIF
@@ -3430,17 +3618,15 @@ C Making compressed output in case of singles spectrum
         modus=' n'
         IF(SoluP(Isc,1).EQ.-1)modus=' d'
         IF(SoluP(Isc,1).EQ.+1)modus=' r'
-        K2=SoluP(Isc,5)+0.5
-        K3=SoluP(Isc,4)+0.5
 
-        WRITE(6,30)J,modus,K2,K3,SoluP(Isc,6),SoluP(Isc,7)
-  30    FORMAT(' Row:',I4,'  Mode:',A2,'  Area:',I9,'(',I9,')  Chi:',F7.2,'  Fluct:',F6.2)
+        WRITE(6,30)J,modus,SoluP(Isc,5),SoluP(Isc,4),SoluP(Isc,6),SoluP(Isc,7),L
+  30    FORMAT('y-ch:',I4,' Mode:',A2,' Area:',E10.3,'(',E10.3,') Chi:',F7.3,' Fluct:',F6.2' Iter:',I3)
 
         IF(iVersion.EQ.1)THEN   !Dropping the Compton subtraction method
           DO i=0,LEN-1
             u(i)=0.0
           ENDDO
-          DO i=low,high
+          DO i=0,highj
             SoluF(Isc,i)=SoluF(Isc,i)   !April 2013 *pf(i)
             u(i)=SoluF(Isc,i)
           ENDDO
@@ -3448,10 +3634,9 @@ C Making compressed output in case of singles spectrum
         ENDIF
 
 
-
 C***************************************************************(new begin)
 C       New method: Compton Subtraction Method (Desember 1995/mg)
-C       Reference: M. Guttormsen et al. NIM (1996), in press
+C       Reference: M. Guttormsen et al. NIM A374, 371 (1996)
 C       The resolution in the unfolded spectrum u0 is about 0.87FWHM. 
 C       Thus, it remains to smooth it with (1/10)*FWHM.
 C       Then we deduce S - U (rawspectrum - unfolded) to get the 
@@ -3459,8 +3644,8 @@ C       Compton-background etc., that is a smooth function of
 C       energy (except for single+double+511 keV peaks). 
 C       Therefore, we smooth
 C       this differanse with FWHM, and calculate Ufinal=S-smooth(S-U). 
-C       Remember, the FWHM parameter contains only 50% of
-C       the value given by user: FWHM = FWHMresp = (1/10)*FWHMexp
+C       Remember, the FWHM parameter used contains only 50% of
+C       the value given by user
         DO i=0,LEN-1
           u0(i)   =0.0
           su0(i)  =0.0
@@ -3485,15 +3670,15 @@ C       the value given by user: FWHM = FWHMresp = (1/10)*FWHMexp
                                    !singles for the reason of displaying spectra
         ITYPE=1
         LOCH=0                     !display markers
-        HICH=high
+        HICH=highj
 
 C Taking the best solution from earlier
-        DO i=low,high
+        DO i=low,highj
           u0(i)=SoluF(Isc,i)
         ENDDO
 
 C Show spectrum u0
-        DO i=low,high
+        DO i=low,highj
           rSPEC(IDEST,i)=u0(i)
         ENDDO
         i1=1
@@ -3506,19 +3691,19 @@ C Show spectrum u0
 
 C Making us, ud and ua (single, double, annih) from unfolded spectrum
 C Single and double escape peaks have the same shape as u0 (same FWHM).
-        id511 =min0(high,INT(( 511./a1)+0.5))
-        id1022=min0(high,INT((1022./a1)+0.5))
-        DO i=high,id1022,-1
+        id511 =min0(highj,INT(( 511./a1)+0.5))
+        id1022=min0(highj,INT((1022./a1)+0.5))
+        DO i=highj,id1022,-1
           us(i- id511)=u0(i)*ps(i)
         ENDDO
 
-        DO i=high,id1022,-1
+        DO i=highj,id1022,-1
           ud(i-id1022)=u0(i)*pd(i)
         ENDDO
 
-        i511= min0(high,INT(((511.-a0)/a1)+0.5))
+        i511= min0(highj,INT(((511.-a0)/a1)+0.5))
         ua511=0.
-        DO i=high,i511,-1
+        DO i=highj,i511,-1
           ua511=ua511+u0(i)*pa(i)
         ENDDO
         Egami=(511.-a0)/a1
@@ -3526,8 +3711,8 @@ C Single and double escape peaks have the same shape as u0 (same FWHM).
         ih=il+1
         yl=(ih-Egami)*ua511
         yh=(Egami-il)*ua511
-        IF(il.GE.0.AND.il.LE.high)ua(il)=ua(il)+yl
-        IF(ih.GE.0.AND.ih.LE.high)ua(ih)=ua(ih)+yh
+        IF(il.GE.0.AND.il.LE.highj)ua(il)=ua(il)+yl
+        IF(ih.GE.0.AND.ih.LE.highj)ua(ih)=ua(ih)+yh
         ymax=AMAX1(yl,yh) !finding fwhm already present for 511 peak
         ymin=AMIN1(yl,yh)
         IF(ymax.GT.0)THEN
@@ -3537,23 +3722,23 @@ C Single and double escape peaks have the same shape as u0 (same FWHM).
         ENDIF
         factor=facFWHM*1.03
         m1=max0(INT((0.7*i511+0.5)-1),low)
-        m2=min0(INT((1.3*i511+0.5)+1),high)
+        m2=min0(INT((1.3*i511+0.5)+1),highj)
         CALL GaussSmoothing(ua,sua,m1,m2,factor,w0)! have to be smoothed since ua is
                                              ! a spike in two channels around i511
 C Making the us + ud spectrum
-        DO i=low,high
+        DO i=low,highj
           w(i)=us(i)+ud(i)
         ENDDO
 C Smoothing with additional 0.5*FWHM
         factor=1.
         w0=1.           
-        CALL GaussSmoothing(w,sw,low,high,factor,w0)
+        CALL GaussSmoothing(w,sw,low,highj,factor,w0)
 C Adding the sua spectrum to get final sw spectrum
-        DO i=low,high
+        DO i=low,highj
           sw(i)=sw(i)+sua(i)
         ENDDO
 C Showing sw
-        DO i=low,high
+        DO i=low,highj
           rSPEC(IDEST,i)=sw(i)
         ENDDO
         i1=1
@@ -3566,17 +3751,17 @@ C Showing sw
 C Smoothing the u0 spectrum
         factor=1.
         w0=1.
-        CALL GaussSmoothing(u0,su0,low,high,factor,w0)
+        CALL GaussSmoothing(u0,su0,low,highj,factor,w0)
 C Multiplying down with pf
-        DO i=low,high
+        DO i=low,highj
           su0(i)=su0(i)*pf(i)        !April 2013 *pf(i)
         ENDDO
 C Making the v spectrum
-        DO i=low,high
+        DO i=low,highj
           v(i)=su0(i)+sw(i)
         ENDDO
 C Making the Compton c spectrum
-        DO i=low,high
+        DO i=low,highj
           c(i)=Raw(i)-v(i)              !c is Compton-background
         ENDDO
 
@@ -3584,7 +3769,7 @@ C Showing Compton spectrum c
         i1=1
         i2=2
         i3=0
-        DO i=low,high
+        DO i=low,highj
           rSPEC(IDEST,i)=c(i)
         ENDDO
         COLORMAP(1)=ired
@@ -3595,12 +3780,12 @@ C Showing Compton spectrum c
 C Smoothing Compton with 50% of FWHM
         factor=facFWHM/2.
         w0=1.
-        CALL GaussSmoothing(c,sc,low,high,factor,w0)   !sc is smoothed Compton-background
+        CALL GaussSmoothing(c,sc,low,highj,factor,w0)   !sc is smoothed Compton-background
 C Showing original raw spectrum 
         i1=2
         i2=2
         i3=0
-        DO i=low,high
+        DO i=low,highj
           rSPEC(IDEST,i)=Raw(i)
         ENDDO
         COLORMAP(1)=ired
@@ -3611,19 +3796,19 @@ C Showing smoothed Compton sc+single+double+ann
         i1=2
         i2=2
         i3=0
-        DO i=low,high
+        DO i=low,highj
           rSPEC(IDEST,i)=sc(i)+sw(i)
         ENDDO
         COLORMAP(1)=igreen
         CALL DSPSP(i1,i2,i3,*888)
  888    CONTINUE
 
-        DO i=low,high
+        DO i=low,highj
           u(i)=Raw(i)-sc(i)-sw(i)         !u is the unfolded spectrum
         ENDDO
 
 C Using the photo/total probability pf(i) to make u(i) contain all counts
-        DO i=low,high
+        DO i=low,highj
           IF(pf(i).GT.0.)THEN
             u(i)=u(i)/pf(i)                 !April 2013 /pf(i)
           ELSE
@@ -3632,7 +3817,7 @@ C Using the photo/total probability pf(i) to make u(i) contain all counts
         ENDDO
 
 C Showing final u/pf
-        DO i=low,high
+        DO i=low,highj
           rSPEC(IDEST,i)=u(i)
         ENDDO
         COLORMAP(1)=iblue
@@ -3654,7 +3839,7 @@ C********************************************************(new ended)
 
 C Correcting for detector efficiency as function of gamma-energy
         negstat=-1
-        DO i=0,high
+        DO i=0,highj
           rMAT(IDEST,I,J)=0
           rSPEC(IDEST,I)=0
           IF(u(i).GT.0)negstat=+1
@@ -3671,6 +3856,25 @@ C Correcting for detector efficiency as function of gamma-energy
         ENDDO
 
       ENDDO                                !J-loop for all spectra ended
+
+C Writes parameters to disk, to be used for next run
+      OPEN(23,FILE='input.unx',ACCESS='SEQUENTIAL',ERR=88)
+      WRITE(23,*)IRSP,facFWHM,FWHM
+      WRITE(23,*)ix1,iy1,ix2,iy2
+      WRITE(23,*)LOW,HIGH
+      WRITE(23,*)Iter,LowChi
+      WRITE(23,*)(EffD(i),i=1,10)
+      CLOSE(23)
+  88  CONTINUE
+
+
+CCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCC                      CCC
+CCC                      CCC
+CCC    BIG LOOP ENDS     CCC
+CCC  Release seat belts  CCC
+CCC                      CCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCC
       fname(2,IDEST)=waitname              !Putting back old name
       END
 

@@ -147,7 +147,7 @@ C*******************************************************************
         IF(Istatus.NE.0)RETURN
         IF(XDIM.GT.4096)XDIM=4096
         WRITE(6,31)YDIM
-  31    FORMAT( 'Dimension on y-axis (max=2048)  <',I4,'>:',$)
+  31    FORMAT( 'Dimension on y-axis (max=2048) <',I4,'>:',$)
         CALL READI(5,YDIM)
         IF(Istatus.NE.0)RETURN
         IF(YDIM.GT.2048)YDIM=2048

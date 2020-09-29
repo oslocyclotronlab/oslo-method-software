@@ -16,7 +16,9 @@ C Version 02. Dec. 2008/ mg
       INTEGER XDIM, YDIM, RDIM
       INTEGER XDIMf, YDIMf, XDIMw, YDIMw
       INTEGER ExpWeight,AreaCorr,StaTot,ReadStatus
-      REAL    Nexp,MASta,MATot,MESta,METot
+c      REAL    Nexp,MASta,MATot,MESta,METot
+      REAL         MASta,MATot,MESta,METot
+
       INTEGER LF1,LF2,LG1,LG2,LW1,LW2
 
       WRITE(6,*)'The original gamma-matrix should be stored in'
@@ -50,7 +52,7 @@ C Zeroing spectra
 		G(j)		= 0.
 		FG(j)		= 0.
 		Gtot(j)		= 0.
-        FGold(j)	= 0.		!First gen. from last iteration 
+c        FGold(j)	= 0.		!First gen. from last iteration
         Weight(j)	= 0.		!Weighting function used
       ENDDO
       DO j=0,2047
@@ -64,8 +66,7 @@ C Zeroing spectra
         SPECf(i)	= 0.
       ENDDO
       DO j=0,2047
-        FGold(j)	= 0.		!First gen. from last iteration 
-        
+        FGold(j)	= 0.		!First gen. from last iteration
         Sing(j)		= 0.        !Singles particle strength
         Mult(j)		= 0.		!Gamma-ray multiplicities
 		AttnFac(j)	= 0.
@@ -89,8 +90,8 @@ C Zeroing spectra
       ExH        = 8500.		!Highest excitation energy
 	  dE_gamma   = 500.         !Eg goes dEg higher than Ex and lower than Ex=0 MeV, due to gamma-resolution
       ExpWeight  = 0			!Default not to weight with exp. spectra
-      a          = 16.0			!Fermi level density parameter a (1/MeV)
-      Nexp       = 4.2			!Exponent for gamma energy
+c      a          = 16.0			!Fermi level density parameter a (1/MeV)
+c      Nexp       = 4.2			!Exponent for gamma energy
       Norm       = 2			!Default normalization with singles method
       StaTot     = 1			!Choose statistical multiplicity
       ThresSta   = 430.			!with threshold > 430 keV
@@ -98,13 +99,13 @@ C Zeroing spectra
       ThresRatio = 0.3			!Upper limit = AMIN1(Eg* ThresRatio,ThresSta)
       ExEntry0s  = 300.			!Average entry point in ground band for M_stat
 	  ExEntry0t  = 0.			!Average entry point in ground band for M_tot
-      AreaCorr   = 0			!Correct for areas versus multiplicity
-      ReadStatus = 0			!Has not read figegain.dat
+      AreaCorr   = 1			!Correct for areas versus multiplicity
+      ReadStatus = 0			!Has not read input.fge
 	  iAttnFac_active = 0		!By default, no active attenuation of direct decay
 
-      OPEN(23,FILE='figegain.dat',STATUS='old',ERR=777)
+      OPEN(23,FILE='input.fge',STATUS='old',ERR=777)
       READ(23,*,END=666,ERR=666)ExH,Ax0,Ax1,Ay0,Ay1,Ngates
-      READ(23,*,END=666,ERR=666)ExpWeight,A,Nexp
+      READ(23,*,END=666,ERR=666)ExpWeight! ,A,Nexp
       READ(23,*,END=666,ERR=666)AxW0,AxW1,AyW0,AyW1
       READ(23,*,END=666,ERR=666)Norm,StaTot
       READ(23,*,END=666,ERR=666)ThresSta,AreaCorr
@@ -114,7 +115,7 @@ C Zeroing spectra
 	  READ(23,*,END=666,ERR=666)(AttnFac(i),i=0,Ngates-1)
       READ(23,*,END=666,ERR=666)ThresTot,ThresRatio,ExH,ExEntry0s,ExEntry0t !parameters of new version
       GO TO 777
- 666  WRITE(6,*)'Warning: Something wrong with your figegain.dat file'
+ 666  WRITE(6,*)'Warning: Something wrong with your input.fge file'
  777  CLOSE(23)
 
       bx=cal(1,ISP,1,1)+cal(1,ISP,1,2)+cal(1,ISP,1,3)
@@ -162,7 +163,7 @@ C Reading various parameters
       Exmax=AMAX1(Ay0+Ay1*0,Ay0+Ay1*(YDIMf-1.))
       IF(ExH.GT.Exmax)THEN
         ExH = Exmax
-        ReadStatus = 0  !wrong figegain.dat, should be replaced
+        ReadStatus = 0  !wrong input.fge, should be replaced
       ENDIF
       WRITE(6,22)ExH
   22  FORMAT(/'Excitation energy of highest gate (keV)  <',F8.1,'>:',$)
@@ -332,34 +333,35 @@ C Compress or stretch spectra in both directions
              
       ELSE													!Or we choose Fermi estimate
        
-        WRITE(6,60)
- 60     FORMAT(/,'Assumes Fermi gas distribution')
-        WRITE(6,62)a
- 62     FORMAT('Level density parameter a (1/MeV)           <',F5.2,'>:',$)
-        CALL READF(5,a)
-        WRITE(6,64)Nexp
- 64     FORMAT('Exponent n for Eg**n                        <',F5.2,'>:',$)
-        IF(Istatus.NE.0)RETURN
-        CALL READF(5,Nexp)
+c       WRITE(6,60)
+c60     FORMAT(/,'Assumes Fermi gas distribution')
+c       WRITE(6,62)a
+c 62     FORMAT('Level density parameter a (1/MeV)           <',F5.2,'>:',$)
+c        CALL READF(5,a)
+c        WRITE(6,64)Nexp
+c 64     FORMAT('Exponent n for Eg**n                        <',F5.2,'>:',$)
+c        IF(Istatus.NE.0)RETURN
+c        CALL READF(5,Nexp)
         DO j=IyH,IyL,IyStep
-          Exi=Ay0+Ay1*j
-          jjmax=((Exi+dE_gamma)/ABS(Ay1))+0.5				!Assuming dE_gamma extra
-          DO jj=0,MIN0(jjmax,2047)
-			Egam=ABS(Ay1)*jj
-            IF(jj.EQ.0)THEN
-              Egam=ABS(Ay1)*0.25							!In order to get something in ch 0
-            ENDIF
-            Exf=Exi-Egam
-            IF(Exf.GE.0)THEN
-              IF(Egam.LT.50.)Egam=50.
-              IF(Exf.LT.300.)Exf=300.
-              Egam=Egam/1000.								!Going to MeV not to get too
-              Exf=Exf/1000.									!large numbers for RESP
-              IF(jj.LT.2048.AND.j.LT.2048)THEN
-                R(jj,j)=((Egam**Nexp)*EXP(2.*SQRT(a*Exf)))/(Exf**2.)
-              ENDIF
-            ENDIF
-          ENDDO
+          R(jj,j) = 1
+c          Exi=Ay0+Ay1*j
+c          jjmax=((Exi+dE_gamma)/ABS(Ay1))+0.5				!Assuming dE_gamma extra
+c          DO jj=0,MIN0(jjmax,2047)
+c			Egam=ABS(Ay1)*jj
+c            IF(jj.EQ.0)THEN
+c              Egam=ABS(Ay1)*0.25							!In order to get something in ch 0
+c            ENDIF
+c            Exf=Exi-Egam
+c            IF(Exf.GE.0)THEN
+c              IF(Egam.LT.50.)Egam=50.
+c              IF(Exf.LT.300.)Exf=300.
+c              Egam=Egam/1000.								!Going to MeV not to get too
+c              Exf=Exf/1000.									!large numbers for RESP
+c              IF(jj.LT.2048.AND.j.LT.2048)THEN
+c                R(jj,j)=((Egam**Nexp)*EXP(2.*SQRT(a*Exf)))/(Exf**2.)
+c              ENDIF
+c            ENDIF
+c          ENDDO
         ENDDO 
       ENDIF
 
@@ -450,7 +452,7 @@ C Writting out parameters
 104   FORMAT(' Ax0 =',F8.1,' Ax1 =',F8.1,' Ay0 =',F8.1,' Ay1 =',F8.1)
       WRITE(21,106)AxW0,AxW1,AyW0,AyW1
 106   FORMAT(' AxW0=',F8.1,' AxW1=',F8.1,' AyW0=',F8.1,' AyW1=',F8.1)
-      WRITE(21,108)ExpWeight,a,Nexp
+      WRITE(21,108)ExpWeight!     a,Nexp
 108   FORMAT(' Weighting:',I2,' Level density parameter a=',F4.1,' Exponent n=',F3.1)
       WRITE(21,110)Norm,StaTot,AreaCorr
 110   FORMAT(' Normalization=',I2,' Stat/Tot=',I2,' Areacorr.=',I2)
@@ -708,9 +710,9 @@ C                                                               *
 C****************************************************************
 		
 C Writes parameters to disk, to be used for next run
-      OPEN(23,FILE='figegain.dat',ACCESS='SEQUENTIAL',ERR=888)
+      OPEN(23,FILE='input.fge',ACCESS='SEQUENTIAL',ERR=888)
       WRITE(23,*)ExH,Ax0,Ax1,Ay0,Ay1,Ngates
-      WRITE(23,*)ExpWeight,A,Nexp
+      WRITE(23,*)ExpWeight! A,Nexp
       WRITE(23,*)AxW0,AxW1,AyW0,AyW1
       WRITE(23,*)Norm,StaTot
       WRITE(23,*)ThresSta,AreaCorr

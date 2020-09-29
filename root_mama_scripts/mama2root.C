@@ -1,3 +1,12 @@
+/*
+ Usage: > root
+    root [1] .L mama2root.C
+ Create a pointer to the histogram in root from a mama file "foo.m"
+    root [2] auto *matrix1 = mama2root("foo.m") 
+ Now you can use it as usual in root, eg. draw it or save it to file. 
+    root [3] matrix1->Draw()
+    root [4] matrix1->SaveAs("matrix1.root")
+ */
 
 #include <TH2.h>
 #include <TFile.h>
