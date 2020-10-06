@@ -35,7 +35,8 @@ float Exf_1 = 0.,    Exf_2 = 696.513; //The finial excitation energies given for
 float exe1  = 2500., sige1 = 2.8, exe2 = 7817., sige2 = 6.08; //sigma1 and sigma2 at exc. E1 and E2
 float rn_1, rn_2;                     //Relative number of levels in the two diagonals
 float sig_2_e1, sig_2_e2;             //sigma**2 at E1 and E2
-int   oddeven = 1.;                   //Half-integer or integer spins
+int   oddeven = 1;                    //Half-integer or integer spins
+int   linlog  = 1;                    //linear = 0, logarithmical = 1 interpolation between gsF pairs
 float jlow;                           //Is 0.5 or 0
 float b1, b2;                         //Parameters giving sigma**2(Ex) = b1 + b2*Ex;
 float sig(float ex, float b1, float b2);
@@ -97,7 +98,7 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                        D I A B L O  1.5                      |\r\n");
+    printf(" |                       D I A B L O  1.5.2                     |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |    Program to calculate gamma-ray strength function (gSF)    |\r\n");
     printf(" |   You need a first-generation matrix (fg) in your directory  |\r\n");
@@ -117,6 +118,7 @@ int main()
     printf(" | Modified: 14 Apr 2020  Average gSF and systematic errors     |\r\n");
     printf(" | Modified: 17 Apr 2020  Compress with accurate integrals      |\r\n");
     printf(" | Modified: 26 May 2020  Root plot created: diablo_plot.cpp    |\r\n");
+    printf(" | Modified: 19 Jun 2020  Lin or Log intepolation of gSF pairs  |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
     
@@ -150,7 +152,8 @@ int main()
         sscanf(line, " %d %d \n",&da01_1, &da01_2);
         fgets_ignore(line,sizeof(line),fp);
         sscanf(line, " %d %d \n",&nl1, &nl2);
-        
+        fgets_ignore(line,sizeof(line),fp);
+        sscanf(line, " %d    \n",&linlog);
         for(i=0;i<50;i++){
             fgets_ignore(line,sizeof(line),fp);
             sscanf(line, " %f %f \n",&spin_1[i], &spin_2[i]);
@@ -589,6 +592,11 @@ int main()
     printf("\nthe uncertainty in the number of counts at the diagonals.   ");
     printf("\nSince we cannot sew if one diagonal is zero, these pairs are zeroed.\n");
     
+    printf("\nFor the sewing process, choose linear or logarithmical interpolation of gSF pairs.");
+    printf("\nLinear (0) or logarithmical (1) interpolation <%1d>:",linlog);
+    fgets_ignore(line,sizeof(line),stdin);
+    sscanf(line,"%d", &linlog);
+    
     sewing();
     
     printf("\n   Ex     <Eg_1>  <Eg_2>  ch_1  ch_2     gsf_1      gsf_2   d_gsf_1    d_gsf_2    ematch    factor\n");
@@ -640,6 +648,7 @@ int main()
         fprintf(fp, " %f %f  \n",n_1, n_2);
         fprintf(fp, " %d %d  \n",da01_1, da01_2);
         fprintf(fp, " %d %d  \n",nl1, nl2);
+        fprintf(fp, " %d     \n",linlog);
         for(i=0;i<50;i++){
             fprintf(fp, " %f %f \n",spin_1[i], spin_2[i]);
         }
@@ -785,6 +794,7 @@ void compressing(){
 }
 
 void sewing(){
+    double x_1pair, x_2pair;
     for(iy=chL;iy<=chH;iy++){
         if(cen_1[iy] > 0.){
             ccc = cen_1[iy];
@@ -811,11 +821,26 @@ void sewing(){
         ch_2[iy+1]  = ex2ch(cen_2[iy+1]);
         if (gsf_1[iy]>0. && gsf_2[iy]>0. && gsf_1[iy+1]>0. && gsf_2[iy+1]>0.){  // Only sew if all four integrals have counts > 0
             ematch_next = (cen_2[iy] + cen_1[iy+1])/2.;
-            gSFave_1pair = gsf_1[iy]  +((gsf_2[iy]  -gsf_1[iy])  /(cen_2[iy]  -cen_1[iy]))  *(ematch_next-cen_1[iy]);
-            gSFave_2pair = gsf_1[iy+1]+((gsf_2[iy+1]-gsf_1[iy+1])/(cen_2[iy+1]-cen_1[iy+1]))*(ematch_next-cen_1[iy+1]);
-        if (gSFave_2pair>0. && gSFave_1pair > 0.)factor_next = gSFave_1pair/gSFave_2pair;
-            gsf_1[iy+1]  = gsf_1[iy+1]*factor_next;     //finished normalized for the next loop
-            gsf_2[iy+1]  = gsf_2[iy+1]*factor_next;     //finished normalized for the next loop
+            if(linlog == 0){
+                gSFave_1pair = gsf_1[iy]  +((gsf_2[iy]  -gsf_1[iy])  /(cen_2[iy]  -cen_1[iy]))  *(ematch_next-cen_1[iy]);
+                gSFave_2pair = gsf_1[iy+1]+((gsf_2[iy+1]-gsf_1[iy+1])/(cen_2[iy+1]-cen_1[iy+1]))*(ematch_next-cen_1[iy+1]);
+                if (gSFave_2pair>0. && gSFave_1pair > 0.)factor_next = gSFave_1pair/gSFave_2pair;
+                gsf_1[iy+1]  = gsf_1[iy+1]*factor_next;     //finished normalized for the next loop
+                gsf_2[iy+1]  = gsf_2[iy+1]*factor_next;     //finished normalized for the next loop
+            }
+            else{
+                x_1pair = log((double)gsf_1[iy])  +((log((double)gsf_2[iy])  -log((double)gsf_1[iy]))  /(cen_2[iy]  -cen_1[iy]))  *(ematch_next-cen_1[iy]);
+                x_2pair = log((double)gsf_1[iy+1])+((log((double)gsf_2[iy+1])-log((double)gsf_1[iy+1]))/(cen_2[iy+1]-cen_1[iy+1]))*(ematch_next-cen_1[iy+1]);
+                
+                
+                gSFave_1pair = exp(x_1pair); //from log to normal
+                gSFave_2pair = exp(x_2pair); //from log to normal
+//                printf("%e  %e  %e  %e\n",x_1pair,x_2pair,gSFave_1pair, gSFave_2pair);
+
+                if (gSFave_2pair>0. && gSFave_1pair > 0.)factor_next = gSFave_1pair/gSFave_2pair;
+                gsf_1[iy+1]  = gsf_1[iy+1]*factor_next;     //finished normalized for the next loop
+                gsf_2[iy+1]  = gsf_2[iy+1]*factor_next;     //finished normalized for the next loop
+            }
         }
         else{
             gsf_1[iy+1]=0.,gsf_2[iy+1]=0.;              //for the next loop
@@ -899,6 +924,7 @@ int makerootplot(){
     else {
         int middle  = (L1 + L4)/2;
         float xnorm = (5.e-08)/gsf_ave[middle];  //Scaling gSF in the middle of the data set to 5.e-08 MeV**(-3)
+        float EgMax = 0.5 + (egam_ave[L4])/1000.; // In MeV for plotting gSF
         fprintf(fp,"{\n");
         fprintf(fp,"    gROOT->Reset();\n");
         fprintf(fp,"    gROOT->SetStyle(\"Plain\");\n");
@@ -909,7 +935,8 @@ int makerootplot(){
         fprintf(fp,"    m = (TH1F*)gROOT->FindObject(\"h\");\n");
         fprintf(fp,"    if (m) m->Delete();\n");
         fprintf(fp,"    TCanvas *c1 = new TCanvas(\"c1\",\"Gamma-ray strength function\",800,600);\n");
-        fprintf(fp,"    TH2F *h     = new TH2F(\"h\",\" \",10,0.0,   10.0,10,5.0e-9,5.0e-07);\n");
+        fprintf(fp,"    float EgMax = %e;\n",EgMax);
+        fprintf(fp,"    TH2F *h     = new TH2F(\"h\",\" \",10,0.0, EgMax,10,5.0e-9,5.0e-07);\n");
         fprintf(fp,"    ifstream diafile(\"results.dia\");\n");
         fprintf(fp,"    float eg[500], energyerr[500];\n");
         fprintf(fp,"    float gsf_ave[500],dgsf_ave[500],dsys_ave[500];\n");
@@ -978,7 +1005,7 @@ int makerootplot(){
         fprintf(fp,"    leg->SetBorderSize(0);\n");
         fprintf(fp,"    leg->SetFillColor(0);\n");
         fprintf(fp,"    leg->SetTextFont(42);\n");
-        fprintf(fp,"    leg->AddEntry(gsfgr,\"Total gSF\",\"P\");\n");
+        fprintf(fp,"    leg->AddEntry(gsfgr,\"Average gSF\",\"P\");\n");
         fprintf(fp,"    leg->AddEntry(gsf1gr,\"Gammas feeding D1\",\"P\");\n");
         fprintf(fp,"    leg->AddEntry(gsf2gr,\"Gammas feeding D2\",\"P\");\n");
         fprintf(fp,"    leg->AddEntry(sysHgr,\"Systematical errors\",\"L\");\n");
@@ -986,7 +1013,7 @@ int makerootplot(){
         fprintf(fp,"    TLatex t;\n");
         fprintf(fp,"    t.SetTextSize(0.05);\n");
         fprintf(fp,"    t.SetTextFont(42);\n");
-        fprintf(fp,"    t.DrawLatex(    5. ,3.5e-07,\"^{xxx}Yy\");\n");
+        fprintf(fp,"    t.DrawLatex( 0.6*EgMax ,3.5e-07,\"^{xxx}Yy\");\n");
         fprintf(fp,"    c1->Update();\n");
         fprintf(fp,"    c1->Print(\"diablo_plot.pdf\");\n");
         fprintf(fp,"}\n");
