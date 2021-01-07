@@ -916,9 +916,9 @@ C See p.426 in SPARCompiler FORTRAN 2.0.1, Reference Manual
 C These operations are wonderful. Personally, I get a cick for each shift...
       INTEGER*2 mask1,mask2,I1,I2,J1,J2,I,ISHFT
 
-      mask1=B'0000000011111111'
+c      mask1=B'0000000011111111'
 c      mask2=B'1111111100000000'
-      mask2=-256
+c      mask2=-256
 
       I2=0
       J1=0
@@ -945,9 +945,9 @@ C an I*4 integer of Sparc (or MC680xx) prosessor
 C See p.426 in SPARCompiler FORTRAN 2.0.1, Reference Manual
       INTEGER*4 mask1,mask2,mask3,mask4,I1,I2,I,J1,J2,J3,J4,ISHFT
       
-      mask1=B'00000000000000000000000011111111'
-      mask2=B'00000000000000001111111100000000'
-      mask3=B'00000000111111110000000000000000'
+c      mask1=B'00000000000000000000000011111111'
+c      mask2=B'00000000000000001111111100000000'
+c      mask3=B'00000000111111110000000000000000'
 c      mask4=B'11111111000000000000000000000000'
       mask4=-16777216
       

@@ -3,7 +3,7 @@
           CC = cc
       CFLAGS = -O3
          F95 = gfortran
-      FFLAGS = -W -Wall -ffixed-line-length-132
+      FFLAGS = -W -Wall -ffixed-line-length-132 -std=legacy
       RANLIB = ranlib
           RM = rm -f
 
