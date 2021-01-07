@@ -1,7 +1,8 @@
 #Ignore following files/filetypes
 
-Presequisites
+# Presequisites
 *.d
+.depend*
 
 # Compiled Object files
 *.slo
@@ -32,3 +33,6 @@ Presequisites
 *.exe
 *.out
 *.appe
+
+# Ignore macOS files
+.DS_Store
