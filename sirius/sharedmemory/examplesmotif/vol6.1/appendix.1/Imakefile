@@ -1,9 +1,0 @@
-SYS_LIBRARIES = -lXm -lXt -lX11
-
-AllTarget(font_styles xmemo xshowbitmap xshowbitmap2 zcard)
-
-NormalProgramTarget(font_styles,font_styles.o,,,)
-NormalProgramTarget(xmemo,xmemo.o,,,)
-NormalProgramTarget(xshowbitmap,xshowbitmap.o,,,)
-NormalProgramTarget(xshowbitmap2,xshowbitmap2.o,,,)
-NormalProgramTarget(zcard,zcard.o,,,)

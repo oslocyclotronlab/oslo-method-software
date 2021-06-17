@@ -1,5 +1,0 @@
-#!/bin/sh
-set LD_BIND_NOW=1
-/Applications/sirius/bin/acq_sort
-
-

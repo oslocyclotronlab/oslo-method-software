@@ -1,8 +1,0 @@
-SYS_LIBRARIES = -lXm -lXt -lX11 
-
-AllTarget(color_draw draw2 drawing free_hand)
-
-NormalProgramTarget(color_draw,color_draw.o,,,)
-NormalProgramTarget(draw2,draw2.o,,,)
-NormalProgramTarget(drawing,drawing.o,,,)
-NormalProgramTarget(free_hand,free_hand.o,,,)
