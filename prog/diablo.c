@@ -32,7 +32,7 @@ float x1U2  =3308., y1U2=3791., x2U2=6227., y2U2=6651.;
 
 float exL   = 3000.,   exH = 7000.;   //Region of initial excitation energies
 float Exf_1 = 0.,    Exf_2 = 696.513; //The finial excitation energies given for the two diagonals
-float exe1  = 2500., sige1 = 2.8, exe2 = 7817., sige2 = 6.08; //sigma1 and sigma2 at exc. E1 and E2
+float exe1  = 2500., sige1 = 2.8, exe2 = 7817., sige2 = 6.26; //sigma1 and sigma2 at exc. E1 and E2
 float rn_1, rn_2;                     //Relative number of levels in the two diagonals
 float sig_2_e1, sig_2_e2;             //sigma**2 at E1 and E2
 int   oddeven = 1;                    //Half-integer or integer spins
@@ -60,16 +60,19 @@ float a, b;
 
 int   chL, chH;
 float rL1,rU1,rL2,rU2;
-
-int   i;
+float tmp;
+int   i, imax;
 float sum;
 int   da01_1 = 0, da01_2 = 0;          //Choosing discrete levels
-float spin_1[50] = {0,2,3,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of levels in diagonal D1
-float spin_2[50] = {0,2,3,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of levels in diagonal D2
+float spin_1[50]  = {0,2,3,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of levels in diagonal D1
+float spin_2[50]  = {0,2,3,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of levels in diagonal D2
+float spin_i[50]  = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //Spins of initial levels populating D1 and D2
+float cross[50]   = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; //Rel. x-section of levels populating D1 and D2
 float n_1 = 14.6278, n_2 = 38.8045;    // Average number of levels in continuum diagonal D1 and D2
 float xxj_1 = 4.5, xxj_2 = 5.6;        // Average spin of levels in contiuum diagonal D1 and D2, taken for 238Np at Ex = 1100 and 1500 keV
 float xj_1, xj_2;
 int   n1, n2;                          // Number of spins to loop over (only = 1) in quasi-continuum
+float Ji_min = 0., Ji_max = 5.;
 float xnl1, xnl2;                      // Average number of levels in D1 and D2
 int   nl1=1, nl2=1;                    // Number of discrete levels in D1 and D2
 float ccc;
@@ -83,6 +86,7 @@ int   compress;
 float a0c,a1c;
 float sigma;
 float prob( float sigma, float jspin);
+float xsect_i(float jspin);
 float gsum(float sigma, float jlow);
 int   makerootplot();
 
@@ -98,10 +102,12 @@ int main()
     printf("\n");
     printf("  ______________________________________________________________ \r\n");
     printf(" |                                                              |\r\n");
-    printf(" |                       D I A B L O  1.5.2                     |\r\n");
+    printf(" |                       D I A B L O  1.6                       |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |    Program to calculate gamma-ray strength function (gSF)    |\r\n");
     printf(" |   You need a first-generation matrix (fg) in your directory  |\r\n");
+    printf(" |                                                              |\r\n");
+    printf(" |          M. Wiedeking et al., PRC xx, yyyyyy (2021)          |\r\n");
     printf(" |                                                              |\r\n");
     printf(" |   The program uses 2 diagonals in the fg matrix to estimate  |\r\n");
     printf(" |  the shape of the gSF. It is assumed that the fg matrix has  |\r\n");
@@ -119,8 +125,11 @@ int main()
     printf(" | Modified: 17 Apr 2020  Compress with accurate integrals      |\r\n");
     printf(" | Modified: 26 May 2020  Root plot created: diablo_plot.cpp    |\r\n");
     printf(" | Modified: 19 Jun 2020  Lin or Log intepolation of gSF pairs  |\r\n");
+    printf(" | Modified: 20 Oct 2020  Reaction x-section sigma(Ei,J,) input |\r\n");
+    printf(" | Modified: 31 May 2021  x-section also for half-integer spin  |\r\n");
     printf(" |______________________________________________________________|\r\n");
     printf("                                                                 \r\n");
+    
     
     /* ***************************************** */
     /* Reading default values from previous runs */
@@ -157,6 +166,10 @@ int main()
         for(i=0;i<50;i++){
             fgets_ignore(line,sizeof(line),fp);
             sscanf(line, " %f %f \n",&spin_1[i], &spin_2[i]);
+        }
+        for(i=0;i<50;i++){
+            fgets_ignore(line,sizeof(line),fp);
+            sscanf(line, " %f %f \n",&spin_i[i], &cross[i]);
         }
         fclose(fp);
     }
@@ -423,6 +436,57 @@ int main()
     //////////////////  DETAILS ON LEVELS IN THE DIAGONALS  //////////////////////
     
     /* ************************************************ */
+    /* Giving cross section for the population          */
+    /* of initial spins. First finding the spin range   */
+    /* ************************************************ */
+    
+    Ji_min = 100.;
+    Ji_max = -1.;
+    tmp    = -1.;
+    for (i=0; i < nl1; i++){
+        if(spin_1[i] < Ji_min)Ji_min=spin_1[i];
+        if(spin_1[i] > Ji_max)Ji_max=spin_1[i];
+    }
+    printf("Ji_min1= %3.1f Ji_max1 = %3.1f \n", Ji_min,Ji_max);
+    for (i=0; i < nl2; i++){
+        if(spin_2[i] < Ji_min)Ji_min=spin_2[i];
+        if(spin_2[i] > Ji_max)Ji_max=spin_2[i];
+    }
+    printf("Ji_min2= %3.1f Ji_max2 = %3.1f \n", Ji_min,Ji_max);
+
+    if(oddeven == 1){                //even A
+        if(Ji_min==0)tmp=Ji_min+1.;
+        if(Ji_min>=1)tmp=Ji_min-1.;
+        printf("tmp= %3.1f  \n", tmp);
+
+        Ji_min=tmp;
+        for (i=0; i < nl1; i++){
+            if((spin_1[i] == 1) || (spin_1[i] == 2) )Ji_min=0;
+        }
+        for (i=0; i < nl2; i++){
+            if((spin_2[i] == 1) || (spin_2[i] == 2) )Ji_min=0;
+        }
+        Ji_max=Ji_max+1.;
+    }
+    
+    if(oddeven==0 ){                  //odd A
+        if(Ji_min>0.5)Ji_min=Ji_min-1.;
+        Ji_max=Ji_max+1.;
+    }
+    //////////////////  DETAILS ON INITIAL POPULATION OF SPINS IN THE LIGHT ION REACTION  //////////////////////
+    printf("\nThe various initial states may have different cross section in the light ion reaction.");
+    printf("\nPlease, give the relative cross section for the initial spins of interest.");
+    printf("\nCommonly, you have the same population and you just type 1.0 for each spin.\n");
+    printf("\nThe initial spin range of interest by dipole transitions is (%3.1f - %3.1f)\n",Ji_min,Ji_max);
+    imax = (int)(Ji_max-Ji_min) + 1;
+    for (i = 0; i < imax; i++){
+        spin_i[i] = Ji_min+i;
+        printf("Give relative cross section (a.u.) of initial level with spin %3.1f  <%5.2f>:",spin_i[i], cross[i]);
+        fgets_ignore(line,sizeof(line),stdin);
+        sscanf(line,"%f", &cross[i]);
+    }
+    
+    /* ************************************************ */
     /* Finding integral (area) of diagonal 1 and 2      */
     /* and gamma-energy centroid cenx and uncertainties */
     /* ************************************************ */
@@ -457,7 +521,8 @@ int main()
     
     /* *********************************************** */
     /* Finding how much of the spin distribution in    */
-    /* the quasicontinuum that populates the diagonals */
+    /* the quasicontinuum that populates the diagonals.*/
+    /* It depends on sigma(Ei,Ji)*g(Ei,Ji)             */
     /* *********************************************** */
     for(iy=chL;iy<=chH;iy++){
         ex = ch2ex(iy);
@@ -468,26 +533,26 @@ int main()
             for(i=0;i<nl1;i++){
                 xj_1 = spin_1[i];
                 if(xj_1 >=0.999){
-                    p_1[iy] = prob( sigma, xj_1 - 1.) + prob( sigma, xj_1) + prob( sigma, xj_1 + 1.);
+                    p_1[iy] = xsect_i(xj_1 - 1.)*prob(sigma, xj_1 - 1.) + xsect_i(xj_1)*prob(sigma, xj_1) + xsect_i(xj_1 + 1.)*prob(sigma, xj_1 + 1.);
                 }
                 if(xj_1 >= 0.499 && xj_1 < 0.999 ){
-                    p_1[iy] = prob( sigma, xj_1) + prob( sigma, xj_1 + 1.);
+                    p_1[iy] = xsect_i(xj_1)*prob(sigma, xj_1) + xsect_i(xj_1 + 1.)*prob(sigma, xj_1 + 1.);
                 }
                 if(xj_1 <= 0.499){
-                    p_1[iy] = prob( sigma, xj_1 + 1.);
+                    p_1[iy] = xsect_i(xj_1 + 1.)*prob(sigma, xj_1 + 1.);
                 }
                 sum = sum + p_1[iy];
             }
             p_1[iy] = sum;
         }else{
             if(xj_1 >=0.999){
-                p_1[iy] = prob( sigma, xj_1 - 1.) + prob( sigma, xj_1) + prob( sigma, xj_1 + 1.);
+                p_1[iy] = prob(sigma, xj_1 - 1.) + prob(sigma, xj_1) + prob(sigma, xj_1 + 1.);
             }
             if(xj_1 > 0.499 && xj_1 < 0.999 ){
-                p_1[iy] = prob( sigma, xj_1) + prob( sigma, xj_1 + 1.);
+                p_1[iy] = prob(sigma, xj_1) + prob(sigma, xj_1 + 1.);
             }
             if(xj_1 <= 0.499){
-                p_1[iy] = prob( sigma, xj_1 + 1.);
+                p_1[iy] = prob(sigma, xj_1 + 1.);
             }
             p_1[iy] = p_1[iy] * n_1;
         }
@@ -498,34 +563,35 @@ int main()
             for(i=0;i<nl2;i++){
                 xj_2 = spin_2[i];
                 if(xj_2 >=0.999){
-                    p_2[iy] = prob( sigma, xj_2 - 1.) + prob( sigma, xj_2) + prob( sigma, xj_2 + 1.);
+                    p_2[iy] = xsect_i(xj_2 - 1.)*prob(sigma, xj_2 - 1.) + xsect_i(xj_2)*prob(sigma, xj_2) + xsect_i(xj_2 + 1.)*prob(sigma, xj_2 + 1.);
                 }
                 if(xj_2 >= 0.499 && xj_2 < 0.999 ){
-                    p_2[iy] = prob( sigma, xj_2) + prob(sigma, xj_2 + 1.);
+                    p_2[iy] = xsect_i(xj_2)*prob(sigma, xj_2) + xsect_i(xj_2 + 1.)*prob(sigma, xj_2 + 1.);
                 }
                 if(xj_2 <= 0.499){
-                    p_2[iy] = prob(sigma, xj_2 + 1.);
+                    p_2[iy] = xsect_i(xj_2 + 1.)*prob(sigma, xj_2 + 1.);
                 }
                 sum = sum + p_2[iy];
             }
             p_2[iy] = sum;
         }else{
             if(xj_2 >=0.999){
-                p_2[iy] = prob(sigma, xj_2 - 1.) + prob( sigma, xj_2) + prob( sigma, xj_2 + 1.);
+                p_2[iy] = prob(sigma, xj_2 - 1.) + prob(sigma, xj_2) + prob(sigma, xj_2 + 1.);
             }
             if(xj_2 > 0.499 && xj_2 < 0.999 ){
-                p_2[iy] = prob(sigma, xj_2) + prob( sigma, xj_2 + 1.);
+                p_2[iy] = prob(sigma, xj_2) + prob(sigma, xj_2 + 1.);
             }
             if(xj_2 <= 0.499){
-                p_2[iy] = prob( sigma, xj_2 + 1.);
+                p_2[iy] = prob(sigma, xj_2 + 1.);
             }
             p_2[iy] = p_2[iy] * n_2;
         }
         
         /* ************************************************** */
-        /* Fasten seatbelts                                   */
-        /* Dividing by Eg**3 and the fraction p of the spin   */
-        /* distribution populating all levels at the diagonal */
+        /* FASTEN SEAT BELTS                                  */
+        /* Dividing by Eg**3 and the fraction g of the spin   */
+        /* distribution x cross section of the initial        */
+        /* levels populating the levels at the diagonals.     */
         /* The gSF values are still not sewed together        */
         /* ************************************************** */
         cen_1[iy] = ex -Exf_1;
@@ -546,9 +612,9 @@ int main()
     
     printf("\nIn the table below, the gSF is calculated from the number of counts at diagonal D1 and D2");
     printf("\nThe pairs are still not sewed together. Each gSF point (gsf_1 and gsf_2) is");
-    printf("\ncalculated by gSF = Counts / (Eg**3 x p), where p is the fraction of levels with spin that");
-    printf("\ncan feed the levels of the diagonals, e.g 0+ can be fed by 1+ and 1-, only.\n\n");
-
+    printf("\ncalculated by gSF = Counts / (Eg**3 x sigma x p), where sigma is the reaction cross section");
+    printf("\nand p is the fraction of the initial levels with spin that");
+    printf("\nfeed the final levels of the diagonals, e.g 0+ can be fed by 1+ and 1-, only.\n\n");
     printf("                Experimental    Eg = Ex - Exf                                                              Un-sewed\n");
     printf("  y      Ex    <Eg_1>  <Eg_2>   <Eg_1>  <Eg_2>   sig   Diag_1    Diag_2      p_1      p_2   p_2/p_1     gsf_1     gsf_2\n");
     printf("(ch)    (keV)   (keV)  (keV)     (keV)  (keV)         (Counts)  (Counts)                              (MeV**-3) (MeV**-3)\n");
@@ -625,9 +691,6 @@ int main()
         printf(    " %3d %7.1f %10.4e %10.4e %10.4e   %10.4e   %10.4e   %10.4e   %10.4e\n", iy, egam_ave[iy], gsf_ave[iy], dgsf_ave[iy], dsys[iy], gsf_1[iy+(chL-L2)], gsf_2[iy+(chL-L1)], dgsf_1[iy+(chL-L2)], dgsf_2[iy+(chL-L1)]);
     }
     fclose(fp);
-	 
-
-    
     
     /* **************************************************** */
     /* Storing default values for the next run in input.dia */
@@ -652,6 +715,9 @@ int main()
         for(i=0;i<50;i++){
             fprintf(fp, " %f %f \n",spin_1[i], spin_2[i]);
         }
+        for(i=0;i<50;i++){
+            fprintf(fp, " %f %f \n",spin_i[i], cross[i]);
+        }
     }
     fclose(fp);
     
@@ -670,6 +736,22 @@ float prob( float sigma, float jspin)
     }
     if(gsum(sigma,jlow) > 0.)xj = xj/gsum(sigma,jlow);
     return xj;
+}
+
+float xsect_i(float jspin)
+{
+    int ii;
+    float x = -1.;
+    for(ii = 0; ii < imax; ii++){
+        if(jspin == spin_i[ii]){
+            x = cross[ii];
+        }
+    }
+    if(x < 0.){
+        printf("\nWarning, cross section unknown for initial state with spin %3.1f\n",jspin);
+        x = 1.;
+    }
+    return x;
 }
 
 float gsum( float sigma, float jlow)
@@ -835,8 +917,6 @@ void sewing(){
                 
                 gSFave_1pair = exp(x_1pair); //from log to normal
                 gSFave_2pair = exp(x_2pair); //from log to normal
-//                printf("%e  %e  %e  %e\n",x_1pair,x_2pair,gSFave_1pair, gSFave_2pair);
-
                 if (gSFave_2pair>0. && gSFave_1pair > 0.)factor_next = gSFave_1pair/gSFave_2pair;
                 gsf_1[iy+1]  = gsf_1[iy+1]*factor_next;     //finished normalized for the next loop
                 gsf_2[iy+1]  = gsf_2[iy+1]*factor_next;     //finished normalized for the next loop
@@ -1021,4 +1101,3 @@ int makerootplot(){
     fclose(fp);
     return 0;
 }
-
