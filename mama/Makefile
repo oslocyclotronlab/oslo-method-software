@@ -1,8 +1,6 @@
 
 all: help
 	make -C src $@
-	make -C spy $@
-	make -C update $@
 
 help:
 	@echo
@@ -17,5 +15,3 @@ help:
 
 %:
 	make -C src $@
-	make -C spy $@
-	make -C update $@
