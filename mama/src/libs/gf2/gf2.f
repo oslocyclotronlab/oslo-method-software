@@ -5,7 +5,7 @@
  5    FORMAT(' ',/,
      +' ____________________________________________________'/
      +'|                                                    |'/ 
-     +'|              Welcome to M A M A  7.5.3             |'/
+     +'|              Welcome to M A M A  7.5.5             |'/
      +'|                                                    |'/
      +'|   MAtrix MAnipulation, Oslo Cyclotron Laboratory   |'/
      +'|           Magne Guttormsen, January 1995           |'/
