@@ -17,9 +17,14 @@ C Version 02. Dec. 2008/ mg
       INTEGER XDIMf, YDIMf, XDIMw, YDIMw
       INTEGER ExpWeight,AreaCorr,StaTot,ReadStatus
 c      REAL    Nexp,MASta,MATot,MESta,METot
-      REAL         MASta,MATot,MESta,METot
+      REAL     MASta,MATot,MESta,METot
 
       INTEGER LF1,LF2,LG1,LG2,LW1,LW2
+      INTEGER device
+      CHARACTER id*20
+      REAL Calib(6)
+      REAL    fgF(0:4095,0:2047), fgGtot(0:4095,0:2047), fgGtot_allcounts(0:4095,0:2047)
+      REAL    Gtot_allcounts(0:4095)
 
       WRITE(6,*)'The original gamma-matrix should be stored in'
       WRITE(6,*)'the source matrix and the extracted 1.gen. matrix'
@@ -48,12 +53,13 @@ c      REAL    Nexp,MASta,MATot,MESta,METot
 
 C Zeroing spectra
       DO j=0,4095
-	    F(j)		= 0.
-		G(j)		= 0.
-		FG(j)		= 0.
-		Gtot(j)		= 0.
+	    F(j)		   = 0.
+		G(j)		   = 0.
+		FG(j)		   = 0.
+		Gtot(j)		   = 0.
+        Gtot_allcounts = 0.
 c        FGold(j)	= 0.		!First gen. from last iteration
-        Weight(j)	= 0.		!Weighting function used
+        Weight(j)	   = 0.		!Weighting function used
       ENDDO
       DO j=0,2047
         DO i=0,2047
@@ -436,28 +442,28 @@ C Setting up lower limit for weighting function, depends on thresholds
       IF(Istatus.NE.0)RETURN
 
 
-100   FORMAT('----------------------------------------------')
+ 100  FORMAT('----------------------------------------------')
 
 C Writting out parameters
       OPEN(UNIT=21,FILE='figegaout.dat',ERR=1001)
       GO TO 1002
-1001  ifile=0
+ 1001 ifile=0
       GO TO 1111
-1002  ifile=1
+ 1002 ifile=1
       WRITE(21,*)'Parameters used:'
       WRITE(21,40)ExH,ExL,IyH,IyL
       WRITE(21,102)Ngates
-102   FORMAT(' Number of spectra=',I5)
+ 102  FORMAT(' Number of spectra=',I5)
       WRITE(21,104)Ax0,Ax1,Ay0,Ay1
-104   FORMAT(' Ax0 =',F8.1,' Ax1 =',F8.1,' Ay0 =',F8.1,' Ay1 =',F8.1)
+ 104  FORMAT(' Ax0 =',F8.1,' Ax1 =',F8.1,' Ay0 =',F8.1,' Ay1 =',F8.1)
       WRITE(21,106)AxW0,AxW1,AyW0,AyW1
-106   FORMAT(' AxW0=',F8.1,' AxW1=',F8.1,' AyW0=',F8.1,' AyW1=',F8.1)
+ 106  FORMAT(' AxW0=',F8.1,' AxW1=',F8.1,' AyW0=',F8.1,' AyW1=',F8.1)
       WRITE(21,108)ExpWeight!     a,Nexp
-108   FORMAT(' Weighting:',I2,' Level density parameter a=',F4.1,' Exponent n=',F3.1)
+ 108  FORMAT(' Weighting:',I2,' Level density parameter a=',F4.1,' Exponent n=',F3.1)
       WRITE(21,110)Norm,StaTot,AreaCorr
-110   FORMAT(' Normalization=',I2,' Stat/Tot=',I2,' Areacorr.=',I2)
+ 110  FORMAT(' Normalization=',I2,' Stat/Tot=',I2,' Areacorr.=',I2)
       WRITE(21,112)ThresTot,LT1,ThresSta,LS1, ExEntry0s, ExEntry0t, ThresRatio
-112   FORMAT(' Experimental lower gamma threshold:     ',F6.1,' keV (ch=',I4,')',
+ 112  FORMAT(' Experimental lower gamma threshold:     ',F6.1,' keV (ch=',I4,')',
      +     /,' Upper threshold for statistical gammas: ',F6.1,' keV (ch=',I4,')',
      +     /,' Average energy entry point in g.s. band:',F6.0,'(stat) ',F6.0,'(tot)',
      +     /,' Sliding threshold given by Ex*R, with R = ',F4.2)
@@ -485,6 +491,7 @@ C****************************************************************
 			IF(i.LT.LT1)F(i)=0.								!No data below threshold
 			FG(i)=0.
 			Gtot(i)=0.
+            Gtot_allcounts(i)=0.
         ENDDO
 		
 C Preparing the weighting function by massageing: 
@@ -553,6 +560,7 @@ C maintain number of counts. Then adds previous weighting and normalize to unity
 		  
 		  DO i=0,LG2										!Making Gtot(i), which shall
             Gtot(i)=Gtot(i)+fact*G(i)						!be subtracted from F(i)
+            Gtot_allcounts(i)=Gtot_allcounts(i)+G(i)
           ENDDO
         ENDDO
 
@@ -573,7 +581,10 @@ C Performing the subtraction
         DO i=0, XDIMf-1
 		  Gtot(i) = alpha0*Gtot(i)
           FG(i) = F(i)-Gtot(i)
-          rMAT(IDEST,i,j) = FG(i)							!Finished, storing in MAT
+          rMAT(IDEST,i,j)       = FG(i)   !Finished, storing in MAT
+          fgF(i,j)              = F(i)    !To be used for rhosigchi to get
+          fgGtot(i,j)           = Gtot(i) !more accurate stat. uncertainties implemented 14. Dec. 2020/mg
+          fgGtot_allcounts(i,j) = Gtot_allcounts(i)
         ENDDO
 
 C Preparing for writting to figegaout.dat
@@ -722,7 +733,80 @@ C Writes parameters to disk, to be used for next run
       WRITE(23,*)ThresTot,ThresRatio,ExH,ExEntry0s,ExEntry0t
       CLOSE(23)
 888   CONTINUE
-		
+
+
+C////////////////////////////////
+C Writes fgF, fgGtot and Gtot_allcounts matrices to disk
+        NX=XDIMf-1
+        NY=YDIMf-1
+        CALL DATETIME(id)
+
+        iCal=6
+        m=0
+        DO i=1,2
+          DO j=1,3
+            m=m+1
+            Calib(m)=cal(1,IDEST,i,j)
+         ENDDO
+       ENDDO
+
+C --  Write file header
+        device = 24
+        OPEN(device,FILE='fgF.fge',ACCESS='SEQUENTIAL',ERR=889)
+        WRITE(device,130)
+        WRITE(device,131)
+        WRITE(device,132) 'Total matrix, all generations (figega.f)'
+        WRITE(device,133) id
+        WRITE(device,134) iCal,(Calib(i),i=1,iCal)
+        WRITE(device,135) NX,NY,NX,NY
+ 130    FORMAT('!FILE=Disk')
+ 131    FORMAT('!KIND=Spectrum',/,
+     +'!LABORATORY=Oslo Cyclotron Laboratory (OCL)',/,
+     +'!EXPERIMENT=mama')
+ 132    FORMAT('!COMMENT=',A60)
+ 133    FORMAT('!TIME=DATE:',A20)
+ 134    FORMAT('!CALIBRATION EkeV=',I1,6(',',E13.6))
+ 135    FORMAT('!PRECISION=16',/,'!DIMENSION=2,0:',I4,',0:',I4,/,
+     +'!CHANNEL=(0:',I4,',0:',I4,')')
+        DO j=0,NY
+          WRITE(device,*)(fgF(i,j),i=0,NX)
+        ENDDO
+        WRITE(device,136)
+ 136    FORMAT('!IDEND='/)
+        CLOSE(device)
+        
+        device = 24
+        OPEN(device,FILE='fgG.fge',ACCESS='SEQUENTIAL',ERR=889)
+        WRITE(device,130)
+        WRITE(device,131)
+        WRITE(device,132) 'gen > 1, normalized to M=1 (figega.f)'
+        WRITE(device,133) id
+        WRITE(device,134) iCal,(Calib(i),i=1,iCal)
+        WRITE(device,135) NX,NY,NX,NY
+        DO j=0,NY
+          WRITE(device,*)(fgGtot(i,j),i=0,NX)
+        ENDDO
+        WRITE(device,136)
+        CLOSE(device)
+  889   CONTINUE
+
+        device = 24
+        OPEN(device,FILE='fgG_all.fge',ACCESS='SEQUENTIAL',ERR=889)
+        WRITE(device,130)
+        WRITE(device,131)
+        WRITE(device,132) 'gen > 1, all counts to estimate errors (figega.f)'
+        WRITE(device,133) id
+        WRITE(device,134) iCal,(Calib(i),i=1,iCal)
+        WRITE(device,135) NX,NY,NX,NY
+        DO j=0,NY
+          WRITE(device,*)(fgGtot_allcounts(i,j),i=0,NX)
+       ENDDO
+       WRITE(device,136)
+       CLOSE(device)
+890   CONTINUE
+
+C/////////////////////////////////////////////////
+
 C Updating comment in the heading of spectrum file
         xcomm(1:3)='FG:'
         fname(1,IDEST)(1:8)='FG'//fname(1,ISP)(1:6)
