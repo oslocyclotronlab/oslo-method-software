@@ -33,7 +33,6 @@ FT [N]        N=1-15: set-up for N peaks and do fit
               N=-1: recalculate initial param. estimates and do fit
 FX [P]        FiX additional param. P or change fixed value(s)
 GR            Get Response matrix into working matrix 1 or 2
-HC            Hard Copy of window, region or screen (snapshot)
 HE            Prints commands and other HElp-topics
 HE/P          Send this output to the laser printer
 HE <TOPIC>    Help on command or topic <TOPIC> (2 or 3 letters needed)
@@ -46,8 +45,7 @@ MP 	         Marker Position
 NF            Set-up New Fit for peaks ( <16 ) and do fit
 NO            NOrmalize to 100000 along X axis in matrix
 NU            Extract NUclear temperature from exp. first-gen. matr.
-OD            Offline Display, shows shared-memory spectra of offline sorting
-OM [I,J[,K]]  Overlay (no erase) Multiple spectra into Ith of J parts of 
+OM [I,J[,K]]  Overlay (no erase) Multiple spectra into Ith of J parts of
               window, where I,J=1,0 or K=1 gives full scale and
                             I,J=2,0 or K=2 gives autoscale
 OS [I,J[,K]]  Overlay (no erase) Spec./matr. into Ith of J parts of 
@@ -67,19 +65,15 @@ RN            Replace counts with new content
 RP N          Free (N=1) or fix (N=0) rel. peak positions
 RW N          Free (N=1) or fix (N=0) relative widths
 SC N          SCale for Y axis: N=-1/-2/-3=lin/square-root/log
-SD            Sirius Display, shows shared-memory spectra of acquisition
-SE            Set environment: numbers of telescopes, names on axis, etc.
 SH            SHow counts of matr./spc. as numbers on TTY
 SM            SMooth matr./spc. with Gaussian weighting
               [SP-1 asks for new initial estimates etc. for R, Beta, Step]
-SP/C          Read (not Oslo) in spectrum from matr. w/cursor for limits
-ST            STop and exit Mama 
+ST            STop and exit Mama
 SU [I,J]      SUm counts between channel I and J using cursor
 SW            Change Starting Widths FWHM parameters, etc.
 TF            Total Fit of (a,n) to the exp. first-gen. matr.
 TR            Transform spectrum to one or many rows in a matrix
 TX            TeXt in display window (name and time) on/off
-UD            UpDate SIRIUS and OFFLINE spectra every 2-20 seconds
 UN            UNfold matr./spc. with NaI or Gaussian response matrix
 UC            Subtraction of UnCorrelated events in gamma-gamma-matrix
 UX            Type in your UniX command	
@@ -93,14 +87,14 @@ XY            Interchange XY axis (reflection about diagonal in matr.)
 File Info Display  Modify   Fit  Fold Special
 ---- ---- ------- ------- ------ ---- -------
  GR   CA   CC CE  AR  CO  FD  FR  FG    AN
- RE   CL   DS DX  CU  EL  FX  FT  FO    HC
+ RE   CL   DS DX  CU  EL  FX  FT  FO
  TR   CR   DY DZ  FN  NO  NF  LP  RM    NU
  WR   HE   EX FI  PA  PC  PO  PF  UN    UX
- WP   LS   IC OD  PM  RN  RP  RF  FY    ST
+ WP   LS   IC     PM  RN  RP  RF  FY    ST
  GY   SH   DM OS  SM  UC  SW  RW  RY    TF
-      SU   SC SD  XY  CT  AP  DF  UY
+      SU   SC     XY  CT  AP  DF  UY
       SE   TX     RA  RD  DP  MA     
-           UD OM  CD      WM
+              OM  CD      WM
                                                   
 Topics: ABOut Mama, PEAkfit, SUMmary, NEWs  
 >>>>END
@@ -659,13 +653,6 @@ First an unfolded first generation NaI matrix have to be read in.
 The procedure finds then the nuclear temperature as a function of 
 excitation energy.
 >>>>END
->>>OD
-OD Offline Display, shows shared-memory spectra of offline sorting
-
-The OD command shows predefined spectra and matrices (e.g. ALFNA and 
-THICKSP) directly from offline sorting. This means that you do not have 
-to dump spectra in OFFLINE before looking at them.
->>>>END
 >>>DM
 >>>OM
 DM Display Multiple spectra (from matrix), OM Overlay Multiple spectra
@@ -834,21 +821,6 @@ N=-2 square-root scale
 N=-3 logarithmic scale
 Default is linear scale.
 >>>>END
->>>SD
-SD Sirius Display, shows shared-memory spectra of acquisition
-
-The SD command shows predefined spectra and matrices (e.g. EDESP and 
-THICKSP) directly from shared memory during acquisition. This means
-that you do not have to dump spectra in SIRIUS before looking at them.
->>>>END
->>>SE
-SE Set Environment
-
-The SE command shows the present settings for the number of telescopes
-used in SIRIUS and OFFLINE sortings. The SE command also allows to set
-other names on the x- and y-axis, like ns, c/s or similar instead of the
-defaults of ch, keV (or MeV). Only 3 characters are valid.
->>>>END
 >>>SH
 SH SHow counts
 
@@ -954,23 +926,6 @@ Often filename and time written in the upper right corner
 of the display window overwrites important parts of the spectra.
 This text information can be omitted by the TX command. To
 reactivate the text, type TX once more.
->>>>END
->>>UD
-UD            UpDate SIRIUS and OFFLINE spectra
-
-The command creates a new window where SIRIUS or OFFLINE spectra
-are displayed with a certain frequency. The spectrum shown is 
-determined from the last spectrum you viewed with MAMA. However,
-it have to be an OD or SD spectrum - or deduced from these. For
-example the projection of an OFFLINE matrix down in a singles
-spectrum will be identified by the UD command, and you will
-see a singles spectrum beeing updated. To stop the update
-process, simply close the UPDATE window with the mouse.
-Information transferred from MAMA to UPDATE is written in your
-present directory as updateinfo.dat. Thus you can also start
-the process without MAMA, if this file is in your directory -
-just type update &.
-
 >>>>END
 >>>UC
 UC Subtraction of UnCorrelated events in gamma-gamma-matrix
