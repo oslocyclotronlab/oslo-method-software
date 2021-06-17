@@ -1,0 +1,8 @@
+# Jurogam2_2014
+# Response functions from source data
+# Next: Number of Lines
+3
+# Eg        FWHM_rel      Eff_tot       FE            SE            DE            c511          
+  846    1.3000e+00    1.0000e+00    9.8677e+04    0.0000e+00    0.0000e+00    0.0000e+00
+ 1238    1.0000e+00    1.0355e+00    5.5857e+04    0.0000e+00    0.0000e+00    0.0000e+00
+ 1836    0.8126e+00    1.0895e+00    2.4965e+04    2.4700e+02    0.0000e+00    5.2400e+02
