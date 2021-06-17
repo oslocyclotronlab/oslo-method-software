@@ -1811,7 +1811,7 @@ C  peak remains its real FWHM.
       WRITE(6,*)'then use a factor = 1. Then FWHM(response) = FWHM(real).'
       facFWHM = 10.0    !We use only FWHM/facFWHM in the response function, except for the 511 keV ann. peak
       WRITE(6,3)facFWHM
-   3  FORMAT(/'Respons functions for unfolding/folding (10.) or viewing (1.) <',F4.1,'>:',$)
+   3  FORMAT(/'Respons functions for unfolding (10.) or folding/viewing (1.) <',F4.1,'>:',$)
       CALL READF(5,facFWHM)
       IF(Istatus.NE.0)RETURN
 
@@ -2655,10 +2655,11 @@ C the two channels il and ih.
         A=FEn(I1)+( FEn(I2)- FEn(I1))*(Egam-E1)/(E2-E1)   !full-energy intensity
         IF(A.LT.0.)A=0.
         Egami=(Egam-a0)/a1
-        il=INT(Egami+0.5)              ! Distribute counts on ch il and ih
-        ih=il+1
+        il=INT(Egami)              !Distribute counts on ch il and ih
+        ih=il+1                    !Changed 17.nov 2020 from il=INT(Egami+0.5) -> il=INT(Egami)
         yl=(ih-Egami)*A
         yh=(Egami-il)*A
+        if((yl.lt.0.).or.(yh.lt.0.))write(6,*)"Warning",Egami,il,ih,yl,yh
         IF(il.GE.0.AND.il.LE.MaxEgam) Ffu(il)=Ffu(il)+yl
         IF(ih.GE.0.AND.ih.LE.MaxEgam) Ffu(ih)=Ffu(ih)+yh
         ymax=AMAX1(yl,yh)
@@ -2699,10 +2700,12 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           IF(C.LT.0.)C=0.
           IF(D.LT.0.)D=0.
 
-          il=INT(SEi+0.5)
+          il=INT(SEi)       !Changed 17.nov 2020 from il=INT(SEi+0.5) -> il=INT(SEi)
           ih=il+1
           yl=(ih-SEi)*B
           yh=(SEi-il)*B
+          if((yl.lt.0.).or.(yh.lt.0.))write(6,*)"Warning",SEi,il,ih,yl,yh
+
           IF(il.GE.0.AND.il.LE.MaxEgam) Fse(il)=Fse(il)+yl
           IF(ih.GE.0.AND.ih.LE.MaxEgam) Fse(ih)=Fse(ih)+yh
           ymax=AMAX1(yl,yh)
@@ -2715,13 +2718,14 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           lim=MAX0(INT((6.*(Fwhm1(il)*FWHM/100.))*FLOAT(il)+0.5) , 1)
           m1=MAX0(il-lim,MinEgam)
           m2=MIN0(ih+lim,MaxEgam)
-          factor=1.1 !Assuming single escape peak 10% larger FWHM than full energy peak
+          factor=1.105  !Assuming single escape peak 10% larger FWHM than full energy peak
           CALL GaussSmoothing(Fse,Gse,m1,m2,factor,w0) !smoothing s.esc. peak
 
-          il=INT(DEi+0.5)
+          il=INT(DEi)     !Changed 17.nov 2020 from il=INT(DEi+0.5) -> il=INT(DEi)
           ih=il+1
           yl=(ih-DEi)*C
           yh=(DEi-il)*C
+          if((yl.lt.0.).or.(yh.lt.0.))write(6,*)"Warning",DEi,il,ih,yl,yh
           IF(il.GE.0.AND.il.LE.MaxEgam) Fde(il)=Fde(il)+yl
           IF(ih.GE.0.AND.ih.LE.MaxEgam) Fde(ih)=Fde(ih)+yh
           ymax=AMAX1(yl,yh)
@@ -2734,13 +2738,14 @@ C Taking care of the limiting case around 2*mc2=1022 keV
           lim=MAX0(INT((6.*(Fwhm1(il)*FWHM/100.))*FLOAT(il)+0.5) , 1)
           m1=MAX0(il-lim,MinEgam)
           m2=MIN0(ih+lim,MaxEgam)
-          factor=1.3 !Assuming double escape peak 20% larger FWHM than full energy peak
+          factor=1.105 !Assuming double escape peak 20% larger FWHM than full energy peak
           CALL GaussSmoothing(Fde,Gde,m1,m2,factor,w0) !smoothing d.esc. peak
 
-          il=INT(ANi+0.5)
+          il=INT(ANi)     !Changed 17.nov 2020 from il=INT(ANi+0.5) -> il=INT(ANi)
           ih=il+1
           yl=(ih-ANi)*D
           yh=(ANi-il)*D
+          if((yl.lt.0.).or.(yh.lt.0.))write(6,*)"Warning",ANi,il,ih,yl,yh
           IF(il.GE.0.AND.il.LE.MaxEgam) Fan(il)=Fan(il)+yl
           IF(ih.GE.0.AND.ih.LE.MaxEgam) Fan(ih)=Fan(ih)+yh
           ymax=AMAX1(yl,yh)
@@ -2769,6 +2774,10 @@ C We renormalize so that matrix R(i,j) have 1*RDIM counts
         ENDDO
  999    CONTINUE
       ENDDO
+
+
+
+
 
 C Finding parameters as function of full energy
 C Writing out to file: respxout.dat
