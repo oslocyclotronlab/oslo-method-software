@@ -65,10 +65,10 @@ C --  SIRIUS
       CHARACTER*2 ICMNDS(90),ICMND
       DATA ICMNDS/
      +    'FT','LP','BI','  ','FX','FR','MA','  ','  ','DS',
-     +    'DX','DY','DZ','SC','CR','UD','DF','CL','HE','PO',
-     +    'WP','CE','IC','CD','SU','SE','CT','OM','EX','RP',
-     +    'FI','TX','RA','  ','RW','CC','AP','DP','HC','PF',
-     +    'SD','OD','OV','OS','NF','LS','DM','RF','  ','  ',
+     +    'DX','DY','DZ','SC','CR','  ','DF','CL','HE','PO',
+     +    'WP','CE','IC','CD','SU','  ','CT','OM','EX','RP',
+     +    'FI','TX','RA','  ','RW','CC','AP','DP','  ','PF',
+     +    '  ','  ','OV','OS','NF','LS','DM','RF','  ','  ',
      +    'RY','UY','FY','GY','  ','  ','ME','  ','  ','ST',
      +    'RE','WR','AR','OL','UC','PC','SM','CO','PM','PA',
      +    'FN','RN','SH','RM','UN','FO','GR','XY','NO','CU',
@@ -125,10 +125,10 @@ C Command cannot be recognized
 
 
 C       FT   LP   BI        FX   FR   MA             DS
-C       DX   DY   DZ   SC   CR   UD   DF   CL   HE   PO
-C       WP   CE   IC   CD   SU   SE   CT   OM   EX   RP
-C       FI   TX   RA        RW   CC   AP   DP   HC   PF
-C       SD   OD   OV   OS   NF   LS   DM   RF   
+C       DX   DY   DZ   SC   CR        DF   CL   HE   PO
+C       WP   CE   IC   CD   SU        CT   OM   EX   RP
+C       FI   TX   RA        RW   CC   AP   DP        PF
+C                 OV   OS   NF   LS   DM   RF
 C       RY   UY   FY   GY             ME             ST
 C       RE   WR   AR   OL   UC   PC   SM   CO   PM   PA      
 C       FN   RN   SH   RM   UN   FO   GR   XY   NO   CU
@@ -144,10 +144,10 @@ C Decode integer input string where required
 C Branch to execute mama command
  90   GO TO (
      +  100,  200,  300, 5900,  600,  600,  700, 5900, 5900, 1000,
-     + 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000,
-     + 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000,
-     + 3100, 3200, 3300, 5900, 3500, 3600, 3700, 3800, 3900, 4000,
-     + 4100, 4200,   95, 4400, 4500, 4600, 4700, 4800, 5900, 5900,
+     + 1100, 1200, 1300, 1400, 1500, 5900, 1700, 1800, 1900, 2000,
+     + 2100, 2200, 2300, 2400, 2500, 5900, 2700, 2800, 2900, 3000,
+     + 3100, 3200, 3300, 5900, 3500, 3600, 3700, 3800, 5900, 4000,
+     + 5900, 5900,   95, 4400, 4500, 4600, 4700, 4800, 5900, 5900,
      + 8361, 8381, 8401, 8421, 5900, 5900, 1900, 5900, 5900, 6000,
      + 8100, 8120, 8140,   95, 8180, 8200, 8220, 8240, 8260, 8280,
      + 8300, 8320, 8340, 8360, 8380, 8400, 8420, 8440, 8460, 8480,
@@ -308,32 +308,6 @@ C Call or dislay cursor (CR)
       ENDIF
       GO TO 30
 
-C UpDate SD or OD spectra (UD)
- 1600 WRITE(6,*) 'To terminate the update window, CLOSE it with the mouse.'
-      OPEN(UNIT=7,FILE='updateinfo.dat',err=30)
-      write(7,*)IYAXIS,LDX,HDX,LDY,HDY,LDZ,HDZ,LOCH,HICH,LOCNT,HICNT
-      write(7,*)XDIM,YDIM,MAXCH
-      write(7,*)I3,iRC,m1,m2,Idistype,OLlow,OLhigh,OLlocnt,OLhicnt
-      write(7,*)(Limit(i),i=0,19)
-      write(7,*)(COLORMAP(i),i=1,20)
-      write(7,*)Istatus,ITYPE,IDEST,iCE,itext
-      write(7,*)cal
-      write(7,1)UNITx,UNITy
-      write(7,2)fname(1,1)
-      write(7,2)fname(2,1)
-      write(7,2)fname(1,2)
-      write(7,2)fname(2,2)
-      write(7,3)comm(1,1)
-      write(7,3)comm(2,1)
-      write(7,3)comm(1,2)
-      write(7,3)comm(2,2)
- 1    FORMAT(2A3)
- 2    FORMAT(A8)
- 3    FORMAT(A60)
-      CLOSE(7)
-      status=system('mama_update &')
-	  
-      GO TO 30
 
 C Display fit (DF)
  1700 IF (.NOT.READY) THEN
@@ -414,9 +388,6 @@ C Sum counts using cursor (SU)
       CALL SUMCTS(K,IDATA,IN)
       GO TO 30
 
-C Set Environment (SE)
- 2600 CALL ENVIRONMENT
-      GO TO 30
 
 C Set CounTs using cursor (CT)
  2700 IF (.NOT.DISP) THEN
@@ -576,58 +547,10 @@ C Delete peak from fit (DP)
       CALL ADDDELPK(MODE,IDATA,READY)
       GO TO 30
 
-C Hardcopy of graphics screen, using snapshot-tool (HC)
- 3900 status=system('snapshot &')
-      GO TO 30
 
 C Set up peak find on spectrum display (PF)
  4000 CALL PEAKFIND
       GO TO 30
-
-
-C -------------------------------------------------------------------
-C     S I R I U S   E X T E N S I O N S*
-C -------------------------------------------------------------------
-
-C     Display spectra in shared memory from SIRIUS data acquistion system
-C     Display offline spectra (OD)
-C     Display online spectra  (SD)
- 4100 continue
-
-
-      call sirius_spectra( TYPE )
-      if(TYPE.GT.0)then
-        call ERASE
-        IDEST=1
-      endif
-      call CLEANUP
-C --  Display spectrum
-      if ( TYPE .EQ. 2) then
-        call DSPMA( IDATA, IN, IN2) 
-      endif
-      if( TYPE .EQ. 1) then
-        call DSPSP( IDATA, IN, IN2, *999)
-      endif
-      go to 30
-
-C     Display spectra in shared memory from OFFLINE off-line sorting system
- 4200 continue
-      call offline_spectra( TYPE )
-      if(TYPE.GT.0)then
-        call ERASE
-        IDEST=1
-      endif
-      call CLEANUP
-C --  Display spectrum
-      if ( TYPE .EQ. 2) then
-        call DSPMA( IDATA, IN, IN2) 
-      endif
-      if( TYPE .EQ. 1) then
-        call DSPSP( IDATA, IN, IN2, *999)
-      endif
-      go to 30
-C -------------------------------------------------------------------
-
 
 C Overlay spectrum (OS)
  4400 iColSpecOld=COLORMAP(1)
