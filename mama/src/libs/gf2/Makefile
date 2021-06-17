@@ -28,7 +28,6 @@ F_SRCS = addcomment.f \
        dspma.f \
        dspmkr.f \
        dspsp.f \
-       environment.f \
        energy.f \
        eval.f \
        ffin.f \
@@ -65,14 +64,15 @@ F_SRCS = addcomment.f \
        trax.f \
        typeit.f \
        lineup.f \
-       attshared2mama.f\
        removepeak.f\
        uncorr.f
 # not in OBJS of original Makefile: readsp.f
 
-C_SRCS = grabchar.c \
-       attspec2mama.c \
-       offspec2mama.c
+C_SRCS = grabchar.c
+
+#C_SRCS = grabchar.c \
+#       attspec2mama.c \
+#       offspec2mama.c
 
 F_OBJS = $(F_SRCS:%.f=%.o)
 C_OBJS = $(C_SRCS:%.c=%.o)
