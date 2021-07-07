@@ -332,7 +332,7 @@ int main()
     /* ********************************************************** */
     printf("\nYou need to give excitation energy and spin cutoff parameter at two points:");
     printf("\nOften Ex = 0.5 MeV and Ex = Sn would be appropriate");
-    printf("\nAt Ex = 0.5 MeV you may look into ToI for the spin distribution.");
+    printf("\nAt Ex = 0.5 MeV you may look into NuDat 2 for the spin distribution.");
     printf("\nAt Ex = Sn you could use the RMI estimate calculated with robin.c (E&B2006).");
     printf("\nA reasonable relation is sig**2 = Theta x Temp. with Theta as function of Ex.");
 
