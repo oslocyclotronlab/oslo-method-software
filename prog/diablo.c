@@ -352,7 +352,7 @@ int main()
     sig_2_e2=sige2*sige2;
     b2 = (sig_2_e2-sig_2_e1)/(exe2-exe1);
     b1 = sig_2_e1 - b2*exe1;
-    printf("Constants for sig**2 = A + B * Ex: A = %f and B = %f MeV**(-1)\n",b1,b2);
+    printf("Constants for sig**2 = A + B * Ex: A = %f and B = %f keV**(-1)\n",b1,b2);
     
     printf("Do you have half (0) or integer (1) spin <%1d>:",oddeven);
     fgets_ignore(line,sizeof(line),stdin);
