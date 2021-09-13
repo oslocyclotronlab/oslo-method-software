@@ -187,6 +187,14 @@ C********************
           Fi(i)=0.
           Ff(i)=0.
         ENDDO
+        IF(X_dim.GT.512)THEN
+           X_dim=512
+           WRITE(6,*)'WARNING, more than 512 channels on x-axis'
+        ENDIF
+        IF(Y_dim.GT.512)THEN
+           Y_dim=512
+           WRITE(6,*)'WARNING, more than 512 channels on y-axis'
+        ENDIF
         DO j=0,Y_dim-1
           DO i=0,X_dim-1
             IF(rmatrix(i,j).LT.eps) rmatrix(i,j) = eps
@@ -234,6 +242,14 @@ C********************
           Fi(i)=0.
           Ff(i)=0.
         ENDDO
+        IF(X_dim.GT.512)THEN
+           X_dim=512
+           WRITE(6,*)'WARNING, more than 512 channels on x-axis'
+        ENDIF
+        IF(Y_dim.GT.512)THEN
+           Y_dim=512
+           WRITE(6,*)'WARNING, more than 512 channels on y-axis'
+        ENDIF        
         DO j=0,Y_dim-1
           DO i=0,X_dim-1
             IF(rmatrix(i,j).LT.eps) rmatrix(i,j) = eps
@@ -281,6 +297,14 @@ C********************
           Fi(i)=0.
           Ff(i)=0.
         ENDDO
+        IF(X_dim.GT.512)THEN
+           X_dim=512
+           WRITE(6,*)'WARNING, more than 512 channels on x-axis'
+        ENDIF
+        IF(Y_dim.GT.512)THEN
+           Y_dim=512
+           WRITE(6,*)'WARNING, more than 512 channels on y-axis'
+        ENDIF        
         DO j=0,Y_dim-1
           DO i=0,X_dim-1
             IF(rmatrix(i,j).LT.eps) rmatrix(i,j) = eps
@@ -1085,6 +1109,7 @@ C No file is read yet
 C Open file
       device=20
       OPEN(device,FILE=filex,ACCESS='SEQUENTIAL',status='old',ERR=901)
+
 
 C Read all 10 lines of the file header
       DO i=1,10
