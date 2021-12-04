@@ -3,9 +3,11 @@ C folding.f program, but tailored for unfolding the y-axis,
 C which is the excitation energy in the (Ex,Eg) matrix of
 C the Oslo method. All routines, commands and COMMON end
 C with y. In particular, the foldingy.f is made for
-C uncomplete summing and beta absorption of total absorbtion
+C uncomplete summing and beta absorption of total absorption
 C spectrometers (TAS) like SuN (MSU).
 C January 2017/Artemis Spyrou and Magne Guttormsen
+C November 2021 implemented beta+ decay/Mansi Saxena, Ohio
+C ver.1dec2021,
 
       FUNCTION Flucy(F,ChiLow,ChiHigh,a1)
 C Calculates fluctuations in a spectrum F between ChiLow and ChiHigh
@@ -15,8 +17,8 @@ C by (F(i)-Faverage)/Faverage. The average is taken over 5 cannels, and so on.
       iFW = 5
       Fluc = 0.0
       nChannels = 0
-      i1=ChiLow
-      i2=ChiLow + iFW
+      i1 = ChiLow
+      i2 = ChiLow + iFW
 
       DO WHILE(i2.LE.ChiHigh)
         Sum=0
@@ -468,12 +470,15 @@ C Updating comment in the heading of spectrum file
       REAL EW2(18),FW2(18)
       CHARACTER ENA2(18)*5, MNA2(18)*2, QNA2(18)*2
 
+      REAL ETAB3(18),FTAB3(18),ER3(18),FE3(18),MUE3(18),QVA3(18)
+      REAL EW3(18),FW3(18)
+      CHARACTER ENA3(18)*5, MNA3(18)*2, QNA3(18)*2
+
 C*****************************************************************
-C********************* SuN_70Ni_2016 *****************************
+C*************** BEGIN SuN_70Ni_2016 *****************************
 C*****************************************************************
 
 C This block of data represents energies (ETAB) and the total efficience (FTAB)
-C at that energy for 5"x5" NaI. Normalized to 1 at 1.33 MeV     
       DATA  ETAB1   /
      +   1000.,  2000.,  3000.,  4000.,   5000.,   6000.,
      +   7000.,  8000.,  9000., 10000.,  11000.,  12000.,
@@ -543,14 +548,15 @@ C summed gamma (Ex) resolution. Normalized to 1. for Ex = 1 MeV
      +   1.000,  0.707,  0.626,  0.556,   0.527,   0.494,
      +   0.463,  0.424,  0.402,  0.370,   0.349,   0.346,
      +      0.,     0.,     0.,     0.,      0.,      0./
+C*****************************************************************
+C***************   END SuN_70Ni_2016 *****************************
+C*****************************************************************
 
 
 C*****************************************************************
-C****************** SuN_variable_Qvalue_2018 *********************
+C**********  BEGIN SuN_variable_Qvalue_2018 beta -  **************
 C*****************************************************************
-
 C This block of data represents energies (ETAB) and the total efficience (FTAB)
-C at that energy for 5"x5" NaI. Normalized to 1 at 1.33 MeV
       DATA  ETAB2   /
      +   1000.,  2000.,  3000.,  4000.,   5000.,   6000.,
      +   7000.,  8000.,  9000., 10000.,  11000.,  12000.,
@@ -607,9 +613,72 @@ C summed gamma (Ex) resolution. Normalized to 1. for Ex = 1 MeV
      +   1.000,  0.707,  0.626,  0.556,   0.527,   0.494,
      +   0.463,  0.424,  0.402,  0.370,   0.349,   0.346,
      +      0.,     0.,     0.,     0.,      0.,      0./
+C*****************************************************************
+C**********    END SuN_variable_Qvalue_2018 beta-  ***************
+C*****************************************************************
 
 C*****************************************************************
+C**********  BEGIN SuN_variable_Qvalue_2021 beta+  ***************
 C*****************************************************************
+C This block of data represents energies (ETAB) and the total efficience (FTAB)
+      DATA  ETAB3   /
+     +   1000.,  2000.,  3000.,  4000.,   5000.,   6000.,
+     +   7000.,  8000.,  9000., 10000.,  11000.,  12000.,
+     +      0.,     0.,     0.,     0.,      0.,      0./
+      DATA  FTAB3   /
+     +      1.,     1.,     1.,     1.,      1.,      1.,
+     +      1.,     1.,     1.,     1.,      1.,      1.,
+     +      0.,     0.,     0.,     0.,      0.,      0./
+
+C This bolck of data represents Ex energies (ER) for resp. func.
+C The intensities (counts) of full-energy (FE) peak are read from file.
+C The counts are converted into probabilities
+C pf in the RSPDetectory routine.
+C Then there are sets for multiplicities m=1,2,3,4,5
+C And then there are sets for Q-values 5, 6, ...12 MeV
+C Two last 3 blocks are used to create names for the response function files
+      DATA  ER3   /
+     +   1000.,  2000.,  3000.,  4000.,   5000.,   6000.,
+     +   7000.,  8000.,  9000., 10000.,  11000.,  12000.,
+     +      0.,     0.,     0.,     0.,      0.,      0./
+
+      DATA MUE3/
+     +      1.,  2.,  3.,  4.,  5.,  0.,
+     +      0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+     +      0 ,  0 ,  0 ,  0 ,  0 ,  0 /
+
+      DATA QVA3/
+     +      5000.,  6000.,  7000.,  8000.,  9000.,  10000.,
+     +     11000., 12000.,     0 ,     0 ,     0 ,      0 ,
+     +         0 ,     0 ,     0 ,     0 ,     0 ,      0 /
+
+      DATA ENA3/
+     +     '01', '02', '03', '04', '05', '06',
+     +     '07', '08', '09', '10', '11', '12',
+     +     '00', '00', '00', '00', '00', '00'/
+
+      DATA MNA3/
+     +     '01', '02', '03', '04', '05', '00',
+     +     '00', '00', '00', '00', '00', '00',
+     +     '00', '00', '00', '00', '00', '00'/
+
+      DATA QNA3/
+     +     '05', '06', '07', '08', '09', '10',
+     +     '11', '12', '00', '00', '00', '00',
+     +     '00', '00', '00', '00', '00', '00'/
+
+C This block of data represents energies (EW) and half-widths (FW) of the
+C summed gamma (Ex) resolution. Normalized to 1. for Ex = 1 MeV
+      DATA  EW3   /
+     +   1000.,  2000.,  3000.,  4000.,   5000.,   6000.,
+     +   7000.,  8000.,  9000., 10000.,  11000.,  12000.,
+     +      0.,     0.,     0.,     0.,      0.,      0./
+      DATA  FW3   /
+     +   1.000,  0.707,  0.626,  0.556,   0.527,   0.494,
+     +   0.463,  0.424,  0.402,  0.370,   0.349,   0.346,
+     +      0.,     0.,     0.,     0.,      0.,      0./
+C*****************************************************************
+C**********  END   SuN_variable_Qvalue_2021 beta+  ***************
 C*****************************************************************
 
 C*******************DEFAULTS******************
@@ -626,13 +695,14 @@ C*******************DEFAULTS******************
       ExMin = -300.                       ! Lower Ex limit = -300 keV
       LOW   = INT(((ExMin-a0)/a1)+0.5)
       IF(LOW.LT.0.OR.LOW.GE.HIGH)LOW = 0
-
+      isRead = 0
       OPEN(23,FILE='input.uny',STATUS='old',ERR=77)
       READ(23,*,END=66,ERR=66)IRSP,Qvalue,facFWHM,FWHM
       READ(23,*,END=66,ERR=66)ix1,iy1,ix2,iy2
       READ(23,*,END=66,ERR=66)(Mex(i),i=1,18)
       READ(23,*,END=66,ERR=66)LOW,HIGH
       READ(23,*,END=66,ERR=66)Iter,ChiHigh
+      isRead = 1
       GO TO 77
  66   WRITE(6,*)'Warning: Something wrong with your input.uny file'
  77   CLOSE(23)
@@ -660,6 +730,7 @@ C ****Begin, Fix for first run****
         mx_old = -1000.
         DO i=1,18                 ! Remember max 18 elements in vectors
           ex = ER2(i)/1000.
+          IF(IRSP.EQ.3)ex = ER3(i)/1000.
           mx = c0 + c1*ex + c2*ex*ex
           IF(mx.LE.mx_old)mx=mx_old + 0.1
           mx_old = mx
@@ -710,23 +781,29 @@ C Reading dimension and energy calibration
       ENDIF
 
       WRITE(6,*)' '
-      IRSP=2
+c      IRSP=2
       WRITE(6,*)'List of response functions:'
       WRITE(6,*)'(1) SuN_70Ni_2016 (Q-value = 12.3 MeV is hardwired)'
-      WRITE(6,*)'(2) SuN_variable_Qvalue_2018 (you are asked to give reaction Q-value)'
-      WRITE(6,*)'(3) For future expansion...'
+      WRITE(6,*)'(2) SuN_variable_Qvalue, beta- decay,  MSU 2018'
+      WRITE(6,*)'(3) SuN_variable_Qvalue, beta+ decay, Ohio 2021'
+      WRITE(6,*)'(4) For future expansion...'
 
       WRITE(6,2)IRSP
    2  FORMAT(/'Choose your response function <',I1,'>:',$)
       CALL READI(5,IRSP)
       IF(Istatus.NE.0)RETURN
-      IF(IRSP.GT.2)THEN
+      IF(IRSP.GT.3)THEN
         write(6,*)'Response function not yet implemented, take a cup of tea and wait...'
         RETURN
       ENDIF
 
 C Copy all vectors used for a specific response function (IRSP) into the
 C general vectors to be used from now on in the subroutine RSPDetectory(IRSP)
+
+C***********************************
+C**       BEGIN IRSP=1  beta -    **
+C**         Fixed Q value         **
+C***********************************
       IF(IRSP.EQ.1)THEN
         IW  = 12
         ITAB= 12
@@ -755,10 +832,15 @@ C general vectors to be used from now on in the subroutine RSPDetectory(IRSP)
           MUE(i)=MUE1(i)
         ENDDO
       ENDIF
+C***********************************
+C**       END IRSP=1  beta -      **
+C**         Fixed Q value         **
+C***********************************
 
 C***********************************
+C**       BEGIN IRSP=2  beta -    **
+C***********************************
       IF(IRSP.EQ.2)THEN
-
         IW  = 12 !Remember: none of these 5 numbers should be >18 (array dimensions)
         ITAB= 12
         IR  = 12
@@ -772,10 +854,10 @@ C***********************************
           ENDDO
         ENDDO
 
-      WRITE(6,12)Qvalue
-  12  FORMAT( 'Give Q-value of beta decay (keV) <',F7.0,'>:',$)
-      CALL READF(5,Qvalue)
-      IF(Qvalue.LT.20.OR.Qvalue.GT.20000) write(6,*) 'Warning: OMG, what a bizarr Q-value!!!'
+        WRITE(6,12)Qvalue
+  12    FORMAT( 'Give Q-value of beta- decay (keV) <',F7.0,'>:',$)
+        CALL READF(5,Qvalue)
+        IF(Qvalue.LT.20.OR.Qvalue.GT.20000) write(6,*) 'Warning: OMG, what a bizarr Q-value!!!'
 
 C Reading counts in the FE peak as function of Q-value and multiplicity M into a
 C matrix called Cnts(jQ,jM,jE). The table is created from GEANT response functions
@@ -828,6 +910,7 @@ C Finding FE counts above and below the Qvalue and interpolate (extrapolate)
         ENDIF
         wQ1 = (QVA(Iq2)-Qvalue)/(QVA(Iq2)-QVA(Iq1))          ! the weight FE of Q1 spectrum
         wQ2 = 1. - wQ1                                       ! the weight FE of Q2 spectrum
+
         DO i=1,IR
           ER(i)  = ER2(i)
           ENA(i) = ENA2(i)
@@ -839,6 +922,99 @@ C Finding FE counts above and below the Qvalue and interpolate (extrapolate)
 C      if(i.eq.5)write(6,*)'c1,c2,iq1,iq2,Qvalue,F',Cnts(Iq1,3,i),Cnts(Iq2,3,i),iq1,iq2,Qvalue,FE(i,3)
         ENDDO
       ENDIF
+C***********************************
+C**        END IRSP=2  beta -     **
+C***********************************
+
+C***********************************
+C**       BEGIN IRSP=3  beta +    **
+C***********************************
+      IF(IRSP.EQ.3)THEN
+        IW  = 12 !Remember: none of these 5 numbers should be >18 (array dimensions)
+        ITAB= 12
+        IR  = 12
+        IM  =  5
+        IQ  =  8
+        DO jQ = 1,18   !Zeroing matrix
+          DO jM = 1,18
+            DO jE = 1,18
+              Cnts(jQ,jM,jE) = 0.
+            ENDDO
+          ENDDO
+        ENDDO
+
+        WRITE(6,13)Qvalue
+  13    FORMAT( 'Give Q-value of beta+ decay (keV) <',F7.0,'>:',$)
+        CALL READF(5,Qvalue)
+        IF(Qvalue.LT.20.OR.Qvalue.GT.20000) write(6,*) 'Warning: OMG, what a bizarr Q-value!!!'
+
+C Reading counts in the FE peak as function of Q-value and multiplicity M into a
+C matrix called Cnts(jQ,jM,jE). The table is created from GEANT response functions
+C via a root script called read_response_bOslo.pp (author Ann-Cecilie Larsen 2018)
+        INF = 21
+        call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/SuN_Exresp_sumpeak_parameters.txt",filnam)
+        OPEN(INF,FILE=FILNAM,ACCESS='SEQUENTIAL',ERR=801)
+        DO i = 1,IR*IM*IQ        ! too many, but terminate when Q, M and E are maximum
+          READ(INF,*,ERR=801)i1,i2,i3,dum,dum,dum,counts
+          jQ=i1-4
+          jM=i2
+          jE=i3
+          Cnts(jQ,jM,jE)=counts
+          IF(jQ.EQ.8.AND.jM.EQ.5.AND.jE.EQ.12) GOTO 801
+        ENDDO
+801     CONTINUE
+        CLOSE(INF)
+
+        DO jQ = 1,IQ
+          DO jM = 1,IM
+c            write(6,*)jQ,jM,(Cnts(jQ,jM,jE),jE=1,3)
+          ENDDO
+        ENDDO
+
+        DO i=1,IW
+          EW(i)=EW3(i)
+          FW(i)=FW3(i)
+        ENDDO
+        DO i=1,ITAB
+          ETAB(i)=ETAB3(i)
+          FTAB(i)=FTAB3(i)
+        ENDDO
+        DO i=1,IM
+          MNA(i)=MNA3(i)
+          MUE(i)=MUE3(i)
+        ENDDO
+        DO i=1,IQ
+          QNA(i)=QNA3(i)
+          QVA(i)=QVA3(i)
+        ENDDO
+C Finding FE counts above and below the Qvalue and interpolate (extrapolate)
+        Iq1=1
+        DO I=1,IQ
+          IF(Qvalue.GT.QVA(I))Iq1=I
+        ENDDO
+        Iq2=Iq1+1
+        IF(Iq1.EQ.IQ) THEN
+          Iq1=IQ-1
+          Iq2=IQ
+        ENDIF
+        wQ1 = (QVA(Iq2)-Qvalue)/(QVA(Iq2)-QVA(Iq1))          ! the weight FE of Q1 spectrum
+        wQ2 = 1. - wQ1                                       ! the weight FE of Q2 spectrum
+c               write(6,*)Iq1,IQ,Iq2,QVA(Iq1),Qvalue,QVA(Iq2)
+
+        DO i=1,IR
+          ER(i)  = ER3(i)
+          ENA(i) = ENA3(i)
+          FE(i,1)= Cnts(Iq1,1,i)*wQ1 + Cnts(Iq2,1,i)*wQ2  ! we have 5 multiplicities
+          FE(i,2)= Cnts(Iq1,2,i)*wQ1 + Cnts(Iq2,2,i)*wQ2
+          FE(i,3)= Cnts(Iq1,3,i)*wQ1 + Cnts(Iq2,3,i)*wQ2
+          FE(i,4)= Cnts(Iq1,4,i)*wQ1 + Cnts(Iq2,4,i)*wQ2
+          FE(i,5)= Cnts(Iq1,5,i)*wQ1 + Cnts(Iq2,5,i)*wQ2
+C      if(i.eq.5)write(6,*)'c1,c2,iq1,iq2,Qvalue,F',Cnts(Iq1,3,i),Cnts(Iq2,3,i),iq1,iq2,Qvalue,FE(i,3)
+        ENDDO
+      ENDIF
+C***********************************
+C**        END IRSP=3  beta +     **
+C***********************************
 
 C The response function along Ex (y-axis) depends on the gamma multiplicity.
 C The user has to type in this multiplicity.
@@ -964,7 +1140,7 @@ C        FW     Half-width (FWHM) at energy EW (normalized to 1 for Ex = 1 MeV)
       DIMENSION Calib(6)
       INTEGER dim
       DIMENSION Fe1m1(0:4095),Fe1m2(0:4095),Fe2m1(0:4095),Fe2m2(0:4095) !to be used for IRSP=1 modus
-      DIMENSION Fe1m1q1(0:4095),Fe1m1q2(0:4095),Fe1m2q1(0:4095),Fe1m2q2(0:4095) !to be used for IRSP=2 modus
+      DIMENSION Fe1m1q1(0:4095),Fe1m1q2(0:4095),Fe1m2q1(0:4095),Fe1m2q2(0:4095) !to be used for IRSP=2 Nd 3 modus
       DIMENSION Fe2m1q1(0:4095),Fe2m1q2(0:4095),Fe2m2q1(0:4095),Fe2m2q2(0:4095)
       DIMENSION Fs(0:4095),F1(0:4095),F2(0:4095),Flow(0:4095),Fhigh(0:4095)
       DIMENSION F(0:2047),G(0:2047), Spec(0:8191)
@@ -985,6 +1161,14 @@ C Response matrix R(i,j) has maximum dimensions 2048x2048
         b0  =5.0
         b1  =10.
         FWHM=6.75
+      ENDIF
+
+      IF(IRSP.EQ.3)THEN
+        b0  =5.0
+        b1  =10.
+        FWHM=6.75
+        twomc2 = 2.*510.998950             !For use when beta+ decay
+        J2mc2 = INT(((twomc2 + 200. - a0)/a1)+0.5)
       ENDIF
 
       ical=6
@@ -1050,9 +1234,6 @@ CCC  Fasten seat belts   CCC
 CCC                      CCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-c         write(6,*) 'iEx0,  J,        ex, ifep1, ifep2, j+iex,          we1,we2'
-
-
       DO J=0,RDIM-1
 
         IT=(J/50)*50
@@ -1110,12 +1291,31 @@ C The Ie1L and Ie2L should be used for low Iq1
             Ie1L=Ie2-1
           ENDIF
         ENDIF
-C         write(6,*)Iq1,Iq2,Ie1,Ie2,Ie2L,QVA(Iq1),QVA(Iq2),ER(Ie2),ER(Ie2L)
+c         write(6,*)Ie1,J,Ie2,ER(Ie1),ex,ER(Ie2)
 
-        ifep1 = INT(((ER(Ie1)-a0)/a1)+0.5)                                 ! the ch for Ex1
-        ifep2 = INT(((ER(Ie2)-a0)/a1)+0.5)                                 ! the ch for Ex2
-        wE1    =  (FLOAT(ifep2)-FLOAT(J))/(FLOAT(ifep2)-FLOAT(ifep1)) ! the weight for F1 spectrum
-        wE2    =  1. - WE1                                                 ! the weight for F2 spectrum
+C         write(6,*)Iq1,Iq2,Ie1,Ie2,Ie2L,QVA(Iq1),QVA(Iq2),ER(Ie2),ER(Ie2L)
+        IF(IRSP.NE.3)THEN
+          ifep1 = INT(((ER(Ie1)-a0)/a1)+0.5)                                 ! the ch for Ex1
+          ifep2 = INT(((ER(Ie2)-a0)/a1)+0.5)                                 ! the ch for Ex2
+c          wE1   =  (FLOAT(ifep2)-FLOAT(J))/(FLOAT(ifep2)-FLOAT(ifep1))      ! the weight for F1 spectrum
+c          wE2   =  1. - WE1                                                 ! the weight for F2 spectrum
+           wE2 = (Ex-ER(Ie1))/(ER(Ie2)-ER(Ie1))
+           wE1 = 1. - wE2
+        ENDIF
+        IF(IRSP.EQ.3)THEN
+          ifep1 = INT(((ER(Ie1)+twomc2-a0)/a1)+0.5)                                 ! the ch for Ex1
+          ifep2 = INT(((ER(Ie2)+twomc2-a0)/a1)+0.5)                                 ! the ch for Ex2
+
+
+          wE2 = (Ex-ER(Ie1))/(ER(Ie2)-ER(Ie1))
+          wE1 = 1. - wE2
+        ENDIF
+
+        IF(wE1.LT.0.OR.wE1.GT.1.)THEN
+c              write(6,*) J,ifep2,wE1
+c          wE1=0.
+c          wE2=0.
+        ENDIF
 
 C Finding the multiplicity (mx) at this excitation energy (ex) based on interpolation between IR points
         mx = Mex(Ie1)+(Mex(Ie2)-Mex(Ie1))*(Ex-ER(Ie1))/(ER(Ie2)-ER(Ie1))
@@ -1139,6 +1339,9 @@ C E1M1Q1, E1M1Q2, E1M2Q1, E1M2Q2,E2M1Q1, E2M1Q2, E2M2Q1, E2M2Q2
 C Observed November 5 2019, that the responsefunctions for SuN have a large
 C number of counts in ch 0. Now removed by statement Spec(0) = 0.
 
+C***********************************
+C**     BEGIN IRSP=1   beta -     **
+C***********************************
         IF(IRSP.EQ.1)THEN
           INP=20
 C Reading the two multiplicity spectra for low Ex
@@ -1201,11 +1404,14 @@ C Making average spectrum for high Ex
             Fhigh(i)=wM1*Fe2m1(i)+wM2*Fe2m2(i)
           ENDDO
         ENDIF
+C***********************************
+C**        END IRSP=1  beta -     **
+C***********************************
 
 
-C////////////////////////////////////
-
-
+C***********************************
+C**      BEGIN IRSP=2  beta -     **
+C***********************************
         IF(IRSP.EQ.2)THEN
           INP=20
 
@@ -1340,6 +1546,151 @@ C Making average spectrum for high Ex
             Fhigh(i)=wM1*Fe2m1(i)+wM2*Fe2m2(i)
           ENDDO
         ENDIF
+C***********************************
+C**       END IRSP=2   beta -     **
+C***********************************
+
+C***********************************
+C**     BEGIN  IRSP=3  beta +     **
+C***********************************
+        IF(IRSP.EQ.3)THEN
+          INP=20
+
+C We deal first with the low Ex
+C Reading two Q-value spectra for low M and low Ex
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie1L),filnam)
+          OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
+          DO i=0,4095
+            Spec(i) = 0.
+          ENDDO
+          dim=-1                      !Gives no header output
+          CALL norr1dim(INP,comment,dim,Spec,Calib)
+          Spec(0) = 0.
+          DO i=0,4095
+            Fe1m1q1(i)=Spec(i)
+          ENDDO
+          CLOSE(INP)
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/b"//QNA(iq2)//"_"//MNA(Im1)//"_"//ENA(Ie1),filnam)
+          OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
+          DO i=0,4095
+            Spec(i) = 0.
+          ENDDO
+          dim=-1                      !Gives no header output
+          CALL norr1dim(INP,comment,dim,Spec,Calib)
+          Spec(0) = 0.
+          DO i=0,4095
+            Fe1m1q2(i)=Spec(i)
+          ENDDO
+          CLOSE(INP)
+C Making average spectrum for low M and low Ex
+          DO i=0,4095
+             Fe1m1(i)=wQ1*Fe1m1q1(i)+wQ2*Fe1m1q2(i)
+          ENDDO
+
+C Reading two Q-value spectra for high M and low Ex
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie1L),filnam)
+          OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
+          DO i=0,4095
+            Spec(i) = 0.
+          ENDDO
+          dim=-1                      !Gives no header output
+          CALL norr1dim(INP,comment,dim,Spec,Calib)
+          Spec(0) = 0.
+          DO i=0,4095
+            Fe1m2q1(i)=Spec(i)
+          ENDDO
+          CLOSE(INP)
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/b"//QNA(iq2)//"_"//MNA(Im1)//"_"//ENA(Ie1),filnam)
+          OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
+          DO i=0,4095
+            Spec(i) = 0.
+          ENDDO
+          dim=-1                      !Gives no header output
+          CALL norr1dim(INP,comment,dim,Spec,Calib)
+          Spec(0) = 0.
+          DO i=0,4095
+            Fe1m2q2(i)=Spec(i)
+          ENDDO
+          CLOSE(INP)
+C Making average spectrum for high M and low Ex
+          DO i=0,4095
+            Fe1m2(i)=wQ1*Fe1m2q1(i)+wQ2*Fe1m2q2(i)
+          ENDDO
+C Then making average spectrum for low Ex
+          DO i=0,4095
+            Flow(i)=wM1*Fe1m1(i)+wM2*Fe1m2(i)
+          ENDDO
+
+C Reading two Q-value spectra for low M and high Ex
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/b"//QNA(iq1)//"_"//MNA(Im1)//"_"//ENA(Ie2L),filnam)
+          OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
+          DO i=0,4095
+            Spec(i) = 0.
+          ENDDO
+          dim=-1                      !Gives no header output
+          CALL norr1dim(INP,comment,dim,Spec,Calib)
+          Spec(0) = 0.
+          DO i=0,4095
+            Fe2m1q1(i)=Spec(i)
+          ENDDO
+          CLOSE(INP)
+
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/b"//QNA(iq2)//"_"//MNA(Im1)//"_"//ENA(Ie2),filnam)
+          OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
+          DO i=0,4095
+            Spec(i) = 0.
+          ENDDO
+          dim=-1                      !Gives no header output
+          CALL norr1dim(INP,comment,dim,Spec,Calib)
+          Spec(0) = 0.
+          DO i=0,4095
+            Fe2m1q2(i)=Spec(i)
+          ENDDO
+          CLOSE(INP)
+C Making average spectrum for low M and low Ex
+          DO i=0,4095
+            Fe2m1(i)=wQ1*Fe2m1q1(i)+wQ2*Fe2m1q2(i)
+          ENDDO
+
+C Reading two Q-value spectra for high M and high Ex
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/b"//QNA(iq1)//"_"//MNA(Im2)//"_"//ENA(Ie2L),filnam)
+          OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
+          DO i=0,4095
+            Spec(i) = 0.
+          ENDDO
+          dim=-1                      !Gives no header output
+          CALL norr1dim(INP,comment,dim,Spec,Calib)
+          Spec(0) = 0.
+          DO i=0,4095
+            Fe2m2q1(i)=Spec(i)
+          ENDDO
+          CLOSE(INP)
+
+          call makepath("UIO_APPLICATIONS","mama/resp/sun_ex_2021/b"//QNA(iq2)//"_"//MNA(Im2)//"_"//ENA(Ie2),filnam)
+          OPEN(INP,FILE=FILNAM,ACCESS='SEQUENTIAL',ACTION='READ',ERR=9999)
+          DO i=0,4095
+            Spec(i) = 0.
+          ENDDO
+          dim=-1                      !Gives no header output
+          CALL norr1dim(INP,comment,dim,Spec,Calib)
+          Spec(0) = 0.
+          DO i=0,4095
+            Fe2m2q2(i)=Spec(i)
+          ENDDO
+          CLOSE(INP)
+C Making average spectrum for high M and low Ex
+          DO i=0,4095
+            Fe2m2(i)=wQ1*Fe2m2q1(i)+wQ2*Fe2m2q2(i)
+          ENDDO
+C Making average spectrum for high Ex
+          DO i=0,4095
+            Fhigh(i)=wM1*Fe2m1(i)+wM2*Fe2m2(i)
+          ENDDO
+        ENDIF
+C***********************************
+C**        END IRSP=3  beta +     **
+C***********************************
+
 
 C Stretching/compressing Flow and Fhigh to fit calibration a0 and a1
         idim1=4096
@@ -1365,7 +1716,7 @@ C Total spectrum normalized to one
         SumF1 = SumF1 + H1                         ! Full energy counts added
         SumF2 = SumF2 + H2
         DO I = 0,4095
-            F1(I) = F1(I)/SumF1                    ! Normalizing energy bacground spectra
+            F1(I) = F1(I)/SumF1                    ! Normalizing energy background spectra
             F2(I) = F2(I)/SumF2
         ENDDO
         H1  = H1 /SumF1                            ! Normalizing full energy counts
@@ -1380,31 +1731,62 @@ C is mainly from ExMin = 30 keV to ExMax = Qvalue (and eventually higher)
 C Zeroing
         DO I = 0, 2047
           F(I) = 0.
+          G(I) = 0.
         ENDDO
 
+        IF(IRSP.NE.3)THEN     ! For the beta-  case
 C Interpolating from ch 0 up to ch for full-energy Ex
-        b = a0/a1
-        DO I = 0, J
-           I1 = 2047
-           I2 = 2047
-           IF(b+FLOAT(J).NE.0.)THEN
-            I1   = INT(-b + (b+FLOAT(I))*((b+FLOAT(ifep1))/(b+FLOAT(J)))+0.5)
-            I2   = INT(-b + (b+FLOAT(I))*((b+FLOAT(ifep2))/(b+FLOAT(J)))+0.5)
-            F(I) = wE1*F1(I1) + wE2*F2(I2)
-          ENDIF
-        ENDDO
-
+          b = a0/a1
+          DO I = 0, J
+             I1 = 2047
+             I2 = 2047
+             IF(b+FLOAT(J).NE.0.)THEN
+              I1   = INT(-b + (b+FLOAT(I))*((b+FLOAT(ifep1))/(b+FLOAT(J)))+0.5)
+              I2   = INT(-b + (b+FLOAT(I))*((b+FLOAT(ifep2))/(b+FLOAT(J)))+0.5)
+              F(I) = wE1*F1(I1) + wE2*F2(I2)
+            ENDIF
+          ENDDO
 C Interpolating from ch for full-energy Ex up to ExMax
-        imax  = INT(((ExMax - a0)/a1)+0.5)
-        DO I = J+1,imax
-           I1 = 2047
-           I2 = 2047
-           IF(FLOAT(imax)-FLOAT(J).NE.0.)THEN
-             I1    = INT(FLOAT(ifep1) + (FLOAT(I)-FLOAT(J))*(FLOAT(imax)-FLOAT(ifep1))/(FLOAT(imax)-FLOAT(J)) + 0.5)
-             I2    = INT(FLOAT(ifep2) + (FLOAT(I)-FLOAT(J))*(FLOAT(imax)-FLOAT(ifep2))/(FLOAT(imax)-FLOAT(J)) + 0.5)
-             F(I)  = wE1*F1(I1) + wE2*F2(I2)
-           ENDIF
-        ENDDO
+          imax  = INT(((ExMax - a0)/a1)+0.5)
+          DO I = J+1,imax
+             I1 = 2047
+             I2 = 2047
+             IF(FLOAT(imax)-FLOAT(J).NE.0.)THEN
+               I1    = INT(FLOAT(ifep1) + (FLOAT(I)-FLOAT(J))*(FLOAT(imax)-FLOAT(ifep1))/(FLOAT(imax)-FLOAT(J)) + 0.5)
+               I2    = INT(FLOAT(ifep2) + (FLOAT(I)-FLOAT(J))*(FLOAT(imax)-FLOAT(ifep2))/(FLOAT(imax)-FLOAT(J)) + 0.5)
+               F(I)  = wE1*F1(I1) + wE2*F2(I2)
+             ENDIF
+          ENDDO
+        ENDIF
+ 
+        IF(IRSP.EQ.3)THEN     ! For the beta+ case
+C Interpolating channel by channel from ch 0 up to ch for 2mc2 pluss 200 keV (so that the whole 2mc2 peak is included
+          b = a0/a1  !should be taken into account later for large a0. To be sure, check that the a0 is small, then it works
+          DO I = 0, J2mc2
+            I1   = I
+            I2   = I
+            F(I) = wE1*F1(I1) + wE2*F2(I2)
+          ENDDO
+C Interpolating from ch for 2mc2 up to ch for full-energy Ex+2mc2
+          JExpeak = INT(((Ex + twomc2 - a0)/a1)+0.5)
+          IF(JExpeak.GT.J2mc2+1)THEN
+            DO I = J2mc2+1, JExpeak
+              I1   = INT((J2mc2+1) + (I-(J2mc2+1)) * FLOAT(ifep1-(J2mc2+1))/FLOAT(JExpeak-(J2mc2+1)) +0.5)
+              I2   = INT((J2mc2+1) + (I-(J2mc2+1)) * FLOAT(ifep2-(J2mc2+1))/FLOAT(JExpeak-(J2mc2+1)) +0.5)
+              F(I) = wE1*F1(I1) + wE2*F2(I2)
+            ENDDO
+          ENDIF
+C Interpolating from ch for full-energy Ex+2mc2 up to ExMax
+          imax  = INT(((ExMax - a0)/a1)+0.5)
+          DO I = JExpeak+1,imax
+            IF(imax.GT.JExpeak+1)THEN
+              I1    = INT(ifep1 + (I-(JExpeak+1)) * (FLOAT(imax-(ifep1+1))/FLOAT(imax-(JExpeak+1))) + 0.5)
+              I2    = INT(ifep2 + (I-(JExpeak+1)) * (FLOAT(imax-(ifep2+1))/FLOAT(imax-(JExpeak+1))) + 0.5)
+              F(I)  = wE1*F1(I1) + wE2*F2(I2)
+            ENDIF
+          ENDDO
+        ENDIF
+
 
 C Interpolating to get the intensity of the full-energy peak in ch J
         H = wE1*H1 + wE2*H2  !full-energy intensity
@@ -1439,7 +1821,9 @@ C the two channels il and ih.
           Gfu(i)=0.
         ENDDO
 
-        Exi=(Ex-a0)/a1       ! real value for channel
+         IF(IRSP.NE.3) Exi = (Ex          -a0)/a1       ! For beta-
+         IF(IRSP.EQ.3) Exi = (Ex + twomc2 -a0)/a1       ! For beta+ we add 2mc2 = 2*510.998950
+
         il=Exi               ! Distributing counts on two neighbouring channels: il and ih
         ih=il+1
         yl=(ih-Exi) * H
@@ -1460,10 +1844,10 @@ C the two channels il and ih.
         m2=MIN0(ih+lim,MaxEx)
         CALL GaussSmoothingy(Ffu,Gfu,m1,m2,factor,w0) !smoothing full energy peak
 
-C We renormalize so that matrix R(i,j) have 1*RDIM counts
+C We renormalize so that matrix R(i,j) have 1*RDIM counts (integrated to unity per row)
         SumR=0.
         DO I=0,RDIM-1
-          R(I,J)=G(I)+Gfu(I)
+          R(I,J)=G(I) + Gfu(I)
           IF(R(I,J).LT.0.)R(I,J)=0
           IF(I.EQ.0)R(I,J)=0
           SumR=SumR+R(I,J)
@@ -1686,8 +2070,9 @@ C Updating comment in the heading of spectrum file
       SUBROUTINE UnFoldity(iVersion)
 C A program for unfolding detector response effects for continoues
 C spectra. Modified version (Aug. 1995), which smoothes the
-C Compton contribution. Modified Jan 2017 for the beta-Oslo method
-C
+C Compton contribution.
+C Modified Jan 2017 for the beta- Oslo method
+C Modified Nov 2021 for the beta+ Oslo method
 C UCID - 30079
 C Lawrence Livermore Laboratory
 C William J. Oconnel September 1973
@@ -1862,20 +2247,14 @@ C ****End, Fix for first run****
        DO I=0,IXDIM-1
          lower(I)=INT(Iy1+CF*(FLOAT(I-Ix1))+0.5)
          IF(CF.EQ.0.)lower(I)=LOW
-c         IF(lower(I).LT.LOW )lower(I)=LOW
          IF(lower(I).LT.0 )lower(I)=0
          IF(lower(I).GT.HIGH)lower(I)=HIGH
-
        ENDDO
       ANS='y'
       WRITE(6,133)ANS    
  133  FORMAT(/,'Include total detector efficiency (y/n) <',A1,'>:',$)
       CALL READA1(5,ANS)
       IF(Istatus.NE.0)RETURN
-c      IF(ANS.EQ.'y'.OR.ANS.EQ.'Y')THEN
-c        CALL ExpThres
-c      ENDIF
-
       
       WRITE(6,134)Iter
  134  FORMAT(/,'Number of iterations ( <500 )  <',I3,'>:',$)
@@ -1898,6 +2277,8 @@ c      ENDIF
       IF(wfluc.GT.0.5)wfluc=0.2
       IF(Istatus.NE.0)RETURN
 
+      twomc2 = 2.*510.998950    !For use when beta+ decay
+      K2mc2 = INT(((twomc2 - a0)/a1)+0.5)
 C Loop for spectrum I to be unfolded***************************
 CCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCC                      CCC
@@ -1915,7 +2296,6 @@ C Getting the raw spectrum Raw(I)
         ENDDO
         sum=   0
         sumCH= 0
-c        DO J=ChiLow,HIGH
         DO J=0,HIGH
           sum  =sum + Raw(J)
         ENDDO
@@ -1933,7 +2313,7 @@ C Initialize parameters
           ENDDO
         ENDDO
 
-        DO J=0,LEN-1
+        DO J=0,2047  !LEN-1
           U(J)    =0.0
           F(J)    =0.0
           Fsave(J)=0.0
@@ -1948,10 +2328,17 @@ C Initialize parameters
        
 C The experimental pulse height spectrum is the first
 C approximation to the unfolded gamma spectrum U(I)
-c        DO J=ChiLow,HIGH
-        DO J=0,HIGH
-          U(J)=Raw(J)
-        ENDDO
+       IF(IRSP.NE.3)THEN
+         DO J=0,HIGH
+           U(J)=Raw(J)
+         ENDDO
+       ENDIF
+                   
+       IF(IRSP.EQ.3)THEN
+           DO J=0,HIGH
+            IF(J+K2mc2.LE.2047) U(J) = Raw(J+K2mc2) !shifting first try U down by 2mc2
+            ENDDO
+       ENDIF
 
 C Iteration loop for spectrum I. Folding the unfolded spectrum
 C We have to start the integration somewhat below ch J, due to the
@@ -1962,7 +2349,6 @@ C detector resolution. We take conservative 20% resolution
           DO J=0,HIGH
             F(J)=0.0
             DO K=LOW,HIGH
-c            DO K=0,HIGH
               F(J)=F(J)+R(J,K)*U(K)
             ENDDO
           ENDDO
@@ -1999,7 +2385,6 @@ C Compute sum of counts
           SoluP(L,6)=CHISQ
           SoluP(L,7)=RelFluc
           DO JJ=LOW,HIGH
-c          DO JJ=0,HIGH
             SoluF(L,JJ)=U(JJ)
           ENDDO
           Lmax=L
@@ -2009,7 +2394,6 @@ C Saves the best solution after at least 3 iterations
             Lsave=L
             CHIsave=CHISQ
             DO J=LOW,HIGH
-c            DO J=0,HIGH
               Usave(J)=U(J)
               Fsave(J)=F(J)
             ENDDO
@@ -2027,7 +2411,6 @@ c            DO J=0,HIGH
               mode=mode*(-1)
               ModeChange=ModeChange+1
               DO J=LOW,HIGH                            !Using the best solution
-c              DO J=0,HIGH                            !Using the best solution
                 F(J)=Fsave(J)                          !as initial function
                 U(J)=Usave(J)
               ENDDO
@@ -2040,13 +2423,17 @@ C mode=-1 selects difference, mode=+1 ratio iteration
           IF(L.EQ.1)mode=-1                            !used for loop number 2
           IF(mode.EQ.-1) THEN
             DO J=LOW,HIGH
-c            DO J=0,HIGH
-              U(J)=U(J)+(Raw(J)-F(J))                  !difference mode
+             IF(IRSP.NE.3)          U(J)=U(J)+(Raw(J)-F(J))                  !difference mode
+             IF(IRSP.EQ.3)THEN
+               IF(J+K2mc2.LE.2047)  U(J)=U(J)+(Raw(J+K2mc2)-F(J+K2mc2))
+             ENDIF
             ENDDO
           ELSE
             DO J=LOW,HIGH
-c            DO J=0,HIGH
-              IF(ABS(F(J)).GT.4)U(J)=U(J)*(Raw(J)/F(J))!ratio mode
+              IF(IRSP.NE.3.AND.ABS(F(J)).GT.4)            U(J)=U(J)*(Raw(J)/F(J))   !ratio mode
+              IF(IRSP.EQ.3)THEN
+                IF(J+K2mc2.LE.2047.AND.ABS((F(J+K2mc2))).GT.4)  U(J)=U(J)*(Raw(J+K2mc2)/F(J+K2mc2))
+              ENDIF
             ENDDO
           ENDIF
           CHIold=CHISQ
@@ -2100,7 +2487,6 @@ C Making compressed output in case of singles spectrum
             u(J)=0.0
           ENDDO
           DO J=LOW,HIGH
-c          DO J=0,HIGH
             SoluF(Isc,J)=SoluF(Isc,J)   !April 2013 *pf(i)
             u(J)=SoluF(Isc,J)
           ENDDO
@@ -2108,7 +2494,7 @@ c          DO J=0,HIGH
         ENDIF
 
 
-C***************************************************************(new begin)
+C***************************************************************(new BEGIN)
 C       New method: Compton Subtraction Method (Desember 1995/mg)
 C       Reference: M. Guttormsen et al. NIM (1996), in press
 C       The resolution in the unfolded spectrum u0 is about 0.87FWHM. 
@@ -2244,7 +2630,12 @@ C Putting back color
         COLORMAP(1)=icmap1
 
  999    CONTINUE
-C********************************************************(new ended)
+C
+C       New method: Compton Subtraction Method (Desember 1995/mg)
+C       Reference: M. Guttormsen et al. NIM (1996), in press
+C********************************************************(new ENDED)
+
+
 
 C Correcting for detector efficiency as function of energy
         negstat=-1
