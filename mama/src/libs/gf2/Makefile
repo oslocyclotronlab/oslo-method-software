@@ -6,7 +6,8 @@
 BASEDIR = ../../..
 include $(BASEDIR)/Makeconf
 
-     CFLAGS += -I$(BASEDIR)/../sirius/include
+     CFLAGS += -I$(BASEDIR)
+#/../sirius/include
           CP = cp
       CP_DIR = ../..
 
