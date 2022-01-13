@@ -5,7 +5,7 @@
 #************************************************************
 
          F95 = gfortran -O3 -ffixed-line-length-132 -std=legacy
-         CC = gcc -W -Wall -O3 -std=gnu99
+         CC = gcc -O3 -std=gnu99
          LIBS = -lm
          RWLIB = rewr/rewr.a
 	     INSTALL_BIN = install -m 0755
