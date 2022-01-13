@@ -369,7 +369,7 @@ int doXWindow_io(int *ix, int *iy, char *outstr)
 	*(outstr+2) = '-';
 	*(outstr+3) = 'S';
       }
-      *(outstr+4) = (char) NULL;
+      *(outstr+4) = ' '      /* (char) NULL;*/
       *ix = (int) event.xbutton.x;
       *iy = (int) event.xbutton.y;
       goodString = 1;
