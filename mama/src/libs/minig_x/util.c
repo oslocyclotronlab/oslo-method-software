@@ -132,7 +132,7 @@ int get_directory(char *env_name, char *dir_name, int maxchar)
 #endif
   } else {
     nc = 0;
-    dir_name = '\0';
+    dir_name = NULL;  /* '\0'; */
   }
   return nc;
 } /* get_directory */
