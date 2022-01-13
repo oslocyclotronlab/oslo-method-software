@@ -2140,7 +2140,7 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
        ENDDO
       ENDIF
 
-      DO I=0,2048
+      DO I=0,2047
 C Finding FWHMs as function of full energy, normalized to 1 at 1.33 MeV
         E=a0+I*a1
         I1=1
