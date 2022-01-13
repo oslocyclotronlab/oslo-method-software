@@ -86,7 +86,7 @@ C Logaritmic display
      +          '0',/,
      +          '(Maximum 16 levels)',/)
 C Reading in levels-values:
-        DO i=1,20
+        DO i=1,19
           Limit(i)=100*i
           IF(i.EQ.1)Limit(i)=1
           IF(mlimit(0).NE.0)Limit(i)=mlimit(i)
@@ -100,7 +100,7 @@ C Reading in levels-values:
         ENDDO
  97     Limit(0)=-Limit(1)
         ncol=i
-        DO i=0,20
+        DO i=0,19
           mlimit(i)=Limit(i)   !just to remember for next time as default
           IF(i.GT.ncol-1)mlimit(i) = 0.
         ENDDO
