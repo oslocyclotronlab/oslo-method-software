@@ -285,7 +285,7 @@ int doTerminal_io(int *ix, int *iy, char *outstr)
     *ix = (int) x;
     *iy = (int) y;
     *outstr = c1;
-    *(outstr+1) = (char) NULL;
+    *(outstr+1) = ' ';        /* (char) NULL; */
     return 1;
   }
   return 0;
