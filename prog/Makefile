@@ -4,7 +4,7 @@
 # modified  December 2008 Alexander Buerger
 #************************************************************
 
-         F95 = gfortran -W -Wall -O3 -ffixed-line-length-132 -std=legacy
+         F95 = gfortran -O3 -ffixed-line-length-132 -std=legacy
          CC = gcc -W -Wall -O3 -std=gnu99
          LIBS = -lm
          RWLIB = rewr/rewr.a
