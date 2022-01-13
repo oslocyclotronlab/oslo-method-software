@@ -34,13 +34,13 @@ int main()
    printf("                                           \r\n");
 
    printf(" Size of 1 byte                = 8 bits \n");
-	printf(" Size of char (bytes)          = %d \n",sizeof(char));
-	printf(" Size of short (bytes)         = %d \n",sizeof(short));
-	printf(" Size of int (bytes)           = %d \n",sizeof(int));
-	printf(" Size of float (bytes)         = %d \n",sizeof(float));
-	printf(" Size of double (bytes)        = %d \n",sizeof(double));
-	printf(" Size of long   (bytes)        = %d \n",sizeof(long));
-	printf(" Size of long double (bytes)   = %d \n",sizeof(long double));
+	printf(" Size of char (bytes)          = %lu \n",sizeof(char));
+	printf(" Size of short (bytes)         = %lu \n",sizeof(short));
+	printf(" Size of int (bytes)           = %lu \n",sizeof(int));
+	printf(" Size of float (bytes)         = %lu \n",sizeof(float));
+	printf(" Size of double (bytes)        = %lu \n",sizeof(double));
+	printf(" Size of long   (bytes)        = %lu \n",sizeof(long));
+	printf(" Size of long double (bytes)   = %lu \n",sizeof(long double));
 
 
    menu();
