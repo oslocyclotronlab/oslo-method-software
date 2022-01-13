@@ -182,10 +182,10 @@ c      CALL SetMarker(1,1,1)
       REAL Calib(6), Spec(0:8191)
       CHARACTER*1 ans
 
-      INTEGER*2 mctype,mca,seg,strtch,lngtdt      !MCA (MultiChannelAnalyzer on PC)
-      INTEGER*2 begrec,endrec,Iold2               !MCA
-      INTEGER*4 spcin(8),xdum,lvetme,rltime,Iold4 !MCA
-      CHARACTER*1 srttme(4),srtsec(2),srtdte(8)   !MCA
+c      INTEGER*2 mctype,mca,seg,strtch,lngtdt      !MCA (MultiChannelAnalyzer on PC)
+c      INTEGER*2 begrec,endrec,Iold2               !MCA
+c      INTEGER*4 spcin(8),xdum,lvetme,rltime,Iold4 !MCA
+c      CHARACTER*1 srttme(4),srtsec(2),srtdte(8)   !MCA
 
 C******************************************************* 
 C
@@ -402,68 +402,69 @@ c        CALL SetMarker(1,1,1)
       ENDIF
          
 906   CONTINUE
- 
+      CLOSE(INF)
+      GO TO 907
 C It could be an MCA-spectrum (ORTEC multichannel analyzer)
 C Uncertain to me if we should have RECL=8 or RECL=32 here, depends on -xl:
-      CLOSE(INF)
-      OPEN(INF,FILE=FILNAM,STATUS='OLD',ACCESS='DIRECT',RECL=32,ERR=907)     
-      READ(INF,REC=1,ERR=907)mctype,mca,seg,srtsec,rltime,lvetme,srtdte,srttme,strtch,lngtdt
+c      CLOSE(INF)
+c      OPEN(INF,FILE=FILNAM,STATUS='OLD',ACCESS='DIRECT',RECL=32,ERR=907)
+c      READ(INF,REC=1,ERR=907)mctype,mca,seg,srtsec,rltime,lvetme,srtdte,srttme,strtch,lngtdt
 
 C Transform from Intel to Sparc representation of INTEGER number
-      Iold2=mctype
-      CALL TransI2(Iold2,mctype)
-      IF(mctype.NE.-1)GO TO 907    !Not an ORTEC MCA-spectrum
-      Iold2=mca
-      CALL TransI2(Iold2,mca)
-      Iold2=seg
-      CALL TransI2(Iold2,seg)
-      Iold4=rltime
-      CALL TransI4(Iold4,rltime)
-      Iold4=lvetme
-      CALL TransI4(Iold4,lvetme)
-      Iold2=strtch
-      CALL TransI2(Iold2,strtch)
-      Iold2=lngtdt
-      CALL TransI2(Iold2,lngtdt)
-      WRITE(6,40)
- 40   FORMAT(/'ORTEC MCA singles spectrum:')
-      WRITE(6,41)mctype,mca,seg,rltime/50,
-     1 lvetme/50,srttme,srtsec,srtdte,strtch,lngtdt
- 41   FORMAT('Type=',I4,' mca #',I2,' Segment # ',
-     1 I3,/,'Realtime= ',I10,' seconds, Livetime= ',
-     2 I10,' seconds',/,'Data collected at ',2A1,':',2A1,
-     3 ':',2A1,' on ',2A1,'-',3A1,'-',3A1,/,
-     4 'Starting channel=',I6,' Number of channels=' ,
-     5 I6,//)
+c      Iold2=mctype
+c      CALL TransI2(Iold2,mctype)
+c      IF(mctype.NE.-1)GO TO 907    !Not an ORTEC MCA-spectrum
+c      Iold2=mca
+c      CALL TransI2(Iold2,mca)
+c      Iold2=seg
+c      CALL TransI2(Iold2,seg)
+c      Iold4=rltime
+c      CALL TransI4(Iold4,rltime)
+c      Iold4=lvetme
+c      CALL TransI4(Iold4,lvetme)
+c      Iold2=strtch
+c      CALL TransI2(Iold2,strtch)
+c      Iold2=lngtdt
+c      CALL TransI2(Iold2,lngtdt)
+c      WRITE(6,40)
+c 40   FORMAT(/'ORTEC MCA singles spectrum:')
+c      WRITE(6,41)mctype,mca,seg,rltime/50,
+c     1 lvetme/50,srttme,srtsec,srtdte,strtch,lngtdt
+c 41   FORMAT('Type=',I4,' mca #',I2,' Segment # ',
+c     1 I3,/,'Realtime= ',I10,' seconds, Livetime= ',
+c     2 I10,' seconds',/,'Data collected at ',2A1,':',2A1,
+c     3 ':',2A1,' on ',2A1,'-',3A1,'-',3A1,/,
+c     4 'Starting channel=',I6,' Number of channels=' ,
+c     5 I6,//)
 
 C Reading spectrum
-      ii=0
-      DO ich=strtch+1,lngtdt,8
-        chanel=ich-1
-        endrec=chanel/8.
-        begrec=chanel/8.
-        DO n=begrec+2,endrec+2
-          READ(INF,rec=n,ERR=42)(spcin(l),l=1,8)
-          DO l=1,8
-            ii=ii+1
-            Iold4=spcin(l)
-            CALL TransI4(Iold4,xdum)
-            IF(ABS(xdum).GT.1677215)xdum=0
-            rSPEC(IDEST,ii-1)=xdum
-            IF(xdum.GT.0)itop=ii
-          ENDDO
-        ENDDO
-      ENDDO
- 42   IF(ii.LT.3)GO TO 907           !Not a real MCA-spectrum
-      IF(itop.LT.(lngtdt/2)) THEN
-         WRITE(6,*)'Warning: Less than half spectrum filled with data!'
-         WRITE(6,*)'You probably forgot to use binary transfer (FTP binary).'
-      ENDIF
-      MAXCH=ii-1
-      ITYPE=1
+c      ii=0
+c      DO ich=strtch+1,lngtdt,8
+c        chanel=ich-1
+c        endrec=chanel/8.
+c        begrec=chanel/8.
+c        DO n=begrec+2,endrec+2
+c          READ(INF,rec=n,ERR=42)(spcin(l),l=1,8)
+c          DO l=1,8
+c            ii=ii+1
+c            Iold4=spcin(l)
+c            CALL TransI4(Iold4,xdum)
+c            IF(ABS(xdum).GT.1677215)xdum=0
+c            rSPEC(IDEST,ii-1)=xdum
+c            IF(xdum.GT.0)itop=ii
+c          ENDDO
+c        ENDDO
+c      ENDDO
+c 42   IF(ii.LT.3)GO TO 907           !Not a real MCA-spectrum
+c      IF(itop.LT.(lngtdt/2)) THEN
+c         WRITE(6,*)'Warning: Less than half spectrum filled with data!'
+c         WRITE(6,*)'You probably forgot to use binary transfer (FTP binary).'
+c      ENDIF
+c      MAXCH=ii-1
+c      ITYPE=1
 c      CALL SetMarker(1,2,0)
-      comm(2,IDEST)='mca '
-      CLOSE(INF)
+c      comm(2,IDEST)='mca '
+c      CLOSE(INF)
 
 C Stripping away path-name from spectrum name
 3333  CALL LENGDE(FILNAM,LIN)
@@ -909,73 +910,73 @@ C Calculating the length of a string of characters
       END
 
 
-      SUBROUTINE TransI2(I1,I2)
+c      SUBROUTINE TransI2(I1,I2)
 C Routine that transform a I*2 integer of Intel (or VMS) processor to
 C an I*2 integer of Sparc (or MC680xx) prosessor
 C See p.426 in SPARCompiler FORTRAN 2.0.1, Reference Manual
 C These operations are wonderful. Personally, I get a cick for each shift...
-      INTEGER*2 mask1,mask2,I1,I2,J1,J2,I,ISHFT
+c      INTEGER*2 mask1,mask2,I1,I2,J1,J2,I,ISHFT
 
 c      mask1=B'0000000011111111'
 c      mask2=B'1111111100000000'
 c      mask2=-256
 
-      I2=0
-      J1=0
-      J2=0
-   
-      I =0
-      I =iAND(I1,mask1)
-      J1=ISHFT(I,8)          !shifts I-bits 8 places to the left 
+c      I2=0
+c      J1=0
+c      J2=0
+c
+c      I =0
+c      I =iAND(I1,mask1)
+c      J1=ISHFT(I,8)          !shifts I-bits 8 places to the left
 
-      I =0
-      I =iAND(I1,mask2)
-      J2=ISHFT(I,-8)          !shifts I-bits 8 places to the right
+c      I =0
+c      I =iAND(I1,mask2)
+c      J2=ISHFT(I,-8)          !shifts I-bits 8 places to the right
 
 C Putting together again the 16 bit word 
-      I2=iOR(J1,I2)     
-      I2=iOR(J2,I2)
+c      I2=iOR(J1,I2)
+c      I2=iOR(J2,I2)
 
-      END
+c      END
 
 
-      SUBROUTINE TransI4(I1,I2)
+c      SUBROUTINE TransI4(I1,I2)
 C Routine that transform a I*4 integer of Intel (or VMS) processor to
 C an I*4 integer of Sparc (or MC680xx) prosessor
 C See p.426 in SPARCompiler FORTRAN 2.0.1, Reference Manual
-      INTEGER*4 mask1,mask2,mask3,mask4,I1,I2,I,J1,J2,J3,J4,ISHFT
+c      INTEGER*4 mask1,mask2,mask3,mask4,I1,I2,I,J1,J2,J3,J4,ISHFT
       
 c      mask1=B'00000000000000000000000011111111'
 c      mask2=B'00000000000000001111111100000000'
 c      mask3=B'00000000111111110000000000000000'
 c      mask4=B'11111111000000000000000000000000'
-      mask4=-16777216
+c      mask4=-16777216
       
-      I2=0
-      J1=0
-      J2=0
-      J3=0
-      J4=0
+c      I2=0
+c      J1=0
+c      J2=0
+c      J3=0
+c      J4=0
       
-      I =0
-      I =iAND(I1,mask1)
-      J1=ISHFT(I,24)        !Shift 24 to left
+c      I =0
+c      I =iAND(I1,mask1)
+c      J1=ISHFT(I,24)        !Shift 24 to left
 
-      I =0
-      I =iAND(I1,mask2)
-      J2=ISHFT(I,8)         !Shift 8 to left
+c      I =0
+c      I =iAND(I1,mask2)
+c      J2=ISHFT(I,8)         !Shift 8 to left
 
-      I =0
-      I =iAND(I1,mask3)
-      J3=ISHFT(I,-8)        !Shift 8 to right
+c      I =0
+c      I =iAND(I1,mask3)
+c      J3=ISHFT(I,-8)        !Shift 8 to right
 
-      I =0
-      I =iAND(I1,mask4)
-      J4=ISHFT(I,-24)       !Shift 24 to right
+c      I =0
+c      I =iAND(I1,mask4)
+c      J4=ISHFT(I,-24)       !Shift 24 to right
 
-      I2=iOR(J1,I2)
-      I2=iOR(J2,I2)
-      I2=iOR(J3,I2)
-      I2=iOR(J4,I2)
-      
-      END
+c      I2=iOR(J1,I2)
+c      I2=iOR(J2,I2)
+c      I2=iOR(J3,I2)
+c      I2=iOR(J4,I2)
+c
+c      END
