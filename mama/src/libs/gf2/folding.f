@@ -335,8 +335,6 @@ C        LEN    Length of spectrum
       ISP=1
       IF(IDEST.EQ.1)ISP=2
 
-
-
       ANS='y'
       WRITE(6,133)ANS
  133  FORMAT(/,'Include total NaI-eff.    (y/n) <',A1,'>:',$)
@@ -2776,9 +2774,6 @@ C We renormalize so that matrix R(i,j) have 1*RDIM counts
       ENDDO
 
 
-
-
-
 C Finding parameters as function of full energy
 C Writing out to file: respxout.dat
       DO I=0,2047
@@ -3219,7 +3214,6 @@ C        Iter   =Max number of iteration steps
       COMMON/State/Istatus,ITYPE,IDEST,cal(2,2,2,3),Idim(2,2,2),fname(2,2),comm(2,2)
       CHARACTER fname*8,comm*60
       COMMON/Sp1Dim/rSPEC(2,0:8191),MAXCH
-
       COMMON/response1/R(0:2047,0:2047),RDIM,a0,a1,FWHM,facFWHM
       COMMON/response3/EffTot(0:2047),Fwhm1(0:2047),EffExp(0:2047)
       COMMON/response4/pf(0:2047),pc(0:2047),ps(0:2047),pd(0:2047),pa(0:2047)
@@ -3243,9 +3237,6 @@ C        Iter   =Max number of iteration steps
       DIMENSION ua(0:2047),sua(0:2047),w(0:2047),sw(0:2047),c(0:2047),sc(0:2047)
 
       INTEGER HIGHj
-
-c      DIMENSION EffD(10)
-
       ISP=1
       IF(IDEST.EQ.1)ISP=2
       Emin  =30.          ! 30 keV lowest limit
