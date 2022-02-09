@@ -143,7 +143,7 @@ You can add another response matrix by adding a folder in the mama/resp director
 
      export MAMA_MYRESP=oscar2018
 
-If you do not set it manually, it will choose the `myresp` folder. You can take this folder as a starting point for adding you own response functions if you like.   
+If you do not set it manually, it will choose the `myresp` folder. You can take this folder as a starting point for adding your own response functions if you like.   
 
 *****************************************************************************
 
