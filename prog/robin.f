@@ -3,35 +3,36 @@
       COMMON/rct2/Sn(3200),dSn(3200),Sp(3200),dSp(3200)
       COMMON/rct7/Pd(3200),dPd(3200),Pn(3200),dPn(3200),Pp(3200),dPp(3200)
       REAL Mexp, S_prime,Pa_prime
-      CHARACTER El*3,dum1*1,dum3*3,dum4*4,dum,filnam*255
+      CHARACTER El*3,dum1*1,dum3*3,dum4*4,dum,filnam*100
       INTEGER Z,A,ii,Z0,A0,N0,ieo,idum
       DOUBLE PRECISION S,dS
-      WRITE(6,*)'    __________________________________________'
-      WRITE(6,*)'   |                                          |'
-      WRITE(6,*)'   |                 ROBIN 1.91               |'
-      WRITE(6,*)'   |                                          |'
-      WRITE(6,*)'   |  Program to calculate the level density  |'
-      WRITE(6,*)'   |         and spin cut-off parameter       |'
-      WRITE(6,*)'   |       at Rho(Bn) for a nucleus with      |'
-      WRITE(6,*)'   | given proton number Z and mass number A. |'
-      WRITE(6,*)'   |       See T. Egidy and Bucurescu:        |'
-      WRITE(6,*)'   |                                          |'
-      WRITE(6,*)'   |    (E&B2009): PRC 80, 054310 (2009)      |'
-      WRITE(6,*)'   |                                          |'
-      WRITE(6,*)'   |    (E&B2006): PRC 72, 044311 (2005) and  |'
-      WRITE(6,*)'   |               PRC 73, 049901 (E) (2006)  |'
-      WRITE(6,*)'   |                                          |'
-      WRITE(6,*)'   |        Oslo Cyclotron Laboratory         |'
-      WRITE(6,*)'   |             Magne Guttormsen             |'
-      WRITE(6,*)'   |            Created: 13 Jun 2005          |'
-      WRITE(6,*)'   |           Modified: 14 Sep 2012          |'
-      WRITE(6,*)'   |           Modified: 25 Mar 2013          |'
-      WRITE(6,*)'   | Modified: 16 Aug 2016:                   |'
-      WRITE(6,*)'   | Opt(2) proposes better a and E1 values   |'
-      WRITE(6,*)'   | Modified: 19 Nov 2016:                   |'
-      WRITE(6,*)'   | In Opt(1) you may choose reduct. of RMI  |'
-      WRITE(6,*)'   | Temp. given at Bn and Bp for Fermi gas   |'
-      WRITE(6,*)'   |__________________________________________|'
+      WRITE(6,*)'    _____________________________________________'
+      WRITE(6,*)'   |                                             |'
+      WRITE(6,*)'   |                   ROBIN 1.92                |'
+      WRITE(6,*)'   |                                             |'
+      WRITE(6,*)'   |    Program to calculate the level density   |'
+      WRITE(6,*)'   |           and spin cut-off parameter        |'
+      WRITE(6,*)'   |         at Rho(Bn) for a nucleus with       |'
+      WRITE(6,*)'   |   given proton number Z and mass number A   |'
+      WRITE(6,*)'   |         See T. Egidy and Bucurescu:         |'
+      WRITE(6,*)'   |                                             |'
+      WRITE(6,*)'   |      (E&B2009): PRC 80, 054310 (2009)       |'
+      WRITE(6,*)'   |      (E&B2006): PRC 72, 044311 (2005) and   |'
+      WRITE(6,*)'   |                 PRC 73, 049901 (E) (2006)   |'
+      WRITE(6,*)'   |                                             |'
+      WRITE(6,*)'   |          Oslo Cyclotron Laboratory          |'
+      WRITE(6,*)'   |               Magne Guttormsen              |'
+      WRITE(6,*)'   | Created  13 Jun 2005                        |'
+      WRITE(6,*)'   | Modified 14 Sep 2012                        |'
+      WRITE(6,*)'   | Modified 25 Mar 2013                        |'
+      WRITE(6,*)'   | Modified 16 Aug 2016:                       |'
+      WRITE(6,*)'   | Opt(2) proposes better a and E1 values      |'
+      WRITE(6,*)'   | Modified 19 Nov 2016:                       |'
+      WRITE(6,*)'   | In Opt(1) you may choose reduct. of RMI     |'
+      WRITE(6,*)'   | Temp. given at Bn and Bp for Fermi gas      |'
+      WRITE(6,*)'   | Modified 03 Aug 2022:                       |'
+      WRITE(6,*)'   | Removed sentences of confusion,lines 220,240|'
+      WRITE(6,*)'   |_____________________________________________|'
 
       Z0     =  66
       A0     =  162
@@ -55,8 +56,10 @@
          ii(A(i),Z(i))=i 
       ENDDO
  12   CONTINUE
-      WRITE(6,*)'Number of nuclei read is',i-1, ' with last (A,Z) = (',A(i-1),',',Z(i-1),')'
-      
+
+      WRITE(6,8)i-1,A(i-1),Z(i-1)
+  8   FORMAT(' Number of nuclei read is',I5,' with last (A,Z) =(',I4,',',I4')')
+
       call makepath("UIO_APPLICATIONS","prog/lib/egidy03/rct2.mas03",filnam)
       WRITE(6,*)'Reading file '//filnam
       OPEN(21,ERR=98,FILE=filnam,STATUS='OLD')
@@ -68,7 +71,7 @@
  13      FORMAT(a1,i3,1x,a3,i3,1x,2(f10.2,f8.2))
       ENDDO
  14   CONTINUE
-      WRITE(6,*)'Number of nuclei read is',i-1, ' with last (A,Z) = (',A(i-1),',',Z(i-1),')'
+      WRITE(6,8)i-1,A(i-1),Z(i-1)
 
       call makepath("UIO_APPLICATIONS","prog/lib/egidy03/rct7.mas03",filnam)
       WRITE(6,*)'Reading file '//filnam
@@ -81,8 +84,7 @@
  15      FORMAT(a1,i3,1x,a3,i3,1x,3(f10.2,f8.2))
       ENDDO
  16   CONTINUE
-      WRITE(6,*)'Number of nuclei read is',i-1, ' with last (A,Z) = (',A(i-1),',',Z(i-1),')'
-      WRITE(6,*)' '
+      WRITE(6,8)i-1,A(i-1),Z(i-1)
       WRITE(6,*)'Please, check that the same number of nuclei is read.'
       WRITE(6,*)'(If not, mismatch of values will give wrong results.)'
       
@@ -213,9 +215,9 @@ C VALUES FROM E&B2009
                 WRITE(6,*)'Gilbert and Cameron formula (G&C) Can. J. Phys 43(1965) 1446'
                 WRITE(6,*)'with U = E-C1-Epair, C1 = -6.6A**(-0.32)MeV, a= 0.21A**(0.87) MeV**(-1),'
                 WRITE(6,*)'and Dp and Dn from mass differences. The same procedure was used by us'
-                WRITE(6,*)'in Guttormsen et al, PRC 68, 064306 (2003).'
-                WRITE(6,*)'Below we calculate these values for you. You may use them'
-                WRITE(6,*)'or the default a and E1 values from E&B 2009.'
+                WRITE(6,*)'in Guttormsen et al., PRC 68, 064306 (2003).'
+                WRITE(6,*)'Below we calculate these values for you.You may use them'
+c                 WRITE(6,*)'or the default a and E1 values from E&B 2009.'
 
                 pair_n = Pn(i)/1000.
                 pair_p = Pp(i)/1000.
@@ -235,8 +237,9 @@ C VALUES FROM E&B2009
                 WRITE(6,*)' '
         ENDIF
 
+c        WRITE(6,*)'You may choose another a and/or E1 than proposed by E&B2009:'
+        WRITE(6,*)'You may choose another a and/or E1 than calculated:'
 
-        WRITE(6,*)'You may choose another a and/or E1 than proposed by E&B2009:'
         WRITE(6,25)aa
  25     FORMAT('Level density parameter a    <',F7.3,'>:',$)
         CALL READF(5,aa)
