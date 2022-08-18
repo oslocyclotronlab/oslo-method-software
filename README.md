@@ -16,12 +16,10 @@ N-0316 OSLO
 E-mail: magne.guttormsen@fys.uio.no 
 
 NOTE: For users of the Apple M1 chip:
-The Oslo software, which is located in the /prog and /mama folders, can be successfully compiled and loaded using the Apple M1 (2020) chip on a MacBook Air. Be sure that the most important components are uploaded before installation. At 11 jan. 2022, these versions were used:
-MacOS 12.01.1, Xcode 13.2.1, Homebrew 3.3.9, Homebrew gcc version 11.2.0_3 with gfortran. The CERN root 6.24/06 is also uploaded via Homebrew.
+The Oslo software, which is located in the /prog and /mama folders, can be successfully compiled and loaded using the Apple M1 (2020) chip on a MacBook Air. Be sure that the most important components are uploaded before installation. At 18 Aug. 2022, these versions were used:
+MacOS 12.5.1, Xcode 13.4.1, Homebrew 3.3.9, Homebrew gcc version 12.1.0 with gfortran. The CERN root 6.26/06 is also uploaded via Homebrew.
 
 The brew stuff is located in the /opt/homebrew folder. Be sure that you have the last version of the Command Tools by running: brew doctor
-
-For the loading, one issue appeared when compiling the files folding.f and foldingy.f (located in the /mama/src/libs/gf2/ folder). Here, it seems like the system cannot allocate enough memory for the reponse matrix R(0:2047,0:2047), which appers in several COMMON statements. Until this problem is solved, you may replace R(0:2047,0:2047) -> R(0:1400,0:1400) at all places in the folding.f and foldingy.f files. Also be sure to correct the index from 2047 -> 1400 when the matrix is zero’ed, just search for R(I,J)= 0 and be sure that the I and J indexes are OK. (The draw back with a smaller response matrix R, is that you have 1401 instead of 2048 channels for your spectra. However, usually only some hundred channels are sufficiant for the Oslo Method.)
 
 Enjoy, Magne
 
