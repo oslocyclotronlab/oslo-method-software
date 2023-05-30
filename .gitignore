@@ -36,3 +36,6 @@
 
 # Ignore macOS files
 .DS_Store
+
+# Ignore compiled programs
+prog/bin/*
