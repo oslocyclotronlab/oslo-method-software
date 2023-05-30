@@ -24,7 +24,7 @@ def v_Dv(txt):
     Dv, Dvep = float_extrapolated(Dv)
     return v, Dv, (vep or Dvep)
 
-print """struct ame2003_mass_t {
+print("""struct ame2003_mass_t {
     const int A, Z, origin;
     const double mass_excess, Dmass_excess;
     const double binding_energy, Dbinding_energy;
@@ -34,7 +34,7 @@ print """struct ame2003_mass_t {
     const bool mass_extrapolated, beta_decay_energy_extrapolated;
 };
 
-const ame2003_mass_t ame2003_masses[] = {"""
+const ame2003_mass_t ame2003_masses[] = {""")
 
 n_masses = 0
 for line in ame:
@@ -64,30 +64,30 @@ for line in ame:
         raise "bad extrapolation for A=%d Z=%d %d %d %d" % (A, Z, amu_ep, mexc_ep, be_ep)
     bdep = bde_ep and 1 or 0
 
-    print "{%3d, %3d, %3d,   %12s, %10s,   %10s, %7s,   %d, %10s, %8s,   %13s, %8s,   %d, %d}," \
-        % ( A, Z, origin, mexc, Dmexc, be, Dbe, betatype, bde, Dbde, amu, Damu, mep, bdep )
+    print("{%3d, %3d, %3d,   %12s, %10s,   %10s, %7s,   %d, %10s, %8s,   %13s, %8s,   %d, %d}," \
+        % ( A, Z, origin, mexc, Dmexc, be, Dbe, betatype, bde, Dbde, amu, Damu, mep, bdep ))
     n_masses += 1
-print "{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} // invalid entry with A=0"
-print "};"
-print "const int ame2003_n_masses = %d;" % n_masses
+print("{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} // invalid entry with A=0")
+print("};")
+print("const int ame2003_n_masses = %d;" % n_masses)
 
 print
-print "const int   element_count = %d;" % len(names)
-print "const char *element_names[element_count] = {"
+print("const int   element_count = %d;" % len(names))
+print("const char *element_names[element_count] = {")
 for i in range(len(names)):
     nn = '"%s"' % names[i]
     comma = (i < len(names)-1) and "," or ""
-    print "%5s%s" % (nn,comma),
+    print("%5s%s" % (nn,comma))
     if i == len(names)-1 or (i%20)==19:
-        print
-print "};"
+        print()
+print("};")
 
-print
-print "const char* origins[%d] = { \"?\", " % (len(origins)+1)
+print()
+print("const char* origins[%d] = { \"?\", " % (len(origins)+1))
 for i in range(len(origins)):
     oo = '"%s"' % origins[i]
     comma = (i < len(origins)-1) and "," or ""
-    print "%7s%s" % (oo,comma),
+    print("%7s%s" % (oo,comma))
     if i == len(origins)-1 or (i%10)==9:
-        print
-print "};"
+        print()
+print("};")
