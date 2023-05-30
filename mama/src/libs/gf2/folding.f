@@ -1307,6 +1307,7 @@ C pf, pc, ps, pd, pa in the RSPNAI routine.
      +      '8600', '8800', '9000', '9200', '9400', '9600', '9800',
      +     '10000','10200'/
 
+
 C This block of data represents energies (EW) and half-width (FW) of the
 C gamma-resolution in the spectra. (NB! Normalized to 1. for 1.33 MeV)
       DATA EW9/
@@ -2015,6 +2016,19 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
       ENDIF
 
       IF(IRSP.EQ.9)THEN         !OSCAR 2017 LaBr
+C Fix for 64Zn data where the full-energy peak for the response functions seems to be too big
+C Multiply down the FE9 strengths with the factor redfac.
+       redfac = 1.0
+       WRITE(6,*)''
+       WRITE(6,*)'For this option, you may play with the intensity of the full-energy peak (FEP).'
+       WRITE(6,*)'Ideally, the reduction factor should be = 1, if we trust the GEANT simulations.'
+       WRITE(6,*)'However, we found a reduction factor of 0.80 in order to fit the (p,p)64Zn experiment.'
+       WRITE(6,*)'This I (Magne) had to do in order to get away counts just below the FEP.'
+       WRITE(6,20)redfac
+  20   FORMAT(/'Give intensity reduction factor of the full-energy peak <',F5.2,'>:',$)
+       CALL READF(5,redfac)
+       IF(Istatus.NE.0)RETURN
+    
        IW  =99
        ITAB=51
        IR  =51
@@ -2030,7 +2044,7 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
          ER(i)=ER9(i)
          ESE(i)=ESE9(i)
          EDE(i)=EDE9(i)
-         FE(i)=FE9(i)
+         FE(i)=redfac * FE9(i)
          SE(i)=SE9(i)
          DE(i)=DE9(i)
          ANN(i)=ANN9(i)
@@ -2117,6 +2131,16 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
        Print *, "Desciption:"
        Print *, HeaderLineDes13
 
+       redfac = 1.0
+       WRITE(6,*)''
+       WRITE(6,*)'For this option, you may play with the intensity of the full-energy peak (FEP).'
+       WRITE(6,*)'Ideally, the reduction factor should be = 1, if we trust the GEANT simulations.'
+       WRITE(6,*)'However, we found a reduction factor of 0.80 in order to fit the (p,p)64Zn experiment.'
+       WRITE(6,*)'This I (Magne) had to do in order to get away counts just below the FEP.'
+       WRITE(6,20)redfac
+       CALL READF(5,redfac)
+       IF(Istatus.NE.0)RETURN
+
        IW  = NLines
        ITAB= NLines
        IR  = NLines
@@ -2132,7 +2156,7 @@ C THE NUMBER OF CALIBRATION POINTS (Default is NaI)
          ER(i)=ER13(i)
          ESE(i)=ESE13(i)
          EDE(i)=EDE13(i)
-         FE(i)=FE13(i)
+         FE(i)=redfac * FE13(i)
          SE(i)=SE13(i)
          DE(i)=DE13(i)
          ANN(i)=ANN13(i)
@@ -2456,6 +2480,10 @@ C first time spectrum exeeds this threshold
 
 C We drop low energy fix when GEANT is used (seg2, seg3, seg23, clover, oscar, afrodite etc)
           IF(IRSP.GE.4.AND.IRSP.LE.11)GO TO 1111
+          if(IRSP==13) then ! Inserted May 30. 2023, Vetle spotted that b0,b1 were not defined in this case
+            b0 = b01
+            b1 = b11
+          endif
           maxi=(300.-b0)/b1 + 0.5
           h1=0.
           h2=0.
