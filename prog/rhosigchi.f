@@ -61,7 +61,9 @@ C Stuff for the rhosig iteration
       WRITE(6,*)'|Modified 11 Nov 2021: Allows different calibrations  |'
       WRITE(6,*)'|  and sizes for fg and *.fge matrices. Uses photo-   |'
       WRITE(6,*)'|  eff. to get appr. raw counts. New Chi^2 including  |'
-      WRITE(6,*)'|  errors in fg.rsg and fgerr.rsg                     |'
+      WRITE(6,*)'|  errors in fgerr.rsg and fgteo.rsg                  |'
+      WRITE(6,*)'|Modified 17 Dec 2024: Errors from fgteo.rsg are set  |'
+      WRITE(6,*)'|  to zero [Cecilie, a.c.larsen@fys.uio.no]           |'
       WRITE(6,*)'|_____________________________________________________|'
 
 C Initializing parameter values
@@ -708,10 +710,11 @@ C Calculating Chi**2 including uncertainties in fg_exp and rho x T
                ENDIF
                sRhoT = 0.
                sAll  = 0.
-               IF(FgTeo(ig,ix).GT.0)sRhoT = FgTeo(ig,ix)*sqrt((sRho(iu)/Rho(it,iu))**2. + (sSig(ig)/Sig(it,ig))**2.0)
+C               IF(FgTeo(ig,ix).GT.0)sRhoT = FgTeo(ig,ix)*sqrt((sRho(iu)/Rho(it,iu))**2. + (sSig(ig)/Sig(it,ig))**2.0)
+               IF(FgTeo(ig,ix).GT.0)sRhoT = 0.
                IF(sFgN(ig,ix).GT.0.AND.sRhoT.GT.0.)THEN
                    sAll =sqrt(sFgN(ig,ix)**2. + sRhoT**2.)
-                   Chi(it)=Chi(it)+((FgTeo(ig,ix)-FgN(ig,ix))/sAll)**2.
+                   Chi(it)=Chi(it)+((FgTeo(ig,ix)-FgN(ig,ix))/sAll)**2. 
                ELSE
                   deg=deg-1
 C Minus one data point in the calculation of Chi^2
